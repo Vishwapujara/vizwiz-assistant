@@ -37,3 +37,7 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff.lint.per-file-ignores]
+# Notebook shell lines (!git ..., !pip ...) can't be wrapped like Python code.
+"*.ipynb" = ["E501"]

@@ -125,6 +125,22 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   others have no right to reuse it, which is the safe default.
 - **Plan sections:** none.
 
+### D-012: Colab session setup and Drive layout (Step 0.2)
+- **Date:** 2026-11-05
+- **Status:** Accepted
+- **Decision:** Every Colab session starts with the same setup cells: mount Drive,
+  clone or hard-reset the repo to `origin/main` in `/content/vizwiz-assistant`
+  (local disk), `pip install -e`, then run `python -m vizwiz.env`. Persistent files
+  live under `MyDrive/vizwiz/{hf_cache,datasets,checkpoints,results,logs}`. Each
+  environment report is saved as JSON in `logs/`.
+- **Why:** Code on local disk is fast and always matches GitHub (the Colab copy is
+  throwaway, never edited). Running checks as `python -m` in a new process avoids
+  the stale-import problem after an editable install in a running kernel. Drive
+  holds what must survive a disconnect.
+- **Alternatives considered:** keeping the repo on Drive (slow, drifts from GitHub);
+  pip cache on Drive (dropped: reads over the Drive mount are slower than re-downloading).
+- **Plan sections:** 2.2, 4.
+
 ---
 
 ## Open decisions
@@ -133,6 +149,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
+| Hugging Face model cache on Drive vs local disk | Step 0.3 | Drive survives disconnects but may load slower than re-downloading; measure load time on L4 |
 | Experiment tracker: W&B vs MLflow | Step 1.1 | W&B is simpler from Colab |
 | Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
 | Quality-label threshold `k` | Step 1.3 | From audit data |

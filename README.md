@@ -27,4 +27,5 @@ ruff check . && pytest
 ```
 
 GPU work (training, evaluation, serving) runs in Google Colab via the launchers in
-`notebooks/`.
+`notebooks/`. Start every session with
+[`00_setup_colab.ipynb`](https://colab.research.google.com/github/Vishwapujara/vizwiz-assistant/blob/main/notebooks/00_setup_colab.ipynb).
