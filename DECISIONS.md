@@ -165,6 +165,20 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   information and costs a session.
 - **Plan sections:** 14 (Step 0.2).
 
+### D-015: Step 0.2 complete; L4 memory budget is 22 GiB, not 24
+- **Date:** 2026-11-05
+- **Status:** Accepted
+- **Observed on Colab L4 (`results/env/colab_l4.json`):** NVIDIA L4, 22.0 GiB usable,
+  compute capability 8.9, bf16 / FlashAttention-2 / FP8 all available, 53 GB RAM.
+  Same Python 3.13.16 and torch 2.11.0+cu130 as the T4 runtime, so one dependency
+  set serves both.
+- **Decision:** All memory planning (training batch size, image resolution, vLLM
+  `gpu_memory_utilization`) uses 22 GiB as the L4 budget. Step 0.2 is done
+  (verified on T4 and L4, see D-014).
+- **Why:** "24 GB" is the marketed decimal size; the usable figure reported by the
+  driver is what actually limits us.
+- **Plan sections:** 2.1, 8.1, 12.
+
 ---
 
 ## Open decisions

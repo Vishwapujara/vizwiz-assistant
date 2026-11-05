@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-11-05T23:35:09+00:00",
+  "python": "3.13.16",
+  "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+  "ram_gib": 53.0,
+  "disk_free_gib": {
+    "/content": 235.6,
+    "/content/drive/MyDrive/vizwiz": 223.8
+  },
+  "torch": "2.11.0+cu130",
+  "cuda": "13.0",
+  "gpu": {
+    "name": "NVIDIA L4",
+    "memory_gib": 22.0,
+    "compute_capability": [
+      8,
+      9
+    ],
+    "bf16": true,
+    "flash_attention_2": true,
+    "fp8": true
+  },
+  "role": "main: training, full evaluation, vLLM serving, benchmarks",
+  "notes": []
+}
