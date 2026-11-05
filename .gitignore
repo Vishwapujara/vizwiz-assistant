@@ -1,0 +1,53 @@
+# --- Data, images, and model artifacts: NEVER commit (privacy + size) ---
+/data/
+/datasets/
+splits/*.jsonl
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.bmp
+*.zip
+*.tar
+*.tar.gz
+/checkpoints/
+/outputs/
+/runs/
+wandb/
+mlruns/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.gguf
+/predictions/
+*.sqlite
+*.db
+
+# Committed results are small summary files only.
+# Plots are allowed back in explicitly (no dataset images live under results/plots).
+!results/**/plots/*.png
+
+# --- Secrets ---
+.env
+.env.*
+*.pem
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Notebooks / editors / OS ---
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store

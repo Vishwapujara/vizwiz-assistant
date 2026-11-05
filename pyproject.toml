@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vizwiz"
+version = "0.1.0"
+description = "Visual assistant for blind users: fine-tuned VLM adapters served from one shared base model."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Vishwa Pujara" }]
+# Core deps stay light so CI and local dev install fast.
+# Heavy GPU deps live in extras and are pinned after the Step 0.3 compatibility check.
+dependencies = [
+    "pydantic>=2",
+    "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+data = ["datasets", "pandas", "pillow", "numpy"]
+train = ["torch", "transformers", "peft", "trl", "accelerate", "bitsandbytes"]
+serve = ["fastapi", "uvicorn", "httpx", "sqlmodel"]
+bench = ["locust"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vizwiz"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
