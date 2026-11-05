@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-11-05T23:03:21+00:00",
+  "python": "3.13.16",
+  "platform": "Linux-6.6.159+-x86_64-with-glibc2.39",
+  "ram_gib": 51.0,
+  "disk_free_gib": {
+    "/content": 235.6,
+    "/content/drive/MyDrive/vizwiz": 223.8
+  },
+  "torch": "2.11.0+cu130",
+  "cuda": "13.0",
+  "gpu": {
+    "name": "Tesla T4",
+    "memory_gib": 14.6,
+    "compute_capability": [
+      7,
+      5
+    ],
+    "bf16": false,
+    "flash_attention_2": false,
+    "fp8": false
+  },
+  "role": "smoke tests only",
+  "notes": [
+    "No bf16: use only for smoke tests (QLoRA / fp16), never real training.",
+    "No FlashAttention-2: use attn_implementation='sdpa'.",
+    "Under 20 GB: not enough for bf16 LoRA training or vLLM serving of 4B."
+  ]
+}

@@ -141,6 +141,30 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   pip cache on Drive (dropped: reads over the Drive mount are slower than re-downloading).
 - **Plan sections:** 2.2, 4.
 
+### D-013: Colab baseline environment; CI tests Python 3.11 and 3.13
+- **Date:** 2026-11-05
+- **Status:** Accepted
+- **Observed on Colab T4 (`results/env/colab_t4.json`):** Python 3.13.16, torch
+  2.11.0+cu130 (CUDA 13.0) preinstalled, Tesla T4 14.6 GB, compute capability 7.5,
+  no bf16 / FlashAttention-2 / FP8 (matches plan assumptions), 51 GB RAM (High RAM),
+  ~235 GB local disk, ~224 GB free on Drive.
+- **Decision:** CI runs on Python 3.11 (minimum supported) and 3.13 (Colab's version).
+  Environment reports from each runtime are committed under `results/env/`.
+- **Why:** Code must be tested on the Python version it actually runs on. The reports
+  are the reference for "what Colab gave us" when debugging version problems later.
+- **Watch-out for Step 0.3:** vLLM wheels are built against a specific torch/CUDA
+  version, so installing vLLM may replace Colab's preinstalled torch 2.11/CUDA 13.
+- **Plan sections:** 2.1, 3, 13.
+
+### D-014: Step 0.2 verified on T4 and L4 only; CPU run skipped
+- **Date:** 2026-11-05
+- **Status:** Accepted
+- **Decision:** The setup notebook is verified on T4 and L4. The CPU runtime is not
+  run separately; it gets exercised in Step 1.2 (data download on CPU).
+- **Why:** The notebook has no GPU-specific code paths, so a CPU run adds no
+  information and costs a session.
+- **Plan sections:** 14 (Step 0.2).
+
 ---
 
 ## Open decisions
