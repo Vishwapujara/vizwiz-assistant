@@ -151,7 +151,7 @@ compatibility with Qwen3-VL **and with T4/L4 GPUs** **[VERIFY all versions]**.
 | Data | `datasets`, `pandas`, `Pillow`, `numpy` |
 | Training | `torch`, `transformers`, `peft`, `trl` (SFTTrainer), `bitsandbytes` (QLoRA), `accelerate` |
 | Optional speedups | `unsloth` (only if it supports Qwen3-VL on T4/L4) **[VERIFY]**. FlashAttention-2 needs sm80+: available on L4, **not on T4**; use SDPA on T4 |
-| Experiment tracking | Weights & Biases **or** MLflow (pick one in Step 1.1; W&B is simpler from Colab) |
+| Experiment tracking | Weights & Biases (D-025); API key in Colab Secrets |
 | Config | YAML configs + `pydantic` for validation |
 | Quantization | `llm-compressor` (FP8 / AWQ / GPTQ for vLLM) **[VERIFY Qwen3-VL support]** |
 | Serving | `vllm` (OpenAI-compatible server, multi-LoRA), run on L4 |
@@ -594,7 +594,6 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 
 ## 17. Open decisions (resolve when reached)
 
-- Experiment tracker: W&B vs MLflow (Step 1.1).
 - Image resolution setting (Step 3.1, from L4 memory/latency measurements).
 - Quality-label threshold `k` (Step 1.3, from audit data).
 - 4-bit serving format: AWQ vs GPTQ (Step 4.1, whichever vLLM supports for this model on L4).

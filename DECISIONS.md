@@ -321,6 +321,22 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   attribution from `docs/data_licenses.md`.
 - **Plan sections:** 11.
 
+### D-025: Experiment tracker: Weights & Biases
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** Log all training and evaluation runs to W&B (free personal account).
+  Colab authenticates with `WANDB_API_KEY` stored in Colab Secrets, never in the repo
+  or notebook. Each run logs config, git commit, dataset manifest hashes, GPU type,
+  peak memory, metrics and the loss curve. Summary metrics JSON is still committed
+  under `results/`, so the repo stays the source of truth if W&B is unavailable.
+- **Why:** It is the most widely used tracker for deep learning / LLM fine-tuning; the
+  Hugging Face Trainer and TRL log to it with `report_to="wandb"`. Runs are stored
+  online as they happen, so a Colab disconnect loses nothing. Dashboards can be shared
+  publicly for the portfolio.
+- **Alternatives considered:** MLflow (common in enterprise / Databricks; needs a
+  self-hosted UI from Colab and is harder to share); TensorBoard (no hosted run history).
+- **Plan sections:** 3, 8.3.
+
 ---
 
 ## Open decisions
@@ -329,7 +345,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| Experiment tracker: W&B vs MLflow | Step 1.1 | W&B is simpler from Colab |
 | Image storage format: zips on Drive + unzip to local disk per session, vs preprocessed shards on Drive | Step 1.2 | ~39k small files read through the Drive mount would be slow |
 | Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
 | Quality-label threshold `k` | Step 1.3 | From audit data |
