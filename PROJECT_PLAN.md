@@ -215,6 +215,7 @@ vizwiz-assistant/
 │   ├── 00_setup_colab.ipynb      # Drive mount, clone, install, GPU check
 │   ├── 00b_compat_check.ipynb    # L4: Step 0.3 compatibility check
 │   ├── 01_data_download.ipynb    # CPU: download + checksums (Step 1.2)
+│   ├── 02_data_prep.ipynb        # CPU: rebuild check, image scan, token stats (1.3–1.5)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
@@ -529,9 +530,10 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   Deliverable: `results/audit/audit_report.md` (text and tables only). STOP.
 - **1.4** Label construction + split creation + dev subset + manifests + leakage tests.
   Deliverable: manifests, passing tests, label statistics. STOP.
-- **1.5** (Colab, T4) Task formatting (chat template, masking) with a dataloader smoke test.
-  Deliverable: printed formatted examples (text only) and token-length stats per
-  image-resolution setting. STOP.
+- **1.5** Task formatting (chat template, masking) + image preprocessing; then one
+  (Colab, CPU) run of `02_data_prep.ipynb` for all image-dependent Phase 1 work
+  (D-037). Deliverable: printed synthetic formatted examples, token-length stats per
+  image-size budget, image stats + hashes, label-file rebuild check. STOP.
 
 ### Phase 2: Evaluation harness and baseline
 - **2.1** Implement metrics (reuse official VizWiz eval logic where possible) + unit tests. STOP.

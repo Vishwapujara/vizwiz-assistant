@@ -22,5 +22,9 @@ class DataConfig(BaseModel):
         return [*self.quality_issues.values(), self.unrecognizable_label, "none"]
 
 
-def load_data_config(path: Path | str = "configs/data.yaml") -> DataConfig:
+REPO_ROOT = Path(__file__).resolve().parents[3]  # src/vizwiz/data/config.py -> repo
+DEFAULT_CONFIG = REPO_ROOT / "configs" / "data.yaml"
+
+
+def load_data_config(path: Path | str = DEFAULT_CONFIG) -> DataConfig:
     return DataConfig(**yaml.safe_load(Path(path).read_text()))

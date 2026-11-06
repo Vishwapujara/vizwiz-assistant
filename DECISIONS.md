@@ -488,6 +488,50 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   test_vqa 8,000 / 8,000.
 - **Plan sections:** 5.2, 13.
 
+### D-035: One image-preprocessing function for training, evaluation and serving
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** `vizwiz.serve.preprocess.prepare_image(source, max_pixels)`:
+  1. apply the EXIF orientation explicitly;
+  2. convert to RGB;
+  3. downscale (never upscale) to area ≤ `max_pixels`, aspect kept, both sides
+     floored to multiples of 32.
+  The `max_pixels` budget is the image-resolution knob; candidate budgets 262,144 /
+  524,288 / 1,048,576 / native are measured in Step 1.5, and the choice is made in
+  Step 3.1 from L4 memory and speed.
+- **Why:** Qwen3-VL makes one visual token per 32×32 block (16-px patches, 2×2 merge),
+  so rounding to 32 makes token count = (w/32)·(h/32): predictable memory and no
+  second resize inside the processor. Phone photos often store rotation as EXIF
+  metadata, and whether a given processor or vLLM applies it is not guaranteed; doing
+  it ourselves removes a silent train/serve mismatch.
+- **Plan sections:** 6, 7, 12.1.
+
+### D-036: Prompts, targets and loss masking
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** `vizwiz.data.formatting`: a system prompt per task; user turn = image
+  (+ question, except for quality); assistant turn = target (answer string /
+  `answerable`|`unanswerable` / JSON list of quality labels). Labels are -100 for every
+  prompt token; the target and the end-of-turn token are trained. The prompt is
+  encoded separately with `add_generation_prompt=True`, and its ids must be an exact
+  prefix of the full conversation's ids. This is checked for every example
+  (`prefix_ok`).
+- **Why:** Training on the end-of-turn token teaches the model to stop after a short
+  answer. The prefix check catches chat templates that add hidden tokens to assistant
+  turns (for example empty "thinking" blocks), which would otherwise shift the mask
+  silently.
+- **Plan sections:** 6.
+
+### D-037: Rest of Phase 1 runs as one CPU notebook (`02_data_prep.ipynb`)
+- **Date:** 2026-11-06
+- **Status:** Accepted (owner's request)
+- **Decision:** The image-dependent parts of Steps 1.3–1.5 (image statistics, image
+  hashes and duplicate check, label-file rebuild check, token-length statistics) run
+  in one Colab CPU session instead of one per step. The pinned GPU venv is used even
+  on CPU, so token counts come from exactly the transformers version used in training.
+  The planned T4 "dataloader smoke test" moves to Step 3.1, which runs on a GPU anyway.
+- **Plan sections:** 14 (Steps 1.3–1.5).
+
 ---
 
 ## Open decisions
