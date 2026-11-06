@@ -1,0 +1,71 @@
+{
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "versions": {
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "pillow": "13.0.0"
+  },
+  "command": [
+    "/content/venv/bin/vllm",
+    "serve",
+    "Qwen/Qwen3-VL-4B-Instruct",
+    "--port",
+    "8000",
+    "--dtype",
+    "bfloat16",
+    "--max-model-len",
+    "8192",
+    "--gpu-memory-utilization",
+    "0.85",
+    "--limit-mm-per-prompt",
+    "{\"image\": 1, \"video\": 0}",
+    "--enable-lora",
+    "--max-loras",
+    "3",
+    "--max-lora-rank",
+    "16",
+    "--lora-modules",
+    "blank=/content/blank_lora"
+  ],
+  "env_overrides": {
+    "VLLM_USE_FLASHINFER_SAMPLER": "0"
+  },
+  "startup_s": 205.1,
+  "server_started": true,
+  "served_models": [
+    "Qwen/Qwen3-VL-4B-Instruct",
+    "blank"
+  ],
+  "answers": {
+    "base": {
+      "answer": "12/2026",
+      "latency_s": 0.53,
+      "usage": {
+        "prompt_tokens": 425,
+        "total_tokens": 433,
+        "completion_tokens": 8,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      }
+    },
+    "lora_blank": {
+      "answer": "12/2026",
+      "latency_s": 1.3,
+      "usage": {
+        "prompt_tokens": 425,
+        "total_tokens": 433,
+        "completion_tokens": 8,
+        "prompt_tokens_details": null,
+        "completion_tokens_details": null
+      }
+    }
+  },
+  "base_answer_looks_correct": true,
+  "lora_matches_base": true,
+  "ok": true,
+  "log": "/content/drive/MyDrive/vizwiz/logs/vllm_server.log"
+}

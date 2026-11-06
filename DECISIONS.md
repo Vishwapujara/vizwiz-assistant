@@ -181,7 +181,7 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ### D-016: Pinned, isolated GPU environment: vLLM 0.32.0 + transformers 5.19.0
 - **Date:** 2026-11-05
-- **Status:** Proposed (confirmed or revised by the Step 0.3 run)
+- **Status:** Accepted (confirmed by the Step 0.3 rerun on 2026-11-06, see D-021)
 - **Decision:** GPU work runs in a separate venv at `/content/venv`, built with `uv`
   from `requirements/colab-gpu.txt` every session: `vllm==0.32.0`,
   `transformers==5.19.0`, plus peft/accelerate/pillow. vLLM pulls in `torch==2.13.0`
@@ -247,7 +247,7 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ### D-020: vLLM subprocess environment: venv bin on PATH, FlashInfer sampler off
 - **Date:** 2026-11-06
-- **Status:** Accepted (pending the R-002 rerun)
+- **Status:** Accepted (confirmed by the R-002 rerun)
 - **Decision:** Every vLLM server we start gets `PATH=<venv>/bin:$PATH` and
   `VLLM_USE_FLASHINFER_SAMPLER=0`.
 - **Why:** The PATH fix lets any tool the venv installs be found (root cause of R-002).
@@ -258,6 +258,30 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 - **Alternatives considered:** keep the FlashInfer sampler and cache its build on Drive
   (more moving parts for a component greedy decoding barely uses).
 - **Plan sections:** 12.
+
+### D-021: Step 0.3 passed; full environment locked
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Observed (Colab L4, rerun):**
+  - transformers: model load 4.5 s (cached), generation 1.1 s, label read correctly
+    ("12/2026"), peak GPU memory 8.39 GiB (`results/env/compat_hf_l4.json`).
+  - vLLM 0.32.0: server healthy after 205 s (most of it torch.compile and CUDA graph
+    capture, ~90 s together in the first log); served models: base + `blank` adapter.
+    Base and blank-adapter answers identical ("12/2026", 8 tokens). Latency 0.53 s base,
+    1.30 s adapter; the adapter number includes its first-use load, so it is not a
+    benchmark (`results/env/compat_vllm_l4.json`).
+  - The package set resolved identically on both runs (`results/env/freeze_l4.txt`).
+- **Decision:** Pin `peft==0.21.2`, `accelerate==1.15.0`, `pillow==13.0.0` in
+  `requirements/colab-gpu.txt`, and commit the full resolved set as a constraints file,
+  `requirements/colab-gpu.lock.txt` (~200 packages). Every notebook installs with
+  `-r colab-gpu.txt -c colab-gpu.lock.txt`.
+- **Why:** Top-level pins alone still let transitive dependencies drift between
+  sessions. The lock reproduces exactly the set that was tested. It only changes
+  after a new compatibility run passes.
+- **Known per-session cost:** ~3.5 min of vLLM startup (compile + graph capture),
+  because Colab wipes `~/.cache/vllm`. Possible later optimisation: point the vLLM
+  compile cache at Drive. Not worth it until Phase 5.
+- **Plan sections:** 3, 12, 14 (Step 0.3 done).
 
 ---
 
@@ -312,7 +336,8 @@ Resolved items move to the Decisions section with a `D-xxx` id.
   the FlashInfer sampler so no JIT build happens; (c) activate the venv in every
   notebook shell line (easy to forget).
 - **Resolution:** (a) + (b), in `vizwiz.compat.server_env()` → see D-020.
-- **Status:** Fix pushed; waiting on the rerun
+- **Status:** Resolved (rerun 2026-11-06: server started, `ok: true`,
+  `results/env/compat_vllm_l4.json`)
 
 ### R-003: `uv venv` blocks on an interactive prompt when the venv already exists
 - **Date hit:** 2026-11-06

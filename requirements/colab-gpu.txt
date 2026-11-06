@@ -3,6 +3,6 @@
 # See DECISIONS.md D-016. Full resolved versions are saved per run as results/env/freeze_*.txt.
 vllm==0.32.0
 transformers==5.19.0
-peft
-accelerate
-pillow
+peft==0.21.2
+accelerate==1.15.0
+pillow==13.0.0
