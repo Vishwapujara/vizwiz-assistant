@@ -359,6 +359,28 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   (original plan; no UI or lineage).
 - **Plan sections:** 3, 4, 12.1, 14 (Step 5.3).
 
+### D-027: Download design (Step 1.2)
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** `vizwiz.data.download` downloads straight to
+  `MyDrive/vizwiz/datasets/raw/` on a CPU runtime, using only the standard library.
+  - Partial files are kept as `*.part` and resumed with HTTP Range requests (the server
+    answers `Range` with 206; checked 2026-11-06).
+  - Every file is checked against the server's `Content-Length` and hashed with SHA-256
+    while streaming. Hashes go to `checksums.json` after each file, and the committed
+    copy lives at `results/data/checksums.json`.
+  - Image zips are checked by counting `.jpg` entries (23,431 / 7,750 / 8,000).
+  - Order: annotations first (small, needed soonest), then val, test, train.
+  - The notebook ends with `drive.flush_and_unmount()` so writes reach Drive before
+    the runtime is deleted.
+- **Why:** The VizWiz server publishes no checksums, so the hashes from our first
+  download become the provenance record: any later copy can be verified against them.
+  Resume means a disconnect during the 11.3 GB train zip costs minutes, not the
+  whole download. A CPU runtime avoids spending GPU credits on network I/O.
+- **Alternatives considered:** download to local disk and then copy to Drive (a
+  disconnect loses everything in flight); Hugging Face mirrors (unofficial, D-023 / Step 1.1).
+- **Plan sections:** 5, 14 (Step 1.2).
+
 ---
 
 ## Open decisions

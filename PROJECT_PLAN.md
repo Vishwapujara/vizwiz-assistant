@@ -213,7 +213,8 @@ vizwiz-assistant/
 │       └── report.py
 ├── notebooks/                    # thin Colab launchers only (run by the owner in Colab)
 │   ├── 00_setup_colab.ipynb      # Drive mount, clone, install, GPU check
-│   ├── 01_data.ipynb             # CPU runtime
+│   ├── 00b_compat_check.ipynb    # L4: Step 0.3 compatibility check
+│   ├── 01_data_download.ipynb    # CPU: download + checksums (Step 1.2)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
