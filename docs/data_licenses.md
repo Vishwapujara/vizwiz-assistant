@@ -45,9 +45,11 @@ the JSON files (26,949 / 4,271 / 7,993 vs 23,431 / 7,750 / 8,000).
 
 ## What the files contain (verified)
 
-**One shared image pool.** The VQA and Captions pages link the *same* image zips. The
-quality annotations cover all 39,181 images (23,431 train / 7,750 val / 8,000 test).
-VQA questions exist for a subset of them.
+**One shared image pool.** The VQA and Captions pages link the *same* image zips.
+Image counts inside the zips (verified in Step 1.2): **train 23,954 / val 7,750 /
+test 8,000**, numbered with no gaps. Train is the union of VQA train (20,523) and
+quality train (23,431), which share 20,000 images. Quality-only images (3,431 in train,
+3,431 in val) are photos submitted for captions, with no question.
 
 **VQA** (`Annotations.zip` → `train.json`, `val.json`, `test.json`; plus `VQA_test.json`):
 

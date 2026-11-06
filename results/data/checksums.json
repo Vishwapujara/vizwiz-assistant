@@ -1,0 +1,79 @@
+{
+  "VQA_test.json": {
+    "seconds_last_attempt": 1.6,
+    "sha256": "fa113f0e90230ab4690bb41c4d74e40f7087cc7c192dd8363fa4d6bad339b7aa",
+    "size": 8227183,
+    "url": "https://vizwiz.cs.colorado.edu/VizWiz_all_answers/VQA_test.json"
+  },
+  "quality_annotations.zip": {
+    "seconds_last_attempt": 0.7,
+    "sha256": "98565ce98b24da332d054eafbf877ac6aae50a8e486d033a0ea6f81b315a4875",
+    "size": 303584,
+    "url": "https://vizwiz.cs.colorado.edu/VizWiz_final/image_quality/annotations.zip",
+    "zip": {
+      "expected": 3,
+      "files": 3,
+      "jpg": 0,
+      "ok": true
+    }
+  },
+  "test.zip": {
+    "seconds_last_attempt": 387.2,
+    "sha256": "4d03f8c21823a3e4d1f501b1234e7380eb7cf2429ff0eb0281741ff1cc44f22a",
+    "size": 3975272799,
+    "url": "https://vizwiz.cs.colorado.edu/VizWiz_final/images/test.zip",
+    "zip": {
+      "expected": 8000,
+      "files": 8000,
+      "jpg": 8000,
+      "ok": true
+    }
+  },
+  "train.zip": {
+    "seconds_last_attempt": 650.5,
+    "sha256": "f31d712fe0bd6b136b100b7d5677b0006dcda64704f0b5f7af2f5f1373215d74",
+    "size": 11298421598,
+    "url": "https://vizwiz.cs.colorado.edu/VizWiz_final/images/train.zip",
+    "zip": {
+      "expected": 23954,
+      "files": 23954,
+      "jpg": 23954,
+      "note": "expected corrected from 23431 (quality-only count) to 23954 = VQA \u222a quality train images; see R-004",
+      "ok": true
+    }
+  },
+  "val.zip": {
+    "seconds_last_attempt": 208.1,
+    "sha256": "7cc829c1fbcbc9ffd0a895f9df33d4b365557289c037a578ea9f812e41422469",
+    "size": 3488913457,
+    "url": "https://vizwiz.cs.colorado.edu/VizWiz_final/images/val.zip",
+    "zip": {
+      "expected": 7750,
+      "files": 7750,
+      "jpg": 7750,
+      "ok": true
+    }
+  },
+  "vqa_annotations.zip": {
+    "seconds_last_attempt": 1.1,
+    "sha256": "dbc32fc1e3f1b1039aea906030d569d6c238b4ddb2eea5e3453a6a565c829ec9",
+    "size": 1711273,
+    "url": "https://vizwiz.cs.colorado.edu/VizWiz_final/vqa_data/Annotations.zip",
+    "zip": {
+      "expected": 3,
+      "files": 3,
+      "jpg": 0,
+      "ok": true
+    }
+  },
+  "vqa_api.zip": {
+    "seconds_last_attempt": 12.0,
+    "sha256": "76de4354ca2fbc57dd2369b579dc9bb5684e41d6a135b36b324a5ba25b7b9ca2",
+    "size": 185601325,
+    "url": "https://vizwiz.cs.colorado.edu/VizWiz_final/vqa_data/API.zip",
+    "zip": {
+      "files": 109,
+      "jpg": 0
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "dest": "/content/data",
+  "timings": {
+    "val": {
+      "seconds": 45.9,
+      "jpg_files": 7750
+    }
+  }
+}

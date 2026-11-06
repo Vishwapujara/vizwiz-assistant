@@ -381,6 +381,27 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   disconnect loses everything in flight); Hugging Face mirrors (unofficial, D-023 / Step 1.1).
 - **Plan sections:** 5, 14 (Step 1.2).
 
+### D-028: Images stay zipped on Drive and are unzipped to local disk each session
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Observed (Step 1.2):**
+  - Download of all 7 files (18.96 GB) took about 21 minutes (val 208 s, test 387 s,
+    train 651 s; 10–18 MB/s). All sizes matched the server, and every zip holds the
+    expected images (after R-004).
+  - Unzipping val (3.49 GB, 7,750 images) from Drive to local disk took 45.9 s, about
+    76 MB/s (`results/data/extract_timings_val.json`).
+- **Decision:** The zips on Drive are the single copy. Each GPU session unzips only the
+  splits it needs into `/content/data/images`: about 2.5 min for train, ~4 min for all
+  three (extrapolated from val). Preprocessed shards are deferred until a step actually
+  needs them (Step 1.5 may store resized images if image loading turns out to be a
+  training bottleneck).
+- **Why:** ~4 minutes per session is cheap next to training runs measured in hours. It
+  avoids reading ~40k small files through the Drive mount, avoids a second ~19 GB copy
+  on Drive, and keeps the original, checksummed files as the only source.
+- **Checksums:** `results/data/checksums.json` is the provenance record (the VizWiz
+  server publishes none). `vizwiz.data.download verify` re-checks any copy against it.
+- **Plan sections:** 2.2, 5, 14 (Step 1.2 done).
+
 ---
 
 ## Open decisions
@@ -389,7 +410,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| Image storage format: zips on Drive + unzip to local disk per session, vs preprocessed shards on Drive | Step 1.2 | ~39k small files read through the Drive mount would be slow |
 | Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
 | Quality-label threshold `k` | Step 1.3 | From audit data |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
@@ -449,6 +469,24 @@ Resolved items move to the Decisions section with a `D-xxx` id.
   deleted), and `uv venv` asks before overwriting.
 - **Resolution:** `uv venv --clear` in the notebook, so it always rebuilds without
   asking. A clean rebuild every session keeps runs reproducible.
+- **Status:** Resolved
+
+### R-004: train.zip image count did not match the expected 23,431
+- **Date hit:** 2026-11-06
+- **Step:** 1.2
+- **Environment:** Colab, `vizwiz.data.download fetch`
+- **What happened:** the zip check reported `train.zip` with 23,954 `.jpg` files
+  against an expected 23,431 (`ok: false`). The file size matched the server's
+  `Content-Length` exactly.
+- **Root cause:** my expected value was wrong. 23,431 is the number of train images in
+  the *quality* (and Captions) dataset. The shared zip holds every train image of both
+  tasks: VQA train 20,523 ∪ quality train 23,431, which share 20,000 → 23,954. Checked
+  against the annotation files: the union is exactly 23,954 names, numbered with no
+  gaps from 00000000 to 00023953.
+- **Resolution:** expected count corrected in `SOURCES` and in the committed
+  `results/data/checksums.json`; data doc updated. No re-download needed.
+- **Lesson:** derive expected counts from the annotation files themselves, not from
+  dataset web pages that describe only one task.
 - **Status:** Resolved
 
 <!--

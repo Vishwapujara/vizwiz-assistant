@@ -61,7 +61,8 @@ SOURCES: tuple[Source, ...] = (
     Source("vqa_api.zip", f"{BASE}/VizWiz_final/vqa_data/API.zip", 185_601_325, "code"),
     Source("val.zip", f"{BASE}/VizWiz_final/images/val.zip", 3_488_913_457, "images", 7_750),
     Source("test.zip", f"{BASE}/VizWiz_final/images/test.zip", 3_975_272_799, "images", 8_000),
-    Source("train.zip", f"{BASE}/VizWiz_final/images/train.zip", 11_298_421_598, "images", 23_431),
+    # train.zip holds VQA ∪ quality train images: 20,523 + 23,431 - 20,000 shared (R-004).
+    Source("train.zip", f"{BASE}/VizWiz_final/images/train.zip", 11_298_421_598, "images", 23_954),
 )
 
 
