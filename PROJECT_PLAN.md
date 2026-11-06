@@ -536,7 +536,8 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   Deliverable: baseline metrics JSON + per-slice table. STOP.
 
 ### Phase 3: Training
-- **3.1** (Colab, T4 then L4) SFT entrypoint; smoke test with 200 examples on T4
+- **3.1** (Colab, T4 then L4) W&B login check first (`WANDB_API_KEY` from Colab Secrets,
+  D-025); then SFT entrypoint; smoke test with 200 examples on T4
   (QLoRA mode); verify loss masking (only answer tokens contribute) and
   checkpoint/resume (kill the run, resume, confirm step count continues). Then
   measure peak memory and step time on L4 in bf16 LoRA mode and fix the image
