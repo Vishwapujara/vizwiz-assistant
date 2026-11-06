@@ -337,6 +337,28 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   self-hosted UI from Colab and is harder to share); TensorBoard (no hosted run history).
 - **Plan sections:** 3, 8.3.
 
+### D-026: W&B for everything: tracking and the adapter registry
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** W&B is the only MLOps tool. Training and evaluation runs go to W&B
+  experiment tracking (D-025). The adapter registry is W&B Registry: each trained
+  adapter is logged as a versioned artifact with metadata (task, base model, rank,
+  training run, metrics), and the `production` alias marks the live version per task.
+  Promotion and rollback mean moving that alias. This replaces the SQLite registry
+  in the original plan.
+- **Consequences:**
+  - The gateway needs internet and `WANDB_API_KEY` at startup to resolve adapters.
+    That holds on Colab and on the laptop.
+  - Code talks to a small `Registry` interface. Tests and GitHub Actions use an
+    in-memory fake, so CI needs no network and no secrets.
+- **Why:** One tool instead of two means less setup and one place to look; runs and
+  adapters are linked automatically (each adapter version points to the run that
+  produced it).
+- **Alternatives considered:** MLflow Model Registry (self-hostable, so no network
+  dependency at serving time, but a second tool to run); custom SQLite registry
+  (original plan; no UI or lineage).
+- **Plan sections:** 3, 4, 12.1, 14 (Step 5.3).
+
 ---
 
 ## Open decisions

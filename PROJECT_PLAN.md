@@ -156,7 +156,7 @@ compatibility with Qwen3-VL **and with T4/L4 GPUs** **[VERIFY all versions]**.
 | Quantization | `llm-compressor` (FP8 / AWQ / GPTQ for vLLM) **[VERIFY Qwen3-VL support]** |
 | Serving | `vllm` (OpenAI-compatible server, multi-LoRA), run on L4 |
 | Gateway | `fastapi`, `uvicorn`, `httpx` |
-| Adapter registry | SQLite (via `sqlmodel` or `sqlite3`) |
+| Adapter registry | W&B Registry (adapters as versioned artifacts; `production` alias = live version), behind a small interface with an in-memory fake for tests (D-026) |
 | Load testing | `locust` (headless mode in Colab) |
 | Monitoring | Prometheus metrics endpoints (vLLM + gateway); Grafana in the local Compose stack |
 | Dashboard | Streamlit (results tables, plots; reads committed `results/*.json`) |
@@ -204,7 +204,7 @@ vizwiz-assistant/
 │   ├── serve/
 │   │   ├── gateway.py            # FastAPI app implementing the cascade
 │   │   ├── cascade.py
-│   │   ├── registry.py           # adapter registry
+│   │   ├── registry.py           # adapter registry interface: W&B Registry + in-memory fake
 │   │   ├── preprocess.py         # image resizing / encoding
 │   │   ├── guidance.py           # quality issue -> fixed retake-guidance text
 │   │   └── mock_model.py         # fake OpenAI-compatible server for local/CI tests
@@ -447,8 +447,13 @@ Cut from scope: full fine-tuning, LoRA rank ablation, 2B vs 4B comparison
   `GET /adapters`, `POST /adapters/{name}/load`, `GET /metrics` (Prometheus).
   Implements the cascade, image preprocessing, timeouts, retries on transient
   errors, and structured logging.
-- **Adapter registry (SQLite):** name, version, task, base model id, rank,
-  training run id, metrics summary, storage path, status (active/inactive).
+- **Adapter registry (W&B Registry, D-026):** each trained adapter is uploaded as a
+  versioned W&B artifact with metadata: task, base model id, rank, training run,
+  metrics summary. The `production` alias marks the live version per task;
+  promotion and rollback = moving the alias. At startup the gateway resolves the
+  `production` version for each task, downloads it, and loads it into vLLM. Code
+  depends on a `Registry` interface; tests and CI use an in-memory fake, so they
+  need no network or API key.
 - **Mock model server:** a small fake OpenAI-compatible server returning canned
   outputs, so the gateway, cascade, and Compose stack are testable locally and in CI
   without a GPU.
@@ -549,7 +554,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 ### Phase 5: Serving
 - **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP.
 - **5.2** FastAPI gateway + cascade + preprocessing + guidance mapping + mock model + tests. STOP.
-- **5.3** Adapter registry + load/unload endpoints. STOP.
+- **5.3** Adapter registry (W&B Registry client + in-memory fake) + promote/rollback + load/unload endpoints. STOP.
 - **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP.
 
 ### Phase 6: Benchmarking and reporting
