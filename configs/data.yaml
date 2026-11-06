@@ -1,0 +1,13 @@
+# Data labels and splits (Step 1.4). See DECISIONS.md D-030..D-033.
+seed: 1234
+val_fraction: 0.10          # carved from official train, image-grouped and stratified
+quality_k: 2                # an issue counts when >= k of 5 annotators flagged it
+quality_issues:             # official code -> our label; OTH dropped (D-032)
+  BLR: blur
+  FRM: framing
+  ROT: rotation
+  DRK: dark
+  BRT: bright
+  OBS: obstruction
+unrecognizable_label: unrecognizable
+answerability_labels: [answerable, unanswerable]   # 2-way (D-031)

@@ -428,6 +428,66 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   `OTH` (0.8% at k = 2) is a candidate to drop as a class (Step 1.4).
 - **Plan sections:** 5.3, 17.
 
+### D-031: Answerability is 2-way (answerable / unanswerable)
+- **Date:** 2026-11-06
+- **Status:** Accepted (owner's choice)
+- **Decision:** The answerability adapter predicts `answerable` or `unanswerable`,
+  straight from the official flag. Unusable photos are caught earlier in the cascade
+  by the quality adapter (`unrecognizable` → retake guidance).
+- **Why:** Every label stays an original human annotation. A third class would have
+  to be stitched together from two datasets (about 8% of questions) and would
+  duplicate the quality adapter's job.
+- **Alternatives considered:** 3-way with `unsuitable_image` built from
+  `unrecognizable` votes (R-005 option b).
+- **Plan sections:** 5.3, 6.2, 6.5, 9.1.
+
+### D-032: Drop the `OTH` quality class
+- **Date:** 2026-11-06
+- **Status:** Accepted (owner's choice)
+- **Decision:** Quality labels are `blur, framing, rotation, dark, bright, obstruction,
+  unrecognizable`, or `none`. `OTH` flags are ignored.
+- **Why:** `OTH` is 0.8% of images at k = 2, too rare to learn, and "other" has no
+  actionable retake advice.
+- **Plan sections:** 5.3, 6.3.
+
+### D-033: Answer target rule; answering adapter trains on answerable questions only
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** The target is the distinct human answer with the highest official
+  accuracy when output verbatim; ties go to more votes, then the earliest-listed answer.
+  For answerable questions, `unanswerable` is excluded as a target. The answering
+  adapter trains only on answerable questions; in the cascade, a decline is scored as
+  the answer `unanswerable`.
+- **Why:** The metric normalises the prediction and compares it with raw answers, so
+  "most frequent string" can pick an answer that scores 0 (audit finding 8). Choosing
+  by the metric itself avoids that. Excluding `unanswerable` keeps the answering
+  adapter from learning to decline, which would blur the two adapters' jobs.
+- **Effect (Step 1.4 build):** the target differs from the most common answer for
+  2,106 of 13,492 answerable train questions (15.6%): 1,856 where `unanswerable` was the
+  most common answer, 246 ties for most common, and 4 where the metric picked a
+  different answer. Mean target accuracy on answerable questions:
+  87.3% (train), 84.9% (test).
+- **Plan sections:** 5.3, 6.1.
+
+### D-034: What the split build commits, and what stays on Drive
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** `python -m vizwiz.data.splits` writes:
+  - record files `vqa_{split}.jsonl` and `quality_{split}.jsonl` with questions,
+    answers and labels → Drive only (`datasets/processed/`), never git;
+  - `results/splits/membership.json`: image names per split (IDs only) → committed;
+  - `results/splits/files.json`: SHA-256 of each record file → committed;
+  - `results/splits/label_stats.{json,md}`: aggregate counts → committed.
+  The build is deterministic (sorted records, fixed seed per stratum, canonical JSON).
+  The Colab run rebuilds with `--expect results/splits/files.json` and must print
+  `REBUILD MATCHES COMMITTED HASHES`.
+- **Why:** Anyone can confirm they have exactly our splits without the repo holding
+  dataset text. Two local builds already produced identical hashes.
+- **Splits (seed 1234):** train 21,559 images / 18,471 questions; val 2,395 / 2,052
+  (stratified, 26.9% unanswerable, the same as train); test 7,750 / 4,319;
+  test_vqa 8,000 / 8,000.
+- **Plan sections:** 5.2, 13.
+
 ---
 
 ## Open decisions
@@ -438,8 +498,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 |---|---|---|
 | Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
-| 3-way answerability label vs binary (R-005) | Step 1.4 | `unsuitable_image` from `unrecognizable` votes ≈ 8% of questions at k = 2 |
-| Training target rule for answers | Step 1.4 | Pick the candidate with the highest official accuracy, not just the most frequent string (audit finding 8) |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
 
@@ -529,8 +587,9 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 - **Options considered:** (a) binary answerability only; (b) derive `unsuitable_image`
   from the quality annotations' `unrecognizable` votes on unanswerable questions
   (about 8% of questions at k = 2); (c) drop answerability and rely on the quality adapter.
-- **Resolution:** decided in Step 1.4 (findings 3–4 in `results/audit/findings.md`).
-- **Status:** Open (decision pending in Step 1.4)
+- **Resolution:** option (a): 2-way answerability; unusable photos are handled by the
+  quality adapter's `unrecognizable` label → see D-031.
+- **Status:** Resolved
 
 <!--
 Template:

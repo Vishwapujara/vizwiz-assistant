@@ -1,0 +1,146 @@
+{
+  "vqa": {
+    "train": {
+      "questions": 18471,
+      "answerability": {
+        "answerable": 13492,
+        "unanswerable": 4979
+      },
+      "answer_type": {
+        "other": 12360,
+        "unanswerable": 4979,
+        "yes/no": 861,
+        "number": 271
+      },
+      "borderline_answerable_3to5_unans_votes": 2262,
+      "with_quality_labels": 17997,
+      "target_mean_accuracy_answerable_pct": 87.26,
+      "target_differs_from_most_common": 2106
+    },
+    "val": {
+      "questions": 2052,
+      "answerability": {
+        "answerable": 1499,
+        "unanswerable": 553
+      },
+      "answer_type": {
+        "other": 1373,
+        "unanswerable": 553,
+        "yes/no": 96,
+        "number": 30
+      },
+      "borderline_answerable_3to5_unans_votes": 243,
+      "with_quality_labels": 2003,
+      "target_mean_accuracy_answerable_pct": 86.95,
+      "target_differs_from_most_common": 227
+    },
+    "test": {
+      "questions": 4319,
+      "answerability": {
+        "unanswerable": 1385,
+        "answerable": 2934
+      },
+      "answer_type": {
+        "other": 2691,
+        "unanswerable": 1385,
+        "yes/no": 195,
+        "number": 48
+      },
+      "borderline_answerable_3to5_unans_votes": 550,
+      "with_quality_labels": 4319,
+      "target_mean_accuracy_answerable_pct": 84.85,
+      "target_differs_from_most_common": 535
+    },
+    "test_vqa": {
+      "questions": 8000,
+      "answerability": {
+        "answerable": 5853,
+        "unanswerable": 2147
+      },
+      "answer_type": {
+        "other": 5381,
+        "unanswerable": 2147,
+        "yes/no": 349,
+        "number": 123
+      },
+      "borderline_answerable_3to5_unans_votes": 968,
+      "with_quality_labels": 0,
+      "target_mean_accuracy_answerable_pct": 86.79,
+      "target_differs_from_most_common": 951
+    }
+  },
+  "quality": {
+    "train": {
+      "images": 21085,
+      "labels": {
+        "blur": 8597,
+        "framing": 11648,
+        "rotation": 3584,
+        "dark": 1240,
+        "bright": 1139,
+        "obstruction": 763,
+        "unrecognizable": 3216,
+        "none": 4802
+      },
+      "labels_pct": {
+        "blur": 40.77,
+        "framing": 55.24,
+        "rotation": 17.0,
+        "dark": 5.88,
+        "bright": 5.4,
+        "obstruction": 3.62,
+        "unrecognizable": 15.25,
+        "none": 22.77
+      },
+      "mean_labels_per_image": 1.66
+    },
+    "val": {
+      "images": 2346,
+      "labels": {
+        "blur": 955,
+        "framing": 1286,
+        "rotation": 402,
+        "dark": 127,
+        "bright": 109,
+        "obstruction": 77,
+        "unrecognizable": 342,
+        "none": 555
+      },
+      "labels_pct": {
+        "blur": 40.71,
+        "framing": 54.82,
+        "rotation": 17.14,
+        "dark": 5.41,
+        "bright": 4.65,
+        "obstruction": 3.28,
+        "unrecognizable": 14.58,
+        "none": 23.66
+      },
+      "mean_labels_per_image": 1.64
+    },
+    "test": {
+      "images": 7750,
+      "labels": {
+        "blur": 3279,
+        "framing": 4348,
+        "rotation": 1325,
+        "dark": 476,
+        "bright": 476,
+        "obstruction": 267,
+        "unrecognizable": 1231,
+        "none": 1626
+      },
+      "labels_pct": {
+        "blur": 42.31,
+        "framing": 56.1,
+        "rotation": 17.1,
+        "dark": 6.14,
+        "bright": 6.14,
+        "obstruction": 3.45,
+        "unrecognizable": 15.88,
+        "none": 20.98
+      },
+      "mean_labels_per_image": 1.68
+    }
+  }
+}
