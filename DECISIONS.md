@@ -179,6 +179,48 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   driver is what actually limits us.
 - **Plan sections:** 2.1, 8.1, 12.
 
+### D-016: Pinned, isolated GPU environment: vLLM 0.32.0 + transformers 5.19.0
+- **Date:** 2026-11-05
+- **Status:** Proposed (confirmed or revised by the Step 0.3 run)
+- **Decision:** GPU work runs in a separate venv at `/content/venv`, built with `uv`
+  from `requirements/colab-gpu.txt` every session: `vllm==0.32.0`,
+  `transformers==5.19.0`, plus peft/accelerate/pillow. vLLM pulls in `torch==2.13.0`
+  and `torchvision==0.28.0` (CUDA 13). Notebooks call `/content/venv/bin/python -m ...`.
+  The full resolved set is saved as `freeze_*.txt` for each run.
+- **Why:**
+  - Colab's preinstalled torch is 2.11 (D-013) and vLLM 0.32.0 requires exactly
+    torch 2.13.0, so vLLM cannot share Colab's kernel environment without replacing
+    torch mid-session.
+  - One environment for training *and* serving means the same transformers version
+    (same chat template and image processor) is used in both, so there is no
+    train/serve mismatch.
+  - Colab updates its preinstalled packages without notice; a pinned venv makes runs
+    reproducible regardless.
+  - vLLM 0.32.0 (2026-10-18) instead of 0.33.0 (2026-11-02, 3 days old at the time):
+    the newer release has had no time to receive bug-fix releases.
+  - transformers 5.19.0 is the newest release inside vLLM 0.32.0's allowed range
+    (`>=5.16.1,<5.20`).
+- **Alternatives considered:** let `pip install vllm` replace Colab's torch in the
+  kernel (fragile, breaks other preinstalled packages); separate venvs for training
+  and serving (two transformers versions, risk of mismatch).
+- **Sources:** PyPI metadata for vllm 0.32.0 / 0.33.0 and transformers; vLLM supported
+  models page (Qwen3-VL: LoRA supported); Qwen3-VL-4B-Instruct model card (Apache-2.0).
+- **Plan sections:** 3, 7.
+
+### D-017: Validate vLLM LoRA support with a blank adapter
+- **Date:** 2026-11-05
+- **Status:** Accepted
+- **Decision:** Step 0.3 builds a rank-16 LoRA adapter with PEFT on the language-model
+  projections (`q/k/v/o/gate/up/down_proj`) without training it. `lora_B` starts at
+  zero, so the adapter's output must exactly equal the base model's. vLLM serves it,
+  and the check passes if the base and adapter answers are identical under greedy
+  decoding.
+- **Why:** This proves the whole adapter path (PEFT save format → vLLM load → apply at
+  request time) works for Qwen3-VL before any training compute is spent. The check
+  also confirms the target names hit no vision-tower modules (vision encoder frozen,
+  plan Section 7).
+- **Plan sections:** 7, 12.
+
 ---
 
 ## Open decisions

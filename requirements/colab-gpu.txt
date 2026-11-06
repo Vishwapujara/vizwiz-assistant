@@ -1,0 +1,8 @@
+# Pinned GPU environment for Colab (installed into an isolated venv, not Colab's kernel).
+# vllm 0.32.0 pins torch==2.13.0, torchvision==0.28.0, transformers>=5.16.1,<5.20 (CUDA 13).
+# See DECISIONS.md D-016. Full resolved versions are saved per run as results/env/freeze_*.txt.
+vllm==0.32.0
+transformers==5.19.0
+peft
+accelerate
+pillow
