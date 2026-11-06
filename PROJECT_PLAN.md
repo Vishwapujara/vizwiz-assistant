@@ -241,12 +241,18 @@ vizwiz-assistant/
 | VizWiz-VQA | Real photos taken by blind people + their spoken questions; ~10 crowdsourced answers per question; answerable/unanswerable annotations | Answering adapter, answerability adapter |
 | VizWiz image quality issues | Per-image flags from multiple annotators: blur, framing, too dark, too bright, obstruction, rotation, other, no issue; plus a recognizability flag | Quality / retake-guidance adapter |
 
-Expected VizWiz-VQA split sizes (approximate): train ~20.5k, val ~4.3k, test ~8k.
-**Test answers are not public** (scored by the official evaluation server).
+Verified VizWiz-VQA split sizes: train 20,523, val 4,319, test 8,000 (one question per
+image). Quality annotations: 23,431 / 7,750 / 8,000 images, same image pool and naming.
+**VQA test answers are now public** (`VQA_test.json`); **quality test labels are not**.
+Details, URLs, and sizes: `docs/data_licenses.md`. Quality labels come from the
+challenge JSON files, not the per-worker CSV (D-023).
 
 ### 5.2 Split strategy
 - **Our test set = official val split.** Never used for training, tuning, or
-  early stopping. Touch it only for final reported numbers.
+  early stopping. Touch it only for final reported numbers. This is the only split
+  that has labels for all three tasks.
+- **Secondary VQA test = official VQA test split** (answers now public). Used only for
+  final answering/answerability numbers that are comparable with published results (D-022).
 - **Our val set = ~10% carved from official train**, stratified by
   answerability and by answer type, with a fixed seed.
 - **Image-level grouping:** if an image appears in multiple tasks/datasets,

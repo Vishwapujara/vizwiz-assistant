@@ -283,6 +283,44 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   compile cache at Drive. Not worth it until Phase 5.
 - **Plan sections:** 3, 12, 14 (Step 0.3 done).
 
+### D-022: Split strategy: keep test = official val; add official VQA test as a secondary test
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **New fact (Step 1.1):** the VQA test answers are now public (`VQA_test.json`), but
+  the quality test labels are not.
+- **Decision:**
+  - Primary test = official val (4,319 VQA questions / 7,750 quality images). It is
+    the only split labelled for all three tasks, so the cascade can be scored end to end.
+  - Our val = ~10% of official train, image-grouped and stratified (unchanged).
+  - Secondary test = official VQA test (8,000), touched only for final answering and
+    answerability numbers, to compare with published VizWiz results.
+- **Why:** A single labelled test set for every task keeps the cascade evaluation
+  honest. The extra VQA test set costs nothing and gives numbers people recognise.
+- **Alternatives considered:** test = official test for VQA and official val for
+  quality. Rejected because then the VQA val and quality test would share images, and
+  the cascade could not be scored on one set.
+- **Plan sections:** 5.1, 5.2.
+
+### D-023: Quality labels come from the challenge JSON files, not the CSV
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** Use `image_quality/annotations.zip` (per-image counts from 5
+  annotators). Do not download `VizWiz_quality_issues_train_val_test.csv`.
+- **Why:** The JSON files use the same image names as VQA (exact overlap: 20,000 of the
+  20,523 train images, and all val and test images). The CSV uses an older naming
+  scheme, a different split assignment, and contains crowd-worker IDs we have no need
+  to hold.
+- **Plan sections:** 5.1, 5.3.
+
+### D-024: License position
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** VizWiz images and VQA annotations are CC BY 4.0. The quality page gives
+  no license, so the quality labels are treated under the same terms (research and
+  portfolio use, with attribution, no redistribution). The README carries the
+  attribution from `docs/data_licenses.md`.
+- **Plan sections:** 11.
+
 ---
 
 ## Open decisions
@@ -292,6 +330,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | Item | Resolve at | Notes |
 |---|---|---|
 | Experiment tracker: W&B vs MLflow | Step 1.1 | W&B is simpler from Colab |
+| Image storage format: zips on Drive + unzip to local disk per session, vs preprocessed shards on Drive | Step 1.2 | ~39k small files read through the Drive mount would be slow |
 | Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
 | Quality-label threshold `k` | Step 1.3 | From audit data |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |

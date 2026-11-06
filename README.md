@@ -18,6 +18,15 @@ then quantized and served with vLLM multi-LoRA behind a FastAPI gateway.
 VizWiz photos were taken by blind people who could not check what they captured, and
 some contain private information. This repo never stores or displays dataset images.
 
+## Data and attribution
+
+This project uses the VizWiz datasets (https://vizwiz.org), licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). VizWiz-VQA: D. Gurari et al.,
+"VizWiz Grand Challenge: Answering Visual Questions from Blind People," CVPR 2018.
+Image quality issues: T. Chiu et al., "Assessing Image Quality Issues for Real-World
+Problems," CVPR 2020. Labels are derived from the original annotations. See
+[`docs/data_licenses.md`](docs/data_licenses.md).
+
 ## Development
 
 ```bash
