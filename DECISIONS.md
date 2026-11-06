@@ -314,6 +314,20 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 - **Resolution:** (a) + (b), in `vizwiz.compat.server_env()` → see D-020.
 - **Status:** Fix pushed; waiting on the rerun
 
+### R-003: `uv venv` blocks on an interactive prompt when the venv already exists
+- **Date hit:** 2026-11-06
+- **Step:** 0.3 (rerun)
+- **Environment:** Colab L4, same VM reused, so `/content/venv` survived from the first run
+- **What happened:** cell 2 printed "A virtual environment already exists at `venv`.
+  Do you want to replace it? [y/n]" and waited for input; the prompt was cancelled
+  (`^C`). The following `uv pip install` then reused the existing venv, and the printed
+  versions were correct, so no harm was done.
+- **Root cause:** `/content` is not always wiped between runs (only when the runtime is
+  deleted), and `uv venv` asks before overwriting.
+- **Resolution:** `uv venv --clear` in the notebook, so it always rebuilds without
+  asking. A clean rebuild every session keeps runs reproducible.
+- **Status:** Resolved
+
 <!--
 Template:
 
