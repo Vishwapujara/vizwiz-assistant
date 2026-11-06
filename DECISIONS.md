@@ -402,6 +402,32 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   server publishes none). `vizwiz.data.download verify` re-checks any copy against it.
 - **Plan sections:** 2.2, 5, 14 (Step 1.2 done).
 
+### D-029: Port the official VizWiz metric; verified for exact parity
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** `vizwiz.eval.vqa_metric` re-implements the official `vqaEval.py`
+  normalisation and accuracy (leave one annotator out, `min(1, matches/3)`, mean of 10),
+  quirks included: only predictions are normalised; `none` → `0`; the official period
+  regex is kept as written.
+- **Why:** The official code has no license, so it is ported rather than copied, and it
+  pulls in caption-metric dependencies we do not need. Keeping the quirks makes our
+  numbers comparable with published VizWiz results.
+- **Verification:** 0 mismatches against the official functions on 151,181
+  normalisation probes (every unique train/val answer, plus upper-case, trailing-period
+  and article variants) and on 3,000 accuracy checks. A one-off parity script was run
+  locally; the official code is not vendored.
+- **Plan sections:** 5.4, 9.1 (most of Step 2.1's metric work is done early).
+
+### D-030: Quality issue threshold k = 2 (confirmed by the audit)
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Decision:** A quality issue is positive when at least 2 of 5 annotators flagged it.
+- **Why:** k = 1 calls 92% of images flawed (single-annotator noise). k = 3 shrinks
+  obstruction, too-bright and too-dark to 1.7–2.8% of images, too few to learn well.
+  k = 2 keeps every main class at ≥ 3.6% and still needs two people to agree.
+  `OTH` (0.8% at k = 2) is a candidate to drop as a class (Step 1.4).
+- **Plan sections:** 5.3, 17.
+
 ---
 
 ## Open decisions
@@ -411,8 +437,9 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | Item | Resolve at | Notes |
 |---|---|---|
 | Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
-| Quality-label threshold `k` | Step 1.3 | From audit data |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
+| 3-way answerability label vs binary (R-005) | Step 1.4 | `unsuitable_image` from `unrecognizable` votes ≈ 8% of questions at k = 2 |
+| Training target rule for answers | Step 1.4 | Pick the candidate with the highest official accuracy, not just the most frequent string (audit finding 8) |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
 
@@ -488,6 +515,22 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 - **Lesson:** derive expected counts from the annotation files themselves, not from
   dataset web pages that describe only one task.
 - **Status:** Resolved
+
+### R-005: The plan assumed an "unsuitable image" answer that does not exist
+- **Date hit:** 2026-11-06
+- **Step:** 1.3
+- **What happened:** Plan Section 5.3 derives the 3-way answerability label
+  (`answerable` / `unanswerable` / `unsuitable_image`) "from the dataset's
+  answerability fields and answer distribution". In this VizWiz version the only
+  special answer is `unanswerable` (55,993 train answers); there is no `unsuitable`
+  answer and no field for it.
+- **Root cause:** an outdated assumption in the plan (older VizWiz releases separated
+  the two).
+- **Options considered:** (a) binary answerability only; (b) derive `unsuitable_image`
+  from the quality annotations' `unrecognizable` votes on unanswerable questions
+  (about 8% of questions at k = 2); (c) drop answerability and rely on the quality adapter.
+- **Resolution:** decided in Step 1.4 (findings 3–4 in `results/audit/findings.md`).
+- **Status:** Open (decision pending in Step 1.4)
 
 <!--
 Template:

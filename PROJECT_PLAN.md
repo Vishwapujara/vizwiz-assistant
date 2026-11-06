@@ -602,7 +602,6 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 ## 17. Open decisions (resolve when reached)
 
 - Image resolution setting (Step 3.1, from L4 memory/latency measurements).
-- Quality-label threshold `k` (Step 1.3, from audit data).
 - 4-bit serving format: AWQ vs GPTQ (Step 4.1, whichever vLLM supports for this model on L4).
 - Cascade "unusable image" rule (Step 5.2, tuned on val).
 - Final serving quantization format (after E4).
