@@ -1,38 +1,38 @@
 {
   "vqa": {
     "train": {
-      "questions": 18471,
+      "questions": 17967,
       "answerability": {
-        "answerable": 13492,
-        "unanswerable": 4979
+        "answerable": 13134,
+        "unanswerable": 4833
       },
       "answer_type": {
-        "other": 12360,
-        "unanswerable": 4979,
-        "yes/no": 861,
-        "number": 271
+        "other": 12039,
+        "unanswerable": 4833,
+        "yes/no": 832,
+        "number": 263
       },
-      "borderline_answerable_3to5_unans_votes": 2262,
-      "with_quality_labels": 17997,
-      "target_mean_accuracy_answerable_pct": 87.26,
-      "target_differs_from_most_common": 2106
+      "borderline_answerable_3to5_unans_votes": 2188,
+      "with_quality_labels": 17482,
+      "target_mean_accuracy_answerable_pct": 87.29,
+      "target_differs_from_most_common": 2028
     },
     "val": {
-      "questions": 2052,
+      "questions": 2000,
       "answerability": {
-        "answerable": 1499,
-        "unanswerable": 553
+        "answerable": 1464,
+        "unanswerable": 536
       },
       "answer_type": {
-        "other": 1373,
-        "unanswerable": 553,
-        "yes/no": 96,
-        "number": 30
+        "other": 1343,
+        "unanswerable": 536,
+        "yes/no": 92,
+        "number": 29
       },
-      "borderline_answerable_3to5_unans_votes": 243,
-      "with_quality_labels": 2003,
-      "target_mean_accuracy_answerable_pct": 86.95,
-      "target_differs_from_most_common": 227
+      "borderline_answerable_3to5_unans_votes": 239,
+      "with_quality_labels": 1962,
+      "target_mean_accuracy_answerable_pct": 87.38,
+      "target_differs_from_most_common": 240
     },
     "test": {
       "questions": 4319,
@@ -71,50 +71,50 @@
   },
   "quality": {
     "train": {
-      "images": 21085,
+      "images": 20525,
       "labels": {
-        "blur": 8597,
-        "framing": 11648,
-        "rotation": 3584,
-        "dark": 1240,
-        "bright": 1139,
-        "obstruction": 763,
-        "unrecognizable": 3216,
-        "none": 4802
+        "blur": 8414,
+        "framing": 11305,
+        "rotation": 3428,
+        "dark": 1185,
+        "bright": 1113,
+        "obstruction": 753,
+        "unrecognizable": 3129,
+        "none": 4714
       },
       "labels_pct": {
-        "blur": 40.77,
-        "framing": 55.24,
-        "rotation": 17.0,
-        "dark": 5.88,
-        "bright": 5.4,
-        "obstruction": 3.62,
-        "unrecognizable": 15.25,
-        "none": 22.77
+        "blur": 40.99,
+        "framing": 55.08,
+        "rotation": 16.7,
+        "dark": 5.77,
+        "bright": 5.42,
+        "obstruction": 3.67,
+        "unrecognizable": 15.24,
+        "none": 22.97
       },
       "mean_labels_per_image": 1.66
     },
     "val": {
-      "images": 2346,
+      "images": 2301,
       "labels": {
-        "blur": 955,
-        "framing": 1286,
-        "rotation": 402,
-        "dark": 127,
-        "bright": 109,
-        "obstruction": 77,
-        "unrecognizable": 342,
-        "none": 555
+        "blur": 923,
+        "framing": 1287,
+        "rotation": 370,
+        "dark": 122,
+        "bright": 113,
+        "obstruction": 71,
+        "unrecognizable": 347,
+        "none": 541
       },
       "labels_pct": {
-        "blur": 40.71,
-        "framing": 54.82,
-        "rotation": 17.14,
-        "dark": 5.41,
-        "bright": 4.65,
-        "obstruction": 3.28,
-        "unrecognizable": 14.58,
-        "none": 23.66
+        "blur": 40.11,
+        "framing": 55.93,
+        "rotation": 16.08,
+        "dark": 5.3,
+        "bright": 4.91,
+        "obstruction": 3.09,
+        "unrecognizable": 15.08,
+        "none": 23.51
       },
       "mean_labels_per_image": 1.64
     },

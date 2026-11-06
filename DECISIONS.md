@@ -532,6 +532,30 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   The planned T4 "dataloader smoke test" moves to Step 3.1, which runs on a GPU anyway.
 - **Plan sections:** 14 (Steps 1.3–1.5).
 
+### D-038: Keep copies of test photos out of training; carve val by file hash
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Context:** the image scan (R-006) found byte-identical photos under different
+  names, including across the official splits.
+- **Decision:**
+  - Commit `results/splits/image_hashes.json` (image name → SHA-256 for all 39,704
+    images; no image content). The split builder reads it.
+  - Any train-pool image whose bytes also appear in test or test_vqa is excluded from
+    training and listed in `results/splits/excluded.json`: 605 images.
+  - val is carved with groups of identical files as the unit, so copies never
+    straddle train and val.
+  - test and test_vqa stay exactly as published, so our scores stay comparable with
+    other VizWiz results. They share 65 identical files with each other; both are
+    evaluation-only, so that is allowed and only reported.
+  - `check_no_leakage` and the image scan fail if any file in train or val is
+    identical to a file in another split.
+- **Effect:** train 21,559 → 21,010 images (18,471 → 17,967 questions); val 2,395 →
+  2,339 images (2,052 → 2,000 questions). Test splits unchanged. Verified: 0 duplicate
+  groups touch train or val and another split.
+- **Not handled:** near-duplicates (the same scene re-photographed, re-encoded files).
+  Exact hashing cannot find them; noted as a limitation for the write-up.
+- **Plan sections:** 14 (Step 1.4).
+
 ---
 
 ## Open decisions
@@ -633,6 +657,40 @@ Resolved items move to the Decisions section with a `D-xxx` id.
   (about 8% of questions at k = 2); (c) drop answerability and rely on the quality adapter.
 - **Resolution:** option (a): 2-way answerability; unusable photos are handled by the
   quality adapter's `unrecognizable` label → see D-031.
+- **Status:** Resolved
+
+### R-006: Identical photo files appear in more than one split
+- **Date hit:** 2026-11-06
+- **Step:** 1.5 (image scan in `02_data_prep.ipynb`, Colab CPU)
+- **What happened:** the scan printed `IMAGE SCAN FOUND PROBLEMS`: 1,017 groups of
+  byte-identical files (2,255 files), 643 of them spanning splits. Checked against the
+  annotations: 235 of 7,750 test images and 298 of 8,000 test_vqa images had an
+  identical file in train; 31 test and 77 test_vqa questions were repeated verbatim
+  on the identical photo in train. Our own val carve had 87 images identical to
+  train images.
+- **Root cause:** the same photo was submitted more than once (often with a new
+  question); the official splits were not deduplicated by file content, and our carve
+  split by file name only.
+- **Options considered:** (a) ignore and report; (b) drop duplicated images from the
+  test sets; (c) drop copies from training and keep the test sets as published.
+- **Resolution:** option (c) → see D-038.
+- **Status:** Resolved
+
+### R-007: Label files were never written in Colab, and the notebook did not stop
+- **Date hit:** 2026-11-06
+- **Step:** 1.5 (`02_data_prep.ipynb`, cells 3 and 6)
+- **Environment:** Colab CPU
+- **What happened:** cell 6 crashed with `FileNotFoundError:
+  .../datasets/processed/vqa_val.jsonl`.
+- **Root cause:** two bugs. (1) `vizwiz.data.splits` defaulted `--config` to the
+  relative path `configs/data.yaml`; Colab runs from `/content`, not the repo, so cell 3
+  failed and wrote nothing. Local runs and tests ran from the repo root, which hid
+  it. (2) Colab `!` commands do not stop the notebook on failure, so later cells ran
+  on missing inputs.
+- **Resolution:** all default paths are resolved from the package location
+  (`REPO_ROOT`), not the working directory. Notebook commands now go through an
+  `sh()` helper that streams output and raises on a non-zero exit, so a failed step
+  stops the run.
 - **Status:** Resolved
 
 <!--

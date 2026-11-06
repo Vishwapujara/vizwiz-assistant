@@ -42,8 +42,9 @@ def official():
 
 
 def test_every_image_in_exactly_one_split():
-    m = assign_splits(official(), CFG)
+    m, excluded = assign_splits(official(), CFG)
     check_no_leakage(m)
+    assert excluded == set()
     assert len(m["train"]) + len(m["val"]) == 200
     assert 15 <= len(m["val"]) <= 25  # ~10%, rounded per stratum
     assert len(m["test"]) == 20 and len(m["test_vqa"]) == 10
@@ -56,6 +57,43 @@ def test_leakage_check_catches_duplicates():
 
 def test_splits_are_deterministic():
     assert assign_splits(official(), CFG) == assign_splits(official(), CFG)
+
+
+def fake_hashes(o, same_groups):
+    """Unique hash per image, except images listed together in a group share one."""
+    names = {e["image"] for part in o.values() for split in part.values() for e in split}
+    h = {n: f"h-{n}" for n in names}
+    for i, group in enumerate(same_groups):
+        for n in group:
+            h[n] = f"dup-{i}"
+    return h
+
+
+def test_copies_of_test_images_are_excluded_from_training():
+    o = official()
+    hashes = fake_hashes(o, [["VizWiz_train_00000003.jpg", "VizWiz_val_00000001.jpg"]])
+    m, excluded = assign_splits(o, CFG, hashes)
+    assert excluded == {"VizWiz_train_00000003.jpg"}
+    assert "VizWiz_val_00000001.jpg" in m["test"]  # test set unchanged
+    check_no_leakage(m, hashes)
+
+
+def test_identical_train_pool_files_land_in_the_same_split():
+    o = official()
+    group = [f"VizWiz_train_{i:08d}.jpg" for i in range(30, 60)]  # one 30-file group
+    hashes = fake_hashes(o, [group])
+    m, _ = assign_splits(o, CFG, hashes)
+    assert set(group) <= m["train"] or set(group) <= m["val"]
+    check_no_leakage(m, hashes)
+
+
+def test_leakage_check_catches_identical_files_across_splits():
+    m = {"train": {"a.jpg"}, "val": set(), "test": {"b.jpg"}, "test_vqa": {"c.jpg"}}
+    with pytest.raises(ValueError, match="identical files shared by train and test"):
+        check_no_leakage(m, {"a.jpg": "x", "b.jpg": "x", "c.jpg": "y"})
+    # test and test_vqa may share files: both are evaluation-only.
+    m = {"train": {"a.jpg"}, "val": set(), "test": {"b.jpg"}, "test_vqa": {"c.jpg"}}
+    check_no_leakage(m, {"a.jpg": "x", "b.jpg": "y", "c.jpg": "y"})
 
 
 def test_build_groups_tasks_by_image_and_is_reproducible(tmp_path):
@@ -71,6 +109,7 @@ def test_build_groups_tasks_by_image_and_is_reproducible(tmp_path):
     r1 = build(root, tmp_path / "out1", tmp_path / "res1", CFG)
     r2 = build(root, tmp_path / "out2", tmp_path / "res2", CFG)
     assert r1["hashes"] == r2["hashes"]
+    assert (tmp_path / "res1" / "excluded.json").exists()
     # An image's VQA record and quality record share a split.
     split_of = {}
     for name in r1["hashes"]:

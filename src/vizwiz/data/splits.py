@@ -11,6 +11,13 @@ Splits (D-022)
 Image grouping: the unit of splitting is the image, so every example built from one
 image (its VQA question and its quality labels) lands in the same split.
 
+Duplicate files (R-006, D-038): some photos were submitted more than once, so the same
+bytes appear under different names, also across the official splits. Using the
+committed SHA-256 of every image (``image_hashes.json``):
+- train-pool images whose bytes also appear in test or test_vqa are excluded from
+  training and listed in ``excluded.json``. The test sets stay exactly as published.
+- val is carved by file hash, so identical copies always land in the same split.
+
 Outputs
     <out>/vqa_{split}.jsonl, <out>/quality_{split}.jsonl
         Labelled records. They contain the dataset's questions and answers, so they stay
@@ -19,6 +26,7 @@ Outputs
     <results>/files.json          SHA-256 of every record file, so a rebuild in Colab
                                   can be checked to be identical (committed)
     <results>/label_stats.json, label_stats.md   aggregate label statistics (committed)
+    <results>/excluded.json       train-pool images dropped as copies of test images
 """
 
 from __future__ import annotations
@@ -31,10 +39,14 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from statistics import mean
 
-from vizwiz.data.config import DataConfig, load_data_config
+from vizwiz.data.config import DEFAULT_CONFIG, REPO_ROOT, DataConfig, load_data_config
 from vizwiz.data.labels import quality_record, vqa_record
 
 SPLITS = ("train", "val", "test", "test_vqa")
+EVAL_SPLITS = ("test", "test_vqa")
+DEFAULT_RESULTS = REPO_ROOT / "results" / "splits"
+DEFAULT_HASHES = DEFAULT_RESULTS / "image_hashes.json"
+EXCLUDE_REASON = "identical file (SHA-256) to an image in test or test_vqa"
 
 
 def load_official(root: Path) -> dict:
@@ -62,40 +74,74 @@ def stratum(image: str, vqa: dict, quality: dict, cfg: DataConfig) -> str:
     return f"quality_only:{'unrecognizable' if unrec else 'recognizable'}"
 
 
-def carve_val(images: list[str], vqa: dict, quality: dict, cfg: DataConfig) -> set[str]:
-    by_stratum: dict[str, list[str]] = defaultdict(list)
-    for image in sorted(images):
-        by_stratum[stratum(image, vqa, quality, cfg)].append(image)
+def carve_val(
+    images: list[str],
+    vqa: dict,
+    quality: dict,
+    cfg: DataConfig,
+    hashes: dict[str, str] | None = None,
+) -> set[str]:
+    """Stratified ~val_fraction carve. The unit is a group of identical files (one image
+    per group when hashes are not given), so copies never straddle train and val."""
+    units: dict[str, list[str]] = defaultdict(list)
+    for image in images:
+        units[hashes[image] if hashes else image].append(image)
+    by_stratum: dict[str, list[list[str]]] = defaultdict(list)
+    for group in sorted((sorted(g) for g in units.values()), key=lambda g: g[0]):
+        by_stratum[stratum(group[0], vqa, quality, cfg)].append(group)
     val: set[str] = set()
     for key in sorted(by_stratum):
-        group = by_stratum[key]
-        random.Random(f"{cfg.seed}:{key}").shuffle(group)
-        val.update(group[: round(len(group) * cfg.val_fraction)])
+        groups = by_stratum[key]
+        random.Random(f"{cfg.seed}:{key}").shuffle(groups)
+        for group in groups[: round(len(groups) * cfg.val_fraction)]:
+            val.update(group)
     return val
 
 
-def assign_splits(official: dict, cfg: DataConfig) -> dict[str, set[str]]:
+def assign_splits(
+    official: dict, cfg: DataConfig, hashes: dict[str, str] | None = None
+) -> tuple[dict[str, set[str]], set[str]]:
+    """Return (membership, excluded train-pool images)."""
     vqa_tr = {e["image"]: e for e in official["vqa"]["train"]}
     q_tr = {e["image"]: e for e in official["quality"]["train"]}
-    train_pool = sorted(set(vqa_tr) | set(q_tr))
-    val = carve_val(train_pool, vqa_tr, q_tr, cfg)
-    return {
+    test = {e["image"] for e in official["vqa"]["val"]} | {
+        e["image"] for e in official["quality"]["val"]
+    }
+    test_vqa = {e["image"] for e in official["vqa"]["test"]}
+    pool = set(vqa_tr) | set(q_tr)
+    excluded: set[str] = set()
+    if hashes:
+        eval_hashes = {hashes[i] for i in test | test_vqa}
+        excluded = {i for i in pool if hashes[i] in eval_hashes}
+    train_pool = sorted(pool - excluded)
+    val = carve_val(train_pool, vqa_tr, q_tr, cfg, hashes)
+    membership = {
         "train": set(train_pool) - val,
         "val": val,
-        "test": {e["image"] for e in official["vqa"]["val"]}
-        | {e["image"] for e in official["quality"]["val"]},
-        "test_vqa": {e["image"] for e in official["vqa"]["test"]},
+        "test": test,
+        "test_vqa": test_vqa,
     }
+    return membership, excluded
 
 
-def check_no_leakage(membership: dict[str, set[str]]) -> None:
-    """Every image belongs to exactly one split."""
+def check_no_leakage(membership: dict[str, set[str]], hashes: dict[str, str] | None = None) -> None:
+    """Every image belongs to exactly one split, and (given hashes) no file in train or
+    val is byte-identical to a file in another split. test and test_vqa may share
+    files: both are evaluation-only."""
     seen: dict[str, str] = {}
     for split, images in membership.items():
         for image in images:
             if image in seen:
                 raise ValueError(f"{image} is in both {seen[image]} and {split}")
             seen[image] = split
+    if not hashes:
+        return
+    by_split = {s: {hashes[i] for i in imgs} for s, imgs in membership.items()}
+    for split in ("train", "val"):
+        for other, hs in by_split.items():
+            if other != split and by_split.get(split, set()) & hs:
+                n = len(by_split[split] & hs)
+                raise ValueError(f"{n} identical files shared by {split} and {other}")
 
 
 def build_records(official: dict, membership: dict[str, set[str]], cfg: DataConfig) -> dict:
@@ -108,11 +154,13 @@ def build_records(official: dict, membership: dict[str, set[str]], cfg: DataConf
     q_out: dict[str, list] = {s: [] for s in SPLITS if s != "test_vqa"}
     for part in official["vqa"].values():
         for e in part:
-            s = split_of[e["image"]]
+            if (s := split_of.get(e["image"])) is None:  # excluded duplicate
+                continue
             vqa_out[s].append(vqa_record(e, s, quality_all.get(e["image"]), cfg))
     for part in official["quality"].values():
         for e in part:
-            s = split_of[e["image"]]
+            if (s := split_of.get(e["image"])) is None:
+                continue
             q_out[s].append(quality_record(e, s, cfg))
     for out in (vqa_out, q_out):
         for recs in out.values():
@@ -160,7 +208,9 @@ def label_stats(records: dict, cfg: DataConfig) -> dict:
     return stats
 
 
-def render_stats(stats: dict, membership: dict[str, set[str]], cfg: DataConfig) -> str:
+def render_stats(
+    stats: dict, membership: dict[str, set[str]], cfg: DataConfig, excluded: int = 0
+) -> str:
     v, q = stats["vqa"], stats["quality"]
 
     def row(label, values):
@@ -177,6 +227,9 @@ def render_stats(stats: dict, membership: dict[str, set[str]], cfg: DataConfig) 
         "| split | images |",
         "|---|---|",
         *[f"| {s} | {len(membership[s]):,} |" for s in SPLITS],
+        "",
+        f"Excluded from training: {excluded:,} train-pool images that are byte-identical "
+        "to a test or test_vqa image (`excluded.json`, D-038).",
         "",
         "## VQA questions",
         "",
@@ -206,41 +259,58 @@ def render_stats(stats: dict, membership: dict[str, set[str]], cfg: DataConfig) 
     return "\n".join(lines)
 
 
-def build(annotations: Path, out: Path, results: Path, cfg: DataConfig) -> dict:
+def build(
+    annotations: Path,
+    out: Path,
+    results: Path,
+    cfg: DataConfig,
+    hashes: dict[str, str] | None = None,
+) -> dict:
     official = load_official(annotations)
-    membership = assign_splits(official, cfg)
-    check_no_leakage(membership)
+    membership, excluded = assign_splits(official, cfg, hashes)
+    check_no_leakage(membership, hashes)
     records = build_records(official, membership, cfg)
 
     out.mkdir(parents=True, exist_ok=True)
     results.mkdir(parents=True, exist_ok=True)
-    hashes = {}
+    file_hashes = {}
     for task, by_split in records.items():
         for split, recs in by_split.items():
             name = f"{task}_{split}.jsonl"
-            hashes[name] = {"records": len(recs), "sha256": write_jsonl(out / name, recs)}
+            file_hashes[name] = {"records": len(recs), "sha256": write_jsonl(out / name, recs)}
 
     members = {s: sorted(membership[s]) for s in SPLITS}
     (results / "membership.json").write_text(json.dumps(members, indent=1) + "\n")
-    (results / "files.json").write_text(json.dumps(hashes, indent=2, sort_keys=True) + "\n")
+    (results / "excluded.json").write_text(
+        json.dumps({"reason": EXCLUDE_REASON, "images": sorted(excluded)}, indent=1) + "\n"
+    )
+    (results / "files.json").write_text(json.dumps(file_hashes, indent=2, sort_keys=True) + "\n")
     stats = label_stats(records, cfg)
     (results / "label_stats.json").write_text(json.dumps(stats, indent=2) + "\n")
-    (results / "label_stats.md").write_text(render_stats(stats, membership, cfg))
-    return {"hashes": hashes, "stats": stats}
+    (results / "label_stats.md").write_text(render_stats(stats, membership, cfg, len(excluded)))
+    return {"hashes": file_hashes, "stats": stats, "excluded": len(excluded)}
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Build VizWiz splits and label files")
     p.add_argument("--annotations", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True, help="record files (Drive, not git)")
-    p.add_argument("--results", type=Path, default=Path("results/splits"))
-    p.add_argument("--config", type=Path, default=Path("configs/data.yaml"))
+    p.add_argument("--results", type=Path, default=DEFAULT_RESULTS)
+    p.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    p.add_argument(
+        "--image-hashes",
+        type=Path,
+        default=DEFAULT_HASHES,
+        help="SHA-256 of every image (from vizwiz.data.images), for duplicate handling",
+    )
     p.add_argument("--expect", type=Path, help="files.json to compare against (rebuild check)")
     args = p.parse_args(argv)
     cfg = load_data_config(args.config)
     # Read the expected hashes before building: the build may overwrite that file.
     expected = json.loads(args.expect.read_text()) if args.expect else None
-    result = build(args.annotations, args.out, args.results, cfg)
+    image_hashes = json.loads(args.image_hashes.read_text())
+    result = build(args.annotations, args.out, args.results, cfg, image_hashes)
+    print(f"excluded {result['excluded']} train-pool images (copies of test images)")
     for name, h in sorted(result["hashes"].items()):
         print(f"{name}: {h['records']} records  sha256 {h['sha256'][:16]}…")
     if expected is not None:

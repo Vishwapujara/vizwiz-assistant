@@ -3,13 +3,16 @@
     python -m vizwiz.data.images --images /content/data/images \\
         --membership results/splits/membership.json --results results/splits
 
-For every image listed in the split membership:
+For every image on disk:
 - SHA-256 of the file bytes → ``image_hashes.json`` (image name → hash; committed,
-  contains no image content). This completes the split manifests: anyone can check
-  they hold exactly our files.
+  contains no image content). The split builder uses it to handle duplicate files
+  (D-038), and anyone can check they hold exactly our files. ``--expect`` compares a
+  fresh scan with the committed file.
 - width, height, EXIF orientation → aggregate statistics in ``image_stats.json``.
-- duplicate check: identical files under different names, within a split and, more
-  importantly, across splits (that would be test-set leakage).
+- duplicate check: identical files under different names. A file in train or val that
+  is identical to one in any other split is leakage and fails the scan. test and
+  test_vqa may share files (both are evaluation-only); those are only counted.
+  Images in no split are the excluded copies of test images (``excluded.json``).
 
 Uses a process pool; reading ~40k JPEG headers and hashing ~19 GB is I/O-bound.
 """
@@ -26,6 +29,8 @@ from pathlib import Path
 from statistics import mean, quantiles
 
 from PIL import Image
+
+from vizwiz.data.config import REPO_ROOT
 
 EXIF_ORIENTATION = 0x0112
 ROTATING_ORIENTATIONS = {5, 6, 7, 8}  # orientations that swap width and height
@@ -62,15 +67,24 @@ def pct_summary(values: list[float]) -> dict:
     }
 
 
+TRAINING_SPLITS = {"train", "val"}
+
+
 def analyse(scans: dict[str, dict], membership: dict[str, list[str]]) -> dict:
+    """Return (stats, leaking duplicate groups)."""
     split_of = {img: s for s, imgs in membership.items() for img in imgs}
     by_hash: dict[str, list[str]] = defaultdict(list)
     for name, r in scans.items():
         by_hash[r["sha256"]].append(name)
     dup_groups = [sorted(v) for v in by_hash.values() if len(v) > 1]
-    cross = [g for g in dup_groups if len({split_of[n] for n in g}) > 1]
+
+    def splits_of(group):
+        return {split_of.get(n, "excluded") for n in group}
+
+    cross = [g for g in dup_groups if len(splits_of(g)) > 1]
+    leaks = [g for g in cross if splits_of(g) & TRAINING_SPLITS]
     cross_pairs = Counter(
-        tuple(sorted({split_of[n] for n in g})) for g in cross
+        tuple(sorted(splits_of(g))) for g in cross
     )  # which split pairs share files
 
     stats: dict = {"images_scanned": len(scans), "per_split": {}}
@@ -102,16 +116,18 @@ def analyse(scans: dict[str, dict], membership: dict[str, list[str]]) -> dict:
         "groups_of_identical_files": len(dup_groups),
         "files_in_groups": sum(len(g) for g in dup_groups),
         "groups_spanning_splits": len(cross),
-        "spanning_split_pairs": {"+".join(k): v for k, v in cross_pairs.items()},
+        "groups_leaking_into_train_or_val": len(leaks),
+        "spanning_split_pairs": {"+".join(k): v for k, v in sorted(cross_pairs.items())},
     }
-    return stats, cross
+    return stats, leaks
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Hash and measure every VizWiz image")
     p.add_argument("--images", type=Path, required=True)
-    p.add_argument("--membership", type=Path, default=Path("results/splits/membership.json"))
-    p.add_argument("--results", type=Path, default=Path("results/splits"))
+    p.add_argument("--membership", type=Path, default=REPO_ROOT / "results/splits/membership.json")
+    p.add_argument("--results", type=Path, required=True)
+    p.add_argument("--expect", type=Path, help="committed image_hashes.json to compare with")
     p.add_argument("--workers", type=int, default=os.cpu_count() or 2)
     args = p.parse_args(argv)
 
@@ -121,9 +137,9 @@ def main(argv: list[str] | None = None) -> int:
     missing = sorted(wanted - set(found))
     extra = sorted(set(found) - wanted)
     print(f"membership: {len(wanted)} images; found on disk: {len(found)}; "
-          f"missing: {len(missing)}; not in any split: {len(extra)}")  # fmt: skip
+          f"missing: {len(missing)}; not in any split (excluded): {len(extra)}")  # fmt: skip
 
-    names = sorted(wanted & set(found))
+    names = sorted(found)
     with ProcessPoolExecutor(args.workers) as pool:
         results = list(pool.map(scan_one, [str(found[n]) for n in names], chunksize=64))
     scans = dict(zip(names, results, strict=True))
@@ -137,8 +153,12 @@ def main(argv: list[str] | None = None) -> int:
     (args.results / "image_stats.json").write_text(json.dumps(stats, indent=2) + "\n")
     print(json.dumps(stats, indent=2))
     if cross:
-        print(f"WARNING: {len(cross)} groups of identical files span splits (leakage).")
-    ok = not missing and not cross
+        print(f"LEAKAGE: {len(cross)} groups of identical files touch train/val and another split.")
+    same = True
+    if args.expect:
+        same = json.loads(args.expect.read_text()) == hashes
+        print("IMAGE HASHES MATCH COMMITTED" if same else "IMAGE HASHES DIFFER FROM COMMITTED")
+    ok = not missing and not cross and same
     print("IMAGE SCAN OK" if ok else "IMAGE SCAN FOUND PROBLEMS")
     return 0 if ok else 1
 

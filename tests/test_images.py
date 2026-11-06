@@ -29,3 +29,27 @@ def test_scan_and_cross_split_duplicate_detection(tmp_path):
                "--results", str(tmp_path / "res"), "--workers", "1"])  # fmt: skip
     assert rc == 1  # leakage found -> non-zero exit
     assert len(json.loads((tmp_path / "res" / "image_hashes.json").read_text())) == 3
+
+
+def test_eval_only_duplicates_pass_and_hashes_are_compared(tmp_path):
+    imgs = tmp_path / "images"
+    imgs.mkdir()
+    save(imgs / "VizWiz_train_00000000.jpg", (255, 0, 0))
+    save(imgs / "VizWiz_val_00000000.jpg", (0, 255, 0))  # official val = our test
+    save(imgs / "VizWiz_test_00000000.jpg", (0, 255, 0))  # same file in test_vqa: allowed
+    save(imgs / "VizWiz_train_00000001.jpg", (0, 255, 0))  # excluded copy: in no split
+    membership = {
+        "train": ["VizWiz_train_00000000.jpg"],
+        "test": ["VizWiz_val_00000000.jpg"],
+        "test_vqa": ["VizWiz_test_00000000.jpg"],
+    }
+    (tmp_path / "m.json").write_text(json.dumps(membership))
+    args = ["--images", str(imgs), "--membership", str(tmp_path / "m.json"), "--workers", "1"]
+    assert main([*args, "--results", str(tmp_path / "a")]) == 0
+    stats = json.loads((tmp_path / "a" / "image_stats.json").read_text())
+    assert stats["images_not_in_any_split"] == 1
+    assert stats["duplicates"]["groups_leaking_into_train_or_val"] == 0
+    expect = tmp_path / "a" / "image_hashes.json"
+    assert main([*args, "--results", str(tmp_path / "b"), "--expect", str(expect)]) == 0
+    expect.write_text("{}")
+    assert main([*args, "--results", str(tmp_path / "c"), "--expect", str(expect)]) == 1

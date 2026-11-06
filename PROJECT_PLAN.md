@@ -528,7 +528,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   frequency and annotator agreement; quality-issue counts for k = 1, 2, 3;
   image size distribution; overlap between datasets by image id.
   Deliverable: `results/audit/audit_report.md` (text and tables only). STOP.
-- **1.4** Label construction + split creation + dev subset + manifests + leakage tests.
+- **1.4** Label construction + split creation + dev subset + manifests + leakage tests. Leakage is checked by file content (SHA-256), not only by name: copies of test photos are excluded from training (D-038).
   Deliverable: manifests, passing tests, label statistics. STOP.
 - **1.5** Task formatting (chat template, masking) + image preprocessing; then one
   (Colab, CPU) run of `02_data_prep.ipynb` for all image-dependent Phase 1 work
