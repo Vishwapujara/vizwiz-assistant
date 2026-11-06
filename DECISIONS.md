@@ -221,6 +221,30 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   plan Section 7).
 - **Plan sections:** 7, 12.
 
+### D-018: Keep the Hugging Face model cache on local disk, not Drive
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Observed (Step 0.3, L4, `results/env/compat_hf_l4.json`):** Qwen3-VL-4B-Instruct
+  downloads from the Hub in 26.4 s and loads to the GPU in 5.6 s from local disk.
+- **Decision:** `HF_HOME=/content/hf_cache` (local disk) in every notebook. Drive keeps
+  only datasets, checkpoints, adapters, results and logs. The `hf_cache` folder on
+  Drive is unused.
+- **Why:** A fresh download costs under 30 s per session, which beats both the risk
+  and the speed of reading ~9 GB through the Drive mount, and it saves Drive space.
+- **Plan sections:** 2.2.
+
+### D-019: transformers path verified on L4 (Step 0.3, part 1)
+- **Date:** 2026-11-06
+- **Status:** Accepted
+- **Observed:** with torch 2.13.0 / transformers 5.19.0 / peft 0.21.2, the model loads
+  as `Qwen3VLForConditionalGeneration` in bf16 with SDPA attention; peak GPU memory
+  8.39 GiB for one image + question (425 prompt tokens); generation 1.84 s; the test
+  label was read correctly ("12/2026"). The blank LoRA (r=16, q/k/v/o/gate/up/down)
+  targets 252 modules, 0 in the vision tower; 33.0M trainable parameters (0.74%).
+- **Decision:** the training stack versions above are confirmed. The serving half of
+  D-016 waits on R-002.
+- **Plan sections:** 7, 8.
+
 ---
 
 ## Open decisions
@@ -229,7 +253,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| Hugging Face model cache on Drive vs local disk | Step 0.3 | Drive survives disconnects but may load slower than re-downloading; measure load time on L4 |
 | Experiment tracker: W&B vs MLflow | Step 1.1 | W&B is simpler from Colab |
 | Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
 | Quality-label threshold `k` | Step 1.3 | From audit data |
@@ -253,6 +276,20 @@ Resolved items move to the Decisions section with a `D-xxx` id.
   `/datasets/`, `/checkpoints/`, `/outputs/`, `/runs/`, `/predictions/`).
 - **Status:** Resolved
 
+
+### R-002: vLLM 0.32.0 server exits during startup on L4
+- **Date hit:** 2026-11-06
+- **Step:** 0.3
+- **Environment:** Colab L4, Python 3.13.16, torch 2.13.0, vllm 0.32.0,
+  transformers 5.19.0 (`results/env/freeze_l4.txt`)
+- **What happened:** `vllm serve` with `--enable-lora` exited before `/health`
+  responded (`server_started: false` after 180 s; the wait limit was 900 s, so the
+  process died rather than timing out). Report: `results/env/compat_vllm_l4_attempt1.json`.
+- **Root cause:** not yet known; needs `vllm_server.log`. Suspect: the venv contains
+  `torchaudio==2.11.0` alongside `torch==2.13.0`. torchaudio is compiled against one
+  exact torch version, and a mismatched build fails on import.
+- **Options considered:** pending the log.
+- **Status:** Open
 
 <!--
 Template:

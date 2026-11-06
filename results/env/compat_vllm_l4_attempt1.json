@@ -1,0 +1,38 @@
+{
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "versions": {
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "pillow": "13.0.0"
+  },
+  "command": [
+    "/content/venv/bin/vllm",
+    "serve",
+    "Qwen/Qwen3-VL-4B-Instruct",
+    "--port",
+    "8000",
+    "--dtype",
+    "bfloat16",
+    "--max-model-len",
+    "8192",
+    "--gpu-memory-utilization",
+    "0.85",
+    "--limit-mm-per-prompt",
+    "{\"image\": 1, \"video\": 0}",
+    "--enable-lora",
+    "--max-loras",
+    "3",
+    "--max-lora-rank",
+    "16",
+    "--lora-modules",
+    "blank=/content/blank_lora"
+  ],
+  "startup_s": 180.1,
+  "server_started": false,
+  "ok": false,
+  "hint": "Server did not become healthy; read the log: /content/drive/MyDrive/vizwiz/logs/vllm_server.log"
+}
