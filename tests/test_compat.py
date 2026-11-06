@@ -1,3 +1,5 @@
+import os
+import sys
 from pathlib import Path
 
 from vizwiz.compat import (
@@ -6,6 +8,7 @@ from vizwiz.compat import (
     build_parser,
     build_vllm_command,
     looks_correct,
+    server_env,
 )
 
 
@@ -35,3 +38,10 @@ def test_parser_subcommands():
     assert parser.parse_args(["versions"]).cmd == "versions"
     args = parser.parse_args(["hf", "--lora-out", "/tmp/x"])
     assert args.lora_out == Path("/tmp/x")
+
+
+def test_server_env_puts_venv_bin_first_and_disables_flashinfer_sampler():
+    env = server_env({"PATH": "/usr/bin"})
+    assert env["PATH"].split(os.pathsep)[0] == str(Path(sys.executable).parent)
+    assert env["PATH"].endswith("/usr/bin")
+    assert env["VLLM_USE_FLASHINFER_SAMPLER"] == "0"

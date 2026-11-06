@@ -245,6 +245,20 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   D-016 waits on R-002.
 - **Plan sections:** 7, 8.
 
+### D-020: vLLM subprocess environment: venv bin on PATH, FlashInfer sampler off
+- **Date:** 2026-11-06
+- **Status:** Accepted (pending the R-002 rerun)
+- **Decision:** Every vLLM server we start gets `PATH=<venv>/bin:$PATH` and
+  `VLLM_USE_FLASHINFER_SAMPLER=0`.
+- **Why:** The PATH fix lets any tool the venv installs be found (root cause of R-002).
+  Disabling the FlashInfer sampler avoids a CUDA JIT build at every session start:
+  Colab wipes the compile cache each session, and the build depends on Colab's CUDA
+  toolkit matching torch's CUDA 13. We decode greedily (temperature 0), so vLLM's
+  PyTorch-native sampler gives the same outputs with no measurable cost.
+- **Alternatives considered:** keep the FlashInfer sampler and cache its build on Drive
+  (more moving parts for a component greedy decoding barely uses).
+- **Plan sections:** 12.
+
 ---
 
 ## Open decisions
@@ -283,13 +297,22 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 - **Environment:** Colab L4, Python 3.13.16, torch 2.13.0, vllm 0.32.0,
   transformers 5.19.0 (`results/env/freeze_l4.txt`)
 - **What happened:** `vllm serve` with `--enable-lora` exited before `/health`
-  responded (`server_started: false` after 180 s; the wait limit was 900 s, so the
-  process died rather than timing out). Report: `results/env/compat_vllm_l4_attempt1.json`.
-- **Root cause:** not yet known; needs `vllm_server.log`. Suspect: the venv contains
-  `torchaudio==2.11.0` alongside `torch==2.13.0`. torchaudio is compiled against one
-  exact torch version, and a mismatched build fails on import.
-- **Options considered:** pending the log.
-- **Status:** Open
+  responded (`server_started: false` after 180 s). Report:
+  `results/env/compat_vllm_l4_attempt1.json`; log: `results/env/vllm_server_l4_attempt1.log`.
+  Model load, torch.compile (66 s), CUDA graph capture (25 s), and KV cache allocation
+  (6.7 GiB, 48,816 tokens) all succeeded first; the crash was the last startup step.
+- **Root cause:** `FileNotFoundError: 'ninja'`. At the end of startup, FlashInfer
+  JIT-compiles its sampling kernel and runs the `ninja` build tool by name. `ninja`
+  is installed in the venv (`ninja==1.13.2`), but the venv is used without being
+  activated, so `/content/venv/bin` is not on `PATH` and the subprocess cannot find it.
+- **Initial suspect ruled out:** `torchaudio==2.11.0` next to `torch==2.13.0` is
+  mismatched, but nothing in the startup path imported it. Left as is; it becomes a
+  problem only if something imports torchaudio.
+- **Options considered:** (a) put the venv `bin` on `PATH` for the server; (b) disable
+  the FlashInfer sampler so no JIT build happens; (c) activate the venv in every
+  notebook shell line (easy to forget).
+- **Resolution:** (a) + (b), in `vizwiz.compat.server_env()` → see D-020.
+- **Status:** Fix pushed; waiting on the rerun
 
 <!--
 Template:

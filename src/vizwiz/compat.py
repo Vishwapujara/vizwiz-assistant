@@ -21,6 +21,7 @@ import argparse
 import base64
 import io
 import json
+import os
 import subprocess
 import sys
 import time
@@ -192,6 +193,23 @@ def _wait_healthy(base: str, proc: subprocess.Popen, timeout_s: float) -> bool:
     return False
 
 
+def server_env(base: dict[str, str] | None = None) -> dict[str, str]:
+    """Environment for the vLLM subprocess.
+
+    - Puts this venv's ``bin`` first on PATH. The venv is used without being activated,
+      so tools it installs (e.g. ``ninja``, needed by FlashInfer's JIT builds) are
+      otherwise not found (R-002).
+    - Disables the FlashInfer sampler, which JIT-compiles CUDA code on first use. Colab
+      wipes the compile cache every session, and we decode greedily, so the
+      PyTorch-native sampler costs nothing and avoids a per-session build (D-020).
+    """
+    env = dict(os.environ if base is None else base)
+    venv_bin = str(Path(sys.executable).parent)
+    env["PATH"] = os.pathsep.join([venv_bin, env.get("PATH", "")])
+    env["VLLM_USE_FLASHINFER_SAMPLER"] = "0"
+    return env
+
+
 def build_vllm_command(model_id: str, lora: Path, port: int) -> list[str]:
     vllm_bin = Path(sys.executable).parent / "vllm"
     return [
@@ -221,12 +239,18 @@ def build_vllm_command(model_id: str, lora: Path, port: int) -> list[str]:
 def vllm_check(model_id: str, lora: Path, report: Path | None, log: Path, port: int) -> int:
     base = f"http://127.0.0.1:{port}"
     cmd = build_vllm_command(model_id, lora, port)
-    result: dict = {"model": model_id, "versions": package_versions(), "command": cmd}
+    env = server_env()
+    result: dict = {
+        "model": model_id,
+        "versions": package_versions(),
+        "command": cmd,
+        "env_overrides": {k: env[k] for k in ("VLLM_USE_FLASHINFER_SAMPLER",)},
+    }
     log.parent.mkdir(parents=True, exist_ok=True)
 
     with log.open("w") as log_file:
         t0 = time.perf_counter()
-        proc = subprocess.Popen(cmd, stdout=log_file, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(cmd, stdout=log_file, stderr=subprocess.STDOUT, env=env)
         try:
             healthy = _wait_healthy(base, proc, timeout_s=900)
             result["startup_s"] = round(time.perf_counter() - t0, 1)
