@@ -693,6 +693,21 @@ Resolved items move to the Decisions section with a `D-xxx` id.
   stops the run.
 - **Status:** Resolved
 
+### R-008: Token-stats step looked for images in the wrong folder
+- **Date hit:** 2026-11-06
+- **Step:** 1.5 (`02_data_prep.ipynb`, cell 6)
+- **Environment:** Colab CPU
+- **What happened:** after the three synthetic demos passed (`prefix_ok=True` for all
+  tasks), the cell stopped with `FileNotFoundError:
+  /content/data/images/VizWiz_train_00010748.jpg`.
+- **Root cause:** the zips unpack into per-split subfolders (`images/train/...`). The
+  image scan finds files with a recursive search, but the token-stats code built the
+  path as `images/<name>`. The unit tests used a flat folder, which hid it.
+- **Resolution:** all image lookups go through `vizwiz.data.images.find_images`
+  (recursive); test added for the subfolder layout. The new fail-fast `sh()` helper
+  (R-007) stopped the run at the failing cell, as intended.
+- **Status:** Resolved
+
 <!--
 Template:
 

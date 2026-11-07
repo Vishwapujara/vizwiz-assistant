@@ -51,6 +51,8 @@ def scan_one(path: str) -> dict:
 
 
 def find_images(root: Path) -> dict[str, Path]:
+    """Image name → path, searching subfolders (the zips unpack into train/, val/, test/).
+    Every caller resolves image paths through this, never ``root / name``."""
     return {p.name: p for p in root.rglob("*.jpg")}
 
 

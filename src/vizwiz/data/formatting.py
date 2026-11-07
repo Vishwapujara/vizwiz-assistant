@@ -142,6 +142,7 @@ def run_stats(args) -> int:
     from transformers import AutoProcessor
 
     from vizwiz.compat import make_test_image
+    from vizwiz.data.images import find_images
     from vizwiz.serve.preprocess import prepare_image, visual_tokens
 
     processor = AutoProcessor.from_pretrained(args.model)
@@ -149,6 +150,7 @@ def run_stats(args) -> int:
     vqa = read_jsonl(args.records / f"vqa_{args.split}.jsonl")
     quality = read_jsonl(args.records / f"quality_{args.split}.jsonl")
     rng = random.Random(args.seed)
+    image_path = find_images(args.images)  # zips unpack into per-split subfolders
 
     report: dict = {"model": args.model, "split": args.split, "sample": args.sample, "tasks": {}}
 
@@ -175,7 +177,7 @@ def run_stats(args) -> int:
         for budget in args.max_pixels:
             total, prompt, target, vis = [], [], [], []
             for r in sample:
-                img = prepare_image(args.images / r["image"], budget or None)
+                img = prepare_image(image_path[r["image"]], budget or None)
                 enc = encode(processor, task, r, img)
                 prefix_failures += not enc["prefix_ok"]
                 total.append(len(enc["input_ids"]))

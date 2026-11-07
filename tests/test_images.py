@@ -2,7 +2,7 @@ import json
 
 from PIL import Image
 
-from vizwiz.data.images import analyse, main, scan_one
+from vizwiz.data.images import analyse, find_images, main, scan_one
 
 
 def save(path, color, size=(64, 48)):
@@ -53,3 +53,10 @@ def test_eval_only_duplicates_pass_and_hashes_are_compared(tmp_path):
     assert main([*args, "--results", str(tmp_path / "b"), "--expect", str(expect)]) == 0
     expect.write_text("{}")
     assert main([*args, "--results", str(tmp_path / "c"), "--expect", str(expect)]) == 1
+
+
+def test_find_images_searches_split_subfolders(tmp_path):
+    (tmp_path / "train").mkdir()
+    save(tmp_path / "train" / "VizWiz_train_00000000.jpg", (1, 2, 3))
+    found = find_images(tmp_path)
+    assert found["VizWiz_train_00000000.jpg"] == tmp_path / "train" / "VizWiz_train_00000000.jpg"
