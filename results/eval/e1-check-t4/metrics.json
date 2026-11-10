@@ -1,0 +1,218 @@
+{
+  "run_id": "e1-check-t4",
+  "created_utc": "2026-11-10T05:36:41+00:00",
+  "git_commit": "3b26e49",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "adapter": null,
+  "split": "test",
+  "limit": 100,
+  "seed": 0,
+  "max_pixels": 524288,
+  "decoding": {
+    "temperature": 0.0,
+    "max_new_tokens": {
+      "answer": 16,
+      "answerability": 4,
+      "quality": 48
+    }
+  },
+  "dtype": "float16",
+  "gpu": "Tesla T4",
+  "engine_load_s": 417.6,
+  "versions": {
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "pillow": "13.0.0"
+  },
+  "tasks": {
+    "answer": {
+      "metrics": {
+        "n": 100,
+        "vqa_accuracy": 55.1,
+        "vqa_accuracy_ci95": [
+          46.2,
+          64.1
+        ],
+        "declined_pct": 0.0,
+        "by_answer_type": {
+          "other": {
+            "n": 94,
+            "accuracy": 54.15
+          },
+          "yes/no": {
+            "n": 6,
+            "accuracy": 70.0
+          }
+        },
+        "by_quality_label": {
+          "blur": {
+            "n": 34,
+            "accuracy": 45.0
+          },
+          "bright": {
+            "n": 5,
+            "accuracy": 58.0
+          },
+          "dark": {
+            "n": 7,
+            "accuracy": 68.57
+          },
+          "framing": {
+            "n": 56,
+            "accuracy": 49.29
+          },
+          "none": {
+            "n": 28,
+            "accuracy": 67.14
+          },
+          "obstruction": {
+            "n": 1,
+            "accuracy": 0.0
+          },
+          "rotation": {
+            "n": 9,
+            "accuracy": 45.56
+          },
+          "unrecognizable": {
+            "n": 8,
+            "accuracy": 47.5
+          }
+        },
+        "by_quality_any_issue": {
+          "any_issue": {
+            "n": 72,
+            "accuracy": 50.42
+          },
+          "no_issue": {
+            "n": 28,
+            "accuracy": 67.14
+          }
+        }
+      },
+      "timing": {
+        "examples": 100,
+        "wall_s": 46.9,
+        "generate_s": 41.5,
+        "examples_per_s": 2.41,
+        "generated_tokens_mean": 3.7
+      }
+    },
+    "answerability": {
+      "metrics": {
+        "n": 100,
+        "positives_unanswerable": 32,
+        "average_precision": 71.05,
+        "average_precision_ci95": [
+          55.14,
+          87.28
+        ],
+        "official_f1_at_0.5": 70.27,
+        "recall_at_precision_0.8": 31.25,
+        "recall_at_precision_0.9": 3.12,
+        "macro_f1_generated": 56.55,
+        "per_class_generated": {
+          "unanswerable": {
+            "precision": 0.6944,
+            "recall": 0.7812,
+            "f1": 0.7353,
+            "support": 32
+          },
+          "answerable": {
+            "precision": 0.7826,
+            "recall": 0.2647,
+            "f1": 0.3956,
+            "support": 68
+          }
+        },
+        "invalid_output_pct": 41.0,
+        "confusion": {
+          "answerable->answerable": 18,
+          "answerable->invalid": 39,
+          "answerable->unanswerable": 11,
+          "unanswerable->answerable": 5,
+          "unanswerable->invalid": 2,
+          "unanswerable->unanswerable": 25
+        },
+        "borderline_answerable": {
+          "n": 6,
+          "predicted_unanswerable_pct": 50.0
+        }
+      },
+      "timing": {
+        "examples": 100,
+        "wall_s": 45.9,
+        "generate_s": 40.1,
+        "examples_per_s": 2.5,
+        "generated_tokens_mean": 3.28,
+        "score_fallbacks": 0
+      }
+    },
+    "quality": {
+      "metrics": {
+        "n": 100,
+        "macro_f1": 23.9,
+        "macro_f1_ci95": [
+          16.6,
+          30.56
+        ],
+        "per_label": {
+          "blur": {
+            "precision": 0.3913,
+            "recall": 1.0,
+            "f1": 0.5625,
+            "support": 36
+          },
+          "framing": {
+            "precision": 0.6053,
+            "recall": 0.3833,
+            "f1": 0.4694,
+            "support": 60
+          },
+          "rotation": {
+            "precision": 0.375,
+            "recall": 0.1875,
+            "f1": 0.25,
+            "support": 16
+          },
+          "dark": {
+            "precision": 0.0405,
+            "recall": 1.0,
+            "f1": 0.0779,
+            "support": 3
+          },
+          "bright": {
+            "precision": 0.2,
+            "recall": 0.25,
+            "f1": 0.2222,
+            "support": 4
+          },
+          "obstruction": {
+            "precision": 0.0588,
+            "recall": 0.2,
+            "f1": 0.0909,
+            "support": 5
+          },
+          "unrecognizable": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 11
+          }
+        },
+        "exact_match_pct": 7.0,
+        "json_valid_pct": 100.0
+      },
+      "timing": {
+        "examples": 100,
+        "wall_s": 46.5,
+        "generate_s": 43.4,
+        "examples_per_s": 2.3,
+        "generated_tokens_mean": 8.77
+      }
+    }
+  }
+}

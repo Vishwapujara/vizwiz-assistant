@@ -626,6 +626,25 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   validated vLLM on the L4 only.
 - **Plan sections:** 9.4, 14 (Step 2.2).
 
+### D-042: Step 2.2 verified on T4 (100 examples per task)
+- **Date:** 2026-11-10
+- **Status:** Accepted
+- **Evidence** (`results/eval/e1-check-t4/metrics.json`, commit `3b26e49`):
+  vLLM 0.32.0 runs Qwen3-VL-4B on a T4 in fp16; engine start-up 418 s including the
+  model download; about 2.4 examples/s. All three tasks produce metrics;
+  `score_fallbacks` is 0 (the answerability score was always read from logprobs);
+  quality replies were 100% valid JSON.
+- **First signals** (100 examples, wide CIs; not the baseline):
+  - answering 55.1% VQA accuracy (CI 46–64); 67% on photos with no quality issue vs
+    50% with any issue, consistent with audit finding 4.
+  - answerability AP 71.1, but **41% of replies were neither "answerable" nor
+    "unanswerable"**, almost all on answerable questions: the base model does not
+    follow the one-word format. AP and the official F1 use the score, so they are
+    not affected; the generated-label metrics are.
+  - quality macro-F1 23.9: over-predicts blur and dark, never predicts
+    unrecognizable.
+- **Plan sections:** 14 (Step 2.2).
+
 ---
 
 ## Open decisions
