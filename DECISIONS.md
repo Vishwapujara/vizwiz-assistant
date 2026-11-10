@@ -570,6 +570,34 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 - **Carried forward:** image-resolution budget for Step 3.1. Measured cost: about 270
   tokens per example at 262k pixels, 530 at 524k, 1,010 at 1M, 1,970 at native.
 
+### D-040: Metric definitions (Step 2.1)
+- **Date:** 2026-11-10
+- **Status:** Accepted
+- **Decision** (`src/vizwiz/eval/metrics.py`, pure Python):
+  - **Answering:** official VQA accuracy (D-029) on answerable questions only, with a
+    95% bootstrap CI and slices by answer type, by each quality label, and by
+    any-issue vs no-issue. The rate at which the model says "unanswerable" anyway is
+    reported as `declined_pct`.
+  - **Answerability**, matching the official `evaluate_unanswerability`: the positive
+    class is `unanswerable`, and each prediction needs a **score**, P(unanswerable).
+    Headline metric is average precision; we also report official F1 at score > 0.5,
+    recall at precision 0.8 and 0.9, macro-F1 of the generated labels, a confusion
+    matrix, invalid-output rate, and the borderline slice (answerable with 3–5
+    "unanswerable" votes).
+  - **Quality:** per-label precision, recall and F1; macro-F1 over the 7 issue labels
+    (`none` excluded: it is the absence of issues); exact-set match; JSON validity.
+    An invalid reply counts as predicting no issues, so bad formatting is penalised
+    rather than skipped.
+  - **CIs:** percentile bootstrap, 1,000 resamples, fixed seed.
+- **Why the score:** average precision ranks questions by confidence, so a yes/no
+  label alone cannot be scored the official way. At inference the score will come
+  from the probabilities of the first generated token ("un…" vs "answer…"), so
+  generating the label and scoring it cost one forward pass (Step 2.2).
+- **Verified:** `average_precision` and F1 equal scikit-learn (used by the official
+  code) on 2,980 random cases with ties: max difference 2.8e-16. scikit-learn is not
+  a project dependency; the check ran in a scratch environment.
+- **Plan sections:** 9.1, 14 (Step 2.1).
+
 ---
 
 ## Open decisions
