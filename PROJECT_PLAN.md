@@ -519,7 +519,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   inference; start vLLM with `--enable-lora` and send one request.
   Deliverable: confirmed versions pinned; go/no-go on the model choice. STOP.
 
-### Phase 1: Data
+### Phase 1: Data (complete, D-039)
 - **1.1** Verify licenses/access terms for all datasets; choose experiment tracker.
   Deliverable: short findings note in `docs/data_licenses.md`. STOP.
 - **1.2** (Colab, CPU) Download scripts with checksums, cached on Drive.

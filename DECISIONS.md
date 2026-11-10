@@ -556,6 +556,20 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   Exact hashing cannot find them; noted as a limitation for the write-up.
 - **Plan sections:** 14 (Step 1.4).
 
+### D-039: Phase 1 complete
+- **Date:** 2026-11-09
+- **Status:** Accepted
+- **Evidence (Colab CPU run of `02_data_prep.ipynb` at `e77bebb`):**
+  `REBUILD MATCHES COMMITTED HASHES` (label files on Drive are byte-identical to the
+  local build), `IMAGE HASHES MATCH COMMITTED`, `IMAGE SCAN OK` (0 missing images,
+  0 duplicate groups touching train or val), `ALL PREFIX CHECKS PASSED` (2,400
+  encodings). The three synthetic demos show that only the target and end-of-turn
+  tokens are trained.
+- **Committed:** `results/splits/image_stats.json`, `results/data/token_stats.json`;
+  interpreted in `results/audit/findings.md` sections 9–10.
+- **Carried forward:** image-resolution budget for Step 3.1. Measured cost: about 270
+  tokens per example at 262k pixels, 530 at 524k, 1,010 at 1M, 1,970 at native.
+
 ---
 
 ## Open decisions
@@ -564,7 +578,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| Image resolution setting | Step 3.1 | From L4 memory/latency measurements |
+| Image resolution setting | Step 3.1 | From L4 memory/latency measurements; token cost per budget in findings §10 |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
