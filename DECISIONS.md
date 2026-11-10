@@ -598,6 +598,34 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   a project dependency; the check ran in a scratch environment.
 - **Plan sections:** 9.1, 14 (Step 2.1).
 
+### D-041: Evaluation runner design (Step 2.2)
+- **Date:** 2026-11-10
+- **Status:** Accepted
+- **Decision** (`src/vizwiz/eval/run_eval.py`):
+  - **Offline vLLM** (`LLM.generate`) for batch evaluation, not the HTTP server: no
+    port or start-up polling, and the same engine and kernels as serving. The server
+    path is exercised in Phase 5.
+  - Prompts are rendered with the model's own chat template from the same
+    `build_messages` used in training (D-036). Images go through the shared
+    `prepare_image` (D-035). Train/eval mismatch is ruled out by construction.
+  - Greedy decoding; max new tokens 16 (answer), 4 (answerability), 48 (quality),
+    sized from the token stats (answer p95 7, quality max 18).
+  - Answerability score = P(unanswerable) from the top-20 logprobs of the first
+    generated token, summed over the casings of each word's first token. If neither
+    class appears, the generated label decides and the case is counted.
+  - dtype from the GPU: bf16 on L4, fp16 on T4 (no bf16).
+  - `--limit N` takes a fixed-seed sample per task for quick checks.
+  - Image budget for evaluation defaults to 524,288 pixels (~500 visual tokens)
+    **provisionally**: the final budget is chosen in Step 3.1, and E1 is rerun at
+    that budget if it differs, so baseline and fine-tuned models are always compared
+    at the same resolution.
+  - Predictions stay on Drive; only `metrics.json` (aggregates, settings, versions,
+    git commit, timing) is committed.
+- **Tested:** end-to-end in CI with a fake generator (real record files, images in
+  split subfolders, real metrics). vLLM on a T4 has not been run before: Step 0.3
+  validated vLLM on the L4 only.
+- **Plan sections:** 9.4, 14 (Step 2.2).
+
 ---
 
 ## Open decisions

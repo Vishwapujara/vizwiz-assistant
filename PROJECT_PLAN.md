@@ -216,6 +216,7 @@ vizwiz-assistant/
 │   ├── 00b_compat_check.ipynb    # L4: Step 0.3 compatibility check
 │   ├── 01_data_download.ipynb    # CPU: download + checksums (Step 1.2)
 │   ├── 02_data_prep.ipynb        # CPU: rebuild check, image scan, token stats (1.3–1.5)
+│   ├── 03_eval_check.ipynb       # T4: run_eval.py on 100 examples per task (2.2)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
