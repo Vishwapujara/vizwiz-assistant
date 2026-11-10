@@ -272,7 +272,15 @@ def evaluate(gen: Generator, args, settings: dict) -> dict:
     )
     image_path = find_images(args.images)
     args.out.mkdir(parents=True, exist_ok=True)
+    metrics_file = args.out / "metrics.json"
+    # Resume: a rerun with --tasks keeps the other tasks' results (Colab can disconnect
+    # during a long run; predictions are written as they go, metrics per task).
     report = {**settings, "tasks": {}}
+    if metrics_file.exists():
+        previous = json.loads(metrics_file.read_text())
+        report["tasks"] = {
+            t: v for t, v in previous.get("tasks", {}).items() if t not in args.tasks
+        }
     for task in args.tasks:
         records = sample_records(task_records(task, vqa, quality), args.limit, args.seed)
         if not records:
@@ -291,15 +299,18 @@ def evaluate(gen: Generator, args, settings: dict) -> dict:
         report["tasks"][task] = {
             "metrics": compute_metrics(task, examples, issue_labels),
             "timing": timing,
+            "git_commit": settings.get("git_commit"),
+            "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         }
+        metrics_file.write_text(json.dumps(report, indent=2) + "\n")  # after every task
         headline = {
             "answer": "vqa_accuracy",
             "answerability": "average_precision",
             "quality": "macro_f1",
         }[task]
         print(f"[{task}] {headline} = {report['tasks'][task]['metrics'][headline]}  {timing}")
-    (args.out / "metrics.json").write_text(json.dumps(report, indent=2) + "\n")
-    print(f"Saved {args.out / 'metrics.json'}")
+    metrics_file.write_text(json.dumps(report, indent=2) + "\n")
+    print(f"Saved {metrics_file}")
     return report
 
 

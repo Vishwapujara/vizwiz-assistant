@@ -645,6 +645,20 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
     unrecognizable.
 - **Plan sections:** 14 (Step 2.2).
 
+### D-043: E1 run setup (Step 2.3)
+- **Date:** 2026-11-10
+- **Status:** Accepted
+- **Decision:** E1 runs every test example (official val) for all three tasks on an
+  L4, bf16, at the provisional 524,288-pixel budget (D-041). test_vqa (official test,
+  D-022) is not part of E1: it is kept for the final comparison, so it is not looked
+  at repeatedly during development.
+- **Robustness:** `metrics.json` is written after each task, and a rerun with
+  `--tasks` keeps the finished tasks, so a Colab disconnect costs at most one task.
+- **Diagnostics:** answerability replies that are neither label are counted by kind
+  (`empty`, `yes_no`, `sentence`, `other` = usually a direct answer). Categories
+  only: committed metrics contain no model text about dataset questions.
+- **Plan sections:** 14 (Step 2.3).
+
 ---
 
 ## Open decisions

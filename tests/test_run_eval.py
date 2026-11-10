@@ -104,3 +104,13 @@ def test_evaluate_end_to_end(tmp_path):
     assert saved["tasks"].keys() == t.keys()
     rows = (tmp_path / "run" / "predictions_answerability.jsonl").read_text().splitlines()
     assert len(rows) == 6 and "score" in json.loads(rows[0])
+
+
+def test_rerun_of_one_task_keeps_the_others(tmp_path):
+    rec_dir, images = write_split(tmp_path)
+    base = ["--records", str(rec_dir), "--images", str(images), "--run-id", "t",
+            "--out", str(tmp_path / "run"), "--max-pixels", "4096"]  # fmt: skip
+    evaluate(FakeGenerator(), build_parser().parse_args(base), {"run_id": "t"})
+    again = build_parser().parse_args([*base, "--tasks", "quality"])
+    report = evaluate(FakeGenerator(), again, {"run_id": "t"})
+    assert set(report["tasks"]) == {"answer", "answerability", "quality"}

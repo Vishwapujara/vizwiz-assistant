@@ -90,6 +90,7 @@ def test_answerability_metrics():
     assert m["average_precision"] == pytest.approx(100 * (0.5 * 1 + 0.5 * 2 / 3), abs=0.01)
     assert m["invalid_output_pct"] == 25.0
     assert m["confusion"]["unanswerable->invalid"] == 1
+    assert m["invalid_output_kinds"] == {"other": 1}
     assert m["borderline_answerable"] == {"n": 2, "predicted_unanswerable_pct": 50.0}
     assert m["official_f1_at_0.5"] == pytest.approx(50.0)  # tp1 fp1 fn1
 
@@ -112,3 +113,12 @@ def test_bootstrap_is_deterministic_and_brackets_the_mean():
     a = bootstrap_ci(items, lambda xs: sum(xs) / len(xs), 200, seed=3)
     assert a == bootstrap_ci(items, lambda xs: sum(xs) / len(xs), 200, seed=3)
     assert a[0] < 0.5 < a[1]
+
+
+def test_invalid_kind():
+    from vizwiz.eval.metrics import invalid_kind
+
+    assert invalid_kind("") == "empty"
+    assert invalid_kind("Yes.") == "yes_no"
+    assert invalid_kind("The photo shows") == "sentence"
+    assert invalid_kind("Red") == "other"

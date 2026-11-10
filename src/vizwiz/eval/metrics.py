@@ -123,6 +123,24 @@ def clean_answer(text: str) -> str:
     return ""
 
 
+INVALID_KINDS = ("empty", "yes_no", "sentence", "other")
+_SENTENCE_STARTS = ("the", "this", "it", "there", "a", "an", "i", "yes,", "no,")
+
+
+def invalid_kind(text: str) -> str:
+    """Coarse category of a reply that is neither label. Categories only, so the
+    committed metrics never contain model text about dataset questions."""
+    words = text.strip().lower().split()
+    if not words:
+        return "empty"
+    first = words[0].strip(".!,")
+    if first in ("yes", "no") and len(words) == 1:
+        return "yes_no"
+    if words[0] in _SENTENCE_STARTS or first in _SENTENCE_STARTS:
+        return "sentence"
+    return "other"  # most often a direct answer to the question
+
+
 def parse_answerability(text: str) -> str | None:
     t = text.strip().lower()
     if t.startswith(UNANSWERABLE) or t.startswith("not answerable"):
@@ -251,6 +269,15 @@ def answerability_metrics(
         "macro_f1_generated": pct(mean([per_class[c]["f1"] for c in per_class])),
         "per_class_generated": per_class,
         "invalid_output_pct": pct(mean([lbl is None for lbl in labels])),
+        "invalid_output_kinds": dict(
+            sorted(
+                Counter(
+                    invalid_kind(e["prediction"])
+                    for e, lbl in zip(examples, labels, strict=True)
+                    if lbl is None
+                ).items()
+            )
+        ),
         "confusion": {f"{gt}->{pred}": n for (gt, pred), n in sorted(conf.items())},
         "borderline_answerable": {
             "n": len(borderline),
