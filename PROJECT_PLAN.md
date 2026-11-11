@@ -537,7 +537,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   (D-037). Deliverable: printed synthetic formatted examples, token-length stats per
   image-size budget, image stats + hashes, label-file rebuild check. STOP.
 
-### Phase 2: Evaluation harness and baseline
+### Phase 2: Evaluation harness and baseline (complete, D-044)
 - **2.1** Implement metrics (reuse official VizWiz eval logic where possible) + unit tests. STOP.
 - **2.2** (Colab, T4) Batch inference + `run_eval.py`; verify on a 100-example subset. STOP.
 - **2.3** (Colab, L4) E1 baseline (4B zero-shot) on the full test set.

@@ -1,0 +1,233 @@
+{
+  "run_id": "e1-baseline",
+  "created_utc": "2026-11-11T20:16:49+00:00",
+  "git_commit": "77dd18e",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "adapter": null,
+  "split": "test",
+  "limit": null,
+  "seed": 0,
+  "max_pixels": 524288,
+  "decoding": {
+    "temperature": 0.0,
+    "max_new_tokens": {
+      "answer": 16,
+      "answerability": 4,
+      "quality": 48
+    }
+  },
+  "dtype": "bfloat16",
+  "gpu": "NVIDIA L4",
+  "engine_load_s": 95.1,
+  "versions": {
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "pillow": "13.0.0"
+  },
+  "tasks": {
+    "answer": {
+      "metrics": {
+        "n": 2934,
+        "vqa_accuracy": 53.52,
+        "vqa_accuracy_ci95": [
+          51.92,
+          55.2
+        ],
+        "declined_pct": 0.07,
+        "by_answer_type": {
+          "number": {
+            "n": 48,
+            "accuracy": 51.25
+          },
+          "other": {
+            "n": 2691,
+            "accuracy": 51.26
+          },
+          "yes/no": {
+            "n": 195,
+            "accuracy": 85.38
+          }
+        },
+        "by_quality_label": {
+          "blur": {
+            "n": 1051,
+            "accuracy": 50.0
+          },
+          "bright": {
+            "n": 122,
+            "accuracy": 55.41
+          },
+          "dark": {
+            "n": 116,
+            "accuracy": 49.31
+          },
+          "framing": {
+            "n": 1595,
+            "accuracy": 50.74
+          },
+          "none": {
+            "n": 731,
+            "accuracy": 60.11
+          },
+          "obstruction": {
+            "n": 59,
+            "accuracy": 59.49
+          },
+          "rotation": {
+            "n": 533,
+            "accuracy": 47.58
+          },
+          "unrecognizable": {
+            "n": 225,
+            "accuracy": 48.76
+          }
+        },
+        "by_quality_any_issue": {
+          "any_issue": {
+            "n": 2203,
+            "accuracy": 51.34
+          },
+          "no_issue": {
+            "n": 731,
+            "accuracy": 60.11
+          }
+        }
+      },
+      "timing": {
+        "examples": 2934,
+        "wall_s": 391.7,
+        "generate_s": 370.6,
+        "examples_per_s": 7.92,
+        "generated_tokens_mean": 3.79
+      },
+      "git_commit": "77dd18e",
+      "created_utc": "2026-11-11T20:23:23+00:00"
+    },
+    "answerability": {
+      "metrics": {
+        "n": 4319,
+        "positives_unanswerable": 1385,
+        "average_precision": 69.38,
+        "average_precision_ci95": [
+          66.83,
+          72.38
+        ],
+        "official_f1_at_0.5": 69.51,
+        "recall_at_precision_0.8": 12.49,
+        "recall_at_precision_0.9": 0.0,
+        "macro_f1_generated": 57.92,
+        "per_class_generated": {
+          "unanswerable": {
+            "precision": 0.6715,
+            "recall": 0.769,
+            "f1": 0.7169,
+            "support": 1385
+          },
+          "answerable": {
+            "precision": 0.7823,
+            "recall": 0.3074,
+            "f1": 0.4414,
+            "support": 2934
+          }
+        },
+        "invalid_output_pct": 36.58,
+        "invalid_output_kinds": {
+          "other": 1503,
+          "sentence": 8,
+          "yes_no": 69
+        },
+        "confusion": {
+          "answerable->answerable": 902,
+          "answerable->invalid": 1511,
+          "answerable->unanswerable": 521,
+          "unanswerable->answerable": 251,
+          "unanswerable->invalid": 69,
+          "unanswerable->unanswerable": 1065
+        },
+        "borderline_answerable": {
+          "n": 550,
+          "predicted_unanswerable_pct": 45.82
+        }
+      },
+      "timing": {
+        "examples": 4319,
+        "wall_s": 561.9,
+        "generate_s": 530.3,
+        "examples_per_s": 8.15,
+        "generated_tokens_mean": 3.35,
+        "score_fallbacks": 7
+      },
+      "git_commit": "77dd18e",
+      "created_utc": "2026-11-11T20:32:51+00:00"
+    },
+    "quality": {
+      "metrics": {
+        "n": 7750,
+        "macro_f1": 27.95,
+        "macro_f1_ci95": [
+          26.94,
+          28.87
+        ],
+        "per_label": {
+          "blur": {
+            "precision": 0.4348,
+            "recall": 0.9732,
+            "f1": 0.6011,
+            "support": 3279
+          },
+          "framing": {
+            "precision": 0.5586,
+            "recall": 0.3254,
+            "f1": 0.4113,
+            "support": 4348
+          },
+          "rotation": {
+            "precision": 0.3529,
+            "recall": 0.1774,
+            "f1": 0.2361,
+            "support": 1325
+          },
+          "dark": {
+            "precision": 0.0748,
+            "recall": 0.9643,
+            "f1": 0.1388,
+            "support": 476
+          },
+          "bright": {
+            "precision": 0.4437,
+            "recall": 0.2899,
+            "f1": 0.3507,
+            "support": 476
+          },
+          "obstruction": {
+            "precision": 0.1351,
+            "recall": 0.4831,
+            "f1": 0.2111,
+            "support": 267
+          },
+          "unrecognizable": {
+            "precision": 0.0714,
+            "recall": 0.0041,
+            "f1": 0.0077,
+            "support": 1231
+          }
+        },
+        "exact_match_pct": 4.8,
+        "json_valid_pct": 100.0
+      },
+      "timing": {
+        "examples": 7750,
+        "wall_s": 1067.2,
+        "generate_s": 1014.5,
+        "examples_per_s": 7.64,
+        "generated_tokens_mean": 8.52
+      },
+      "git_commit": "77dd18e",
+      "created_utc": "2026-11-11T20:51:03+00:00"
+    }
+  }
+}

@@ -659,6 +659,20 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   only: committed metrics contain no model text about dataset questions.
 - **Plan sections:** 14 (Step 2.3).
 
+### D-044: E1 baseline recorded; Phase 2 complete
+- **Date:** 2026-11-11
+- **Status:** Accepted
+- **Evidence:** `results/eval/e1-baseline/` (metrics.json + README tables), L4, bf16,
+  commit `77dd18e`, 36 min for 15,003 examples.
+- **Result:** answering 53.5 VQA accuracy [51.9, 55.2]; answerability AP 69.4
+  [66.8, 72.4]; quality macro-F1 28.0 [26.9, 28.9].
+- **What E2 must beat, and where:** (1) the 36.6% of answerability replies that
+  ignore the format, and recall 0 at precision 0.9; (2) the 9-point accuracy gap
+  on photos with quality issues; (3) quality labels that are near-useless for
+  `unrecognizable` (F1 0.01) and `dark` (precision 0.07).
+- **Note:** the 7 answerability score fallbacks (0.16%) use the generated label.
+- **Plan sections:** 14 (Steps 2.3, Phase 2).
+
 ---
 
 ## Open decisions
