@@ -1,0 +1,92 @@
+{
+  "task": "answer",
+  "mode": "lora",
+  "dtype": "bfloat16",
+  "gpu": "NVIDIA L4",
+  "gpu_total_gb": 22.03,
+  "gradient_checkpointing": true,
+  "steps_timed_per_setting": 8,
+  "rows": [
+    {
+      "max_pixels": 262144,
+      "per_device_batch": 1,
+      "status": "ok",
+      "step_s": 0.604,
+      "examples_per_s": 1.66,
+      "tokens_per_example": 267,
+      "peak_mem_gb": 9.2
+    },
+    {
+      "max_pixels": 262144,
+      "per_device_batch": 2,
+      "status": "ok",
+      "step_s": 0.709,
+      "examples_per_s": 2.82,
+      "tokens_per_example": 258,
+      "peak_mem_gb": 9.74
+    },
+    {
+      "max_pixels": 262144,
+      "per_device_batch": 4,
+      "status": "ok",
+      "step_s": 1.413,
+      "examples_per_s": 2.83,
+      "tokens_per_example": 260,
+      "peak_mem_gb": 10.96
+    },
+    {
+      "max_pixels": 524288,
+      "per_device_batch": 1,
+      "status": "ok",
+      "step_s": 0.686,
+      "examples_per_s": 1.46,
+      "tokens_per_example": 501,
+      "peak_mem_gb": 9.69
+    },
+    {
+      "max_pixels": 524288,
+      "per_device_batch": 2,
+      "status": "ok",
+      "step_s": 1.419,
+      "examples_per_s": 1.41,
+      "tokens_per_example": 466,
+      "peak_mem_gb": 10.73
+    },
+    {
+      "max_pixels": 524288,
+      "per_device_batch": 4,
+      "status": "ok",
+      "step_s": 3.098,
+      "examples_per_s": 1.29,
+      "tokens_per_example": 475,
+      "peak_mem_gb": 12.94
+    },
+    {
+      "max_pixels": 1048576,
+      "per_device_batch": 1,
+      "status": "ok",
+      "step_s": 1.304,
+      "examples_per_s": 0.77,
+      "tokens_per_example": 918,
+      "peak_mem_gb": 10.63
+    },
+    {
+      "max_pixels": 1048576,
+      "per_device_batch": 2,
+      "status": "ok",
+      "step_s": 3.092,
+      "examples_per_s": 0.65,
+      "tokens_per_example": 846,
+      "peak_mem_gb": 12.61
+    },
+    {
+      "max_pixels": 1048576,
+      "per_device_batch": 4,
+      "status": "ok",
+      "step_s": 6.951,
+      "examples_per_s": 0.58,
+      "tokens_per_example": 857,
+      "peak_mem_gb": 16.57
+    }
+  ]
+}

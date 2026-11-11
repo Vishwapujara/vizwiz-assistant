@@ -705,6 +705,23 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   report `resumed_from = checkpoint-20` and finish at step 30.
 - **Plan sections:** 8, 14 (Step 3.1).
 
+### D-046: Step 3.1 checks passed; environment re-locked
+- **Date:** 2026-11-11
+- **Status:** Accepted
+- **Evidence** (`results/train/setup/`, commit `e6284f5`, L4): W&B login OK;
+  QLoRA smoke run stopped on purpose after its step-20 checkpoint and resumed to
+  step 30 (`resumed_from = checkpoint-20`, 10 steps in the second session); LoRA
+  bf16 smoke run OK; LoRA on 252 language-model modules, none in vision.
+- **Measured:** LoRA 1.61 examples/s at 524k pixels, 11.1 GB; QLoRA 1.17
+  examples/s, 7.2 GB. Profile: throughput roughly halves each time the image budget
+  doubles; memory fits everywhere (max 16.6 of 22 GB).
+- **Environment:** `bitsandbytes==0.50.2` and `wandb==0.31.0` pinned; lock file
+  regenerated from `results/env/freeze_train_l4.txt`. Only additions; every
+  previously locked version is unchanged.
+- **Image budget:** still open (Open decisions). Cost per epoch of all three
+  adapters: 5.1 h at 262k pixels, 9.8 h at 524k, 18.6 h at 1M.
+- **Plan sections:** 14 (Step 3.1).
+
 ---
 
 ## Open decisions
@@ -713,7 +730,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| Image resolution setting | Step 3.1 | From L4 memory/latency measurements; token cost per budget in findings §10 |
+| Image resolution setting | Step 3.1 | Measured (D-046): memory fits at all budgets; time per epoch 5.1 h / 9.8 h / 18.6 h at 262k / 524k / 1M. Needs the accuracy side. |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |

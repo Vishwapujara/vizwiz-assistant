@@ -1,0 +1,15 @@
+{
+  "run_id": "smoke-lora",
+  "finished_utc": "2026-11-11T21:39:29+00:00",
+  "resumed_from": null,
+  "global_step": 30,
+  "optimizer_steps_planned": 30,
+  "steps_this_session": 30,
+  "train_loss": 0.5397,
+  "final_val_loss": 0.4159,
+  "wall_s": 307.2,
+  "optimizer_step_s_median": 9.947,
+  "examples_per_s": 1.61,
+  "peak_mem_gb": 11.07,
+  "adapter_dir": "/content/drive/MyDrive/vizwiz/checkpoints/smoke-lora/adapter"
+}

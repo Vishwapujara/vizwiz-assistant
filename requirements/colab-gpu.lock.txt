@@ -1,6 +1,6 @@
-# Exact versions from the passing Step 0.3 run on Colab L4 (2026-11-06). See DECISIONS.md D-021.
+# Exact versions from the passing Step 3.1 run on Colab L4 (2026-11-11): the Step 0.3 set
+# (D-021) plus bitsandbytes, wandb and their dependencies (D-046).
 # Used as a constraints file: uv pip install -r colab-gpu.txt -c colab-gpu.lock.txt
-# Regenerate only after a new compatibility run passes.
 accelerate==1.15.0
 agent-detector==2.0.0
 aiohappyeyeballs==2.7.1
@@ -13,6 +13,7 @@ anyio==4.16.0
 apache-tvm-ffi==0.1.11
 astor==0.8.1
 attrs==26.1.0
+bitsandbytes==0.50.2
 blake3==1.0.11
 cachetools==7.3.0
 cbor2==6.2.0.post2
@@ -29,9 +30,11 @@ cuda-pathfinder==1.8.6
 cuda-python==13.5.0
 cuda-tile==1.8.0
 cuda-toolkit==13.0.3.0
+cwevals==0.0.1b1
 depyf==0.20.0
 detect-installer==0.2.1
 dill==0.4.1
+distro==1.9.0
 dnspython==2.9.2
 docstring-parser==0.18.0
 einops==0.8.2
@@ -133,6 +136,7 @@ packaging==26.3
 partial-json-parser==0.2.1.1.post7
 peft==0.21.2
 pillow==13.0.0
+platformdirs==4.14.5
 prometheus-client==0.26.0
 prometheus-fastapi-instrumentator==8.1.0
 propcache==0.5.4
@@ -196,8 +200,10 @@ urllib3==2.8.0
 uvicorn==0.54.0
 uvloop==0.23.0
 vllm==0.32.0
+wandb==0.31.0
 watchfiles==1.3.0
 websockets==17.4
 xgrammar==0.2.8
+xxhash==4.1.0
 yarl==1.25.1
 z3-solver==4.15.4.0

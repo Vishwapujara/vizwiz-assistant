@@ -1,0 +1,15 @@
+{
+  "run_id": "smoke-qlora",
+  "finished_utc": "2026-11-11T21:33:47+00:00",
+  "resumed_from": "checkpoint-20",
+  "global_step": 30,
+  "optimizer_steps_planned": 30,
+  "steps_this_session": 10,
+  "train_loss": 0.395,
+  "final_val_loss": 0.4536,
+  "wall_s": 149.3,
+  "optimizer_step_s_median": 13.67,
+  "examples_per_s": 1.17,
+  "peak_mem_gb": 7.17,
+  "adapter_dir": "/content/drive/MyDrive/vizwiz/checkpoints/smoke-qlora/adapter"
+}
