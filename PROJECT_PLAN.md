@@ -218,6 +218,7 @@ vizwiz-assistant/
 │   ├── 02_data_prep.ipynb        # CPU: rebuild check, image scan, token stats (1.3–1.5)
 │   ├── 03_eval_check.ipynb       # T4: run_eval.py on 100 examples per task (2.2)
 │   ├── 04_e1_baseline.ipynb      # L4: E1 zero-shot baseline, full test set (2.3)
+│   ├── 05_train_setup.ipynb      # L4: W&B check, QLoRA/LoRA smoke + resume, profile (3.1)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
@@ -544,7 +545,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   Deliverable: baseline metrics JSON + per-slice table. STOP.
 
 ### Phase 3: Training
-- **3.1** (Colab, T4 then L4) W&B login check first (`WANDB_API_KEY` from Colab Secrets,
+- **3.1** (Colab, L4 only, D-045) W&B login check first (`WANDB_API_KEY` from Colab Secrets,
   D-025); then SFT entrypoint; smoke test with 200 examples on T4
   (QLoRA mode); verify loss masking (only answer tokens contribute) and
   checkpoint/resume (kill the run, resume, confirm step count continues). Then

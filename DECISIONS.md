@@ -673,6 +673,38 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 - **Note:** the 7 answerability score fallbacks (0.16%) use the generated label.
 - **Plan sections:** 14 (Steps 2.3, Phase 2).
 
+### D-045: Training entrypoint design; Step 3.1 runs on the L4 only
+- **Date:** 2026-11-11
+- **Status:** Accepted
+- **Decision** (`src/vizwiz/train/`):
+  - Hugging Face `Trainer` with a PEFT LoRA model, not TRL's SFT trainer: our
+    dataset already produces masked labels (prefix-checked on every example), so
+    `Trainer` only needs to run the loop. It brings checkpoint/resume, gradient
+    accumulation, cosine schedule, and the W&B integration.
+  - Config: plan 8.1 defaults in `TrainConfig`, per-task YAML in `configs/train/`,
+    `--set key=value` overrides; unknown keys are errors. Starting point: lr 1e-4,
+    3% warmup, 1 epoch, per-device batch 2 × accumulation 8 = effective batch 16.
+  - Every run records git commit, full config, SHA-256 of the record files (and
+    refuses to train if they differ from `files.json`), GPU, versions, timing and
+    peak memory, in `settings.json` / `train_summary.json` and in W&B.
+  - Resume is automatic: a rerun with the same run id continues from the newest
+    complete checkpoint, and the W&B run id equals the run id so the curves join.
+  - QLoRA: NF4 with double quantisation, compute in bf16 (fp16 on GPUs without
+    bf16); the vision tower and `lm_head` stay in 16-bit.
+  - Attention: SDPA. FlashAttention-2 needs the separate `flash-attn` package,
+    which is not in the pinned environment; SDPA on an L4 already uses a fused
+    kernel. Revisit only if profiling shows attention dominates.
+  - `bitsandbytes` and `wandb` added to `requirements/colab-gpu.txt`, unpinned until
+    the first passing run, then pinned from its freeze file.
+- **Deviation from the plan:** the plan put the smoke test on a T4 (QLoRA, fp16).
+  All real training runs on the L4 in bf16, and T4-specific fp16 problems would cost
+  time without telling us anything about those runs. The smoke tests (QLoRA and
+  LoRA) and the profile therefore all run in one L4 session (`05_train_setup.ipynb`).
+- **Resume test:** `--crash-at-step 20` ends the process with `os._exit` right
+  after the step-20 checkpoint (no cleanup, like a lost runtime); the rerun must
+  report `resumed_from = checkpoint-20` and finish at step 30.
+- **Plan sections:** 8, 14 (Step 3.1).
+
 ---
 
 ## Open decisions

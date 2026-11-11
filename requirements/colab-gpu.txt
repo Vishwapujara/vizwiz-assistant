@@ -6,3 +6,7 @@ transformers==5.19.0
 peft==0.21.2
 accelerate==1.15.0
 pillow==13.0.0
+# Added in Step 3.1 (D-045): QLoRA and experiment tracking. Pinned after the first
+# passing run, from its freeze file.
+bitsandbytes
+wandb
