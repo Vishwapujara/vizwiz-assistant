@@ -722,6 +722,27 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   adapters: 5.1 h at 262k pixels, 9.8 h at 524k, 18.6 h at 1M.
 - **Plan sections:** 14 (Step 3.1).
 
+### D-047: How the image budget is chosen (rule fixed before the measurement)
+- **Date:** 2026-11-11
+- **Status:** Accepted (owner chose "measure first")
+- **Why measure:** training cost scales with the budget (D-046: 5.1 h / 9.8 h / 18.6
+  h per epoch of the three adapters at 262k / 524k / 1M pixels); the accuracy side
+  is unknown, and VizWiz has many questions about small printed text.
+- **Measurement:** the untrained model on the **val** split (never test, so the
+  test set stays untouched for the final comparisons), at 262,144 / 524,288 /
+  1,048,576 pixels: answering on all 1,464 answerable val questions, answerability
+  on all 2,000 val questions (`06_resolution_check.ipynb`). Differences are
+  measured **paired** on the same questions with a bootstrap CI
+  (`vizwiz.eval.compare`, new; reused for E2–E5).
+- **Rule, written down before seeing any result:** choose the smallest budget
+  whose answering accuracy is within **1.0 point** of the best budget's and whose
+  answerability AP is within **1.5 points** of the best budget's (point estimates;
+  CIs reported alongside).
+- **Known limitation:** zero-shot sensitivity to resolution is a proxy; a
+  fine-tuned model may use extra detail differently. E6 (optional) would measure
+  it after training.
+- **Plan sections:** 10 (E6), 14 (Step 3.1).
+
 ---
 
 ## Open decisions
@@ -730,7 +751,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| Image resolution setting | Step 3.1 | Measured (D-046): memory fits at all budgets; time per epoch 5.1 h / 9.8 h / 18.6 h at 262k / 524k / 1M. Needs the accuracy side. |
+| Image resolution setting | Step 3.1 | Measured (D-046): memory fits at all budgets; time per epoch 5.1 h / 9.8 h / 18.6 h at 262k / 524k / 1M. Accuracy side measured by the D-047 rule. |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |

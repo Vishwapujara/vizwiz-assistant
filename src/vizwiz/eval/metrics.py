@@ -323,3 +323,45 @@ def quality_metrics(
         "exact_match_pct": pct(mean([p == g for p, g in zip(pred, gold, strict=True)])),
         "json_valid_pct": pct(mean([v for _, v in parsed])),
     }  # fmt: skip
+
+
+def paired_bootstrap_diff(
+    n: int,
+    stat: Callable[[Sequence[int], int], float | None],
+    n_runs: int,
+    reference: int = 0,
+    n_resamples: int = 1000,
+    alpha: float = 0.05,
+    seed: int = 0,
+) -> list[dict]:
+    """Differences between runs evaluated on the same n examples, with paired CIs.
+
+    ``stat(indices, run)`` computes a metric for one run on a resample of example
+    indices. Every resample is shared by all runs, so example difficulty cancels out
+    and the CI of the difference is much tighter than comparing two separate CIs.
+    Returns one dict per run: point difference vs ``reference``, its CI, and the
+    fraction of resamples in which the run beats the reference.
+    """
+    rng = random.Random(seed)
+    full = list(range(n))
+    point = [stat(full, r) for r in range(n_runs)]
+    diffs: list[list[float]] = [[] for _ in range(n_runs)]
+    for _ in range(n_resamples):
+        idx = [rng.randrange(n) for _ in range(n)]
+        values = [stat(idx, r) for r in range(n_runs)]
+        if any(v is None for v in values):
+            continue
+        for r in range(n_runs):
+            diffs[r].append(values[r] - values[reference])
+    out = []
+    for r in range(n_runs):
+        d = sorted(diffs[r])
+        k = len(d)
+        out.append({
+            "value": point[r],
+            "diff_vs_reference": None if point[r] is None else point[r] - point[reference],
+            "diff_ci95": [d[int(alpha / 2 * (k - 1))], d[int((1 - alpha / 2) * (k - 1))]]
+            if k else None,
+            "p_better": sum(x > 0 for x in d) / k if k else None,
+        })  # fmt: skip
+    return out
