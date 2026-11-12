@@ -813,6 +813,25 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
     training curves are compared against; the reported E2 number is on test.
 - **Plan sections:** 8.1, 14 (Step 3.1).
 
+### D-051: E2 answering run, settings fixed before training
+- **Date:** 2026-11-12
+- **Status:** Accepted
+- **Run:** `e2-answer-lora`, notebook `07_e2_answer.ipynb`, L4. Bf16 LoRA (r 16,
+  α 32, dropout 0.05) on the language model; 13,134 answerable training questions,
+  1 epoch = 821 optimizer steps at effective batch 16 (1 × 16); learning rate 1e-4,
+  cosine, 3% warm-up; 524,288 px (D-050); val loss on 500 val questions every 200
+  steps; checkpoint every 10 min (D-048). Estimated 2.5–3 h.
+- **No hyperparameter search:** one run with the plan's defaults (8.1). Tuning on
+  test is not allowed, and the GPU budget does not cover a sweep; the val loss
+  curve in W&B is the check for under- or over-fitting.
+- **Reported result:** VQA accuracy on the full test set (2,934 answerable
+  questions), paired bootstrap against E1 on the same questions, plus the E1
+  slices (answer type, clean vs any quality issue).
+- **Early check:** before training, vLLM loads the 30-step smoke adapter from
+  Step 3.1 on 64 val questions, so an adapter-format problem shows up before
+  3 hours of training, not after.
+- **Plan sections:** 8.1, 10 (E2), 14 (Step 3.2).
+
 ---
 
 ## Open decisions

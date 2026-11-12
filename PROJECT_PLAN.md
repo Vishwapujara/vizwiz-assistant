@@ -220,6 +220,7 @@ vizwiz-assistant/
 │   ├── 04_e1_baseline.ipynb      # L4: E1 zero-shot baseline, full test set (2.3)
 │   ├── 05_train_setup.ipynb      # L4: W&B check, QLoRA/LoRA smoke + resume, profile (3.1)
 │   ├── 06_resolution_check.ipynb # L4: zero-shot val accuracy at 3 image sizes (3.1, D-047)
+│   ├── 07_e2_answer.ipynb        # L4: train answering adapter, test eval, paired vs E1 (3.2, D-051)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
