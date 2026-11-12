@@ -5,6 +5,7 @@ from vizwiz.train.config import (
     last_checkpoint,
     load_train_config,
     parse_override,
+    save_due,
     total_optimizer_steps,
     warmup_steps,
 )
@@ -61,3 +62,11 @@ def test_cli_parses():
         ["profile", "--config", "c.yaml", "--records", "r", "--images", "i", "--report", "p"]
     )
     assert b.budgets == [262_144, 524_288, 1_048_576] and b.batch_sizes == [1, 2, 4]
+
+
+def test_time_based_save_every_10_minutes_by_default():
+    cfg = load_train_config("configs/train/answer.yaml")
+    assert cfg.save_every_minutes == 10 and cfg.save_steps is None
+    assert not save_due(now=599.0, last_save=0.0, minutes=10)
+    assert save_due(now=600.0, last_save=0.0, minutes=10)
+    assert not save_due(now=10_000.0, last_save=0.0, minutes=None)

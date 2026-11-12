@@ -11,8 +11,8 @@
 ``train``
     LoRA on the language model only (vision tower frozen), bf16 on GPUs that support
     it. ``--mode qlora`` loads the base in 4-bit NF4 (bitsandbytes), vision tower and
-    lm_head kept in 16-bit. Checkpoints every ``save_steps`` to ``<out>/<run-id>/``; a
-    rerun with the same run id resumes from the newest complete checkpoint
+    lm_head kept in 16-bit. Checkpoints every ``save_every_minutes`` (default 10) to
+    ``<out>/<run-id>/``; a rerun with the same run id resumes from the newest complete checkpoint
     automatically. The final adapter (adapter weights only) goes to
     ``<out>/<run-id>/adapter``; ``train_summary.json`` records steps, timing, peak
     memory, and whether the run resumed. ``--crash-at-step N`` stops the process right
@@ -41,6 +41,7 @@ from vizwiz.train.config import (
     TrainConfig,
     last_checkpoint,
     load_train_config,
+    save_due,
     total_optimizer_steps,
     warmup_steps,
 )
@@ -128,7 +129,7 @@ def check_record_hashes(hashes: dict[str, str]) -> None:
 # ---------------------------------------------------------------- train
 
 
-def make_callbacks(crash_at_step: int | None):
+def make_callbacks(crash_at_step: int | None, save_every_minutes: float | None):
     import torch
     from transformers import TrainerCallback
 
@@ -155,7 +156,22 @@ def make_callbacks(crash_at_step: int | None):
                       f"{state.global_step} (simulated disconnect)", flush=True)  # fmt: skip
                 os._exit(CRASH_EXIT_CODE)  # no cleanup, like a lost Colab runtime
 
-    return Stats(), CrashAt()
+    class TimedSave(TrainerCallback):
+        """Ask the Trainer for a checkpoint once ``save_every_minutes`` have passed, so
+        a lost Colab runtime costs at most that much training, at any speed."""
+
+        def __init__(self):
+            self.last = time.monotonic()
+
+        def on_step_end(self, args, state, control, **kw):
+            if save_due(time.monotonic(), self.last, save_every_minutes):
+                control.should_save = True
+            return control
+
+        def on_save(self, args, state, control, **kw):
+            self.last = time.monotonic()
+
+    return Stats(), TimedSave(), CrashAt()
 
 
 def run_train(args) -> int:
@@ -234,7 +250,7 @@ def run_train(args) -> int:
         eval_strategy="steps",
         eval_steps=cfg.eval_steps,
         save_strategy="steps",
-        save_steps=cfg.save_steps,
+        save_steps=cfg.save_steps or 10**9,  # time-based saving is the default
         save_total_limit=cfg.save_total_limit,
         report_to=report_to,
         run_name=args.run_id,
@@ -246,14 +262,14 @@ def run_train(args) -> int:
         gradient_checkpointing=False,  # already enabled on the model in load_model
         optim="adamw_torch",
     )
-    stats, crash = make_callbacks(args.crash_at_step)
+    stats, timed_save, crash = make_callbacks(args.crash_at_step, cfg.save_every_minutes)
     trainer = Trainer(
         model=model,
         args=targs,
         train_dataset=train_ds,
         eval_dataset=val_ds,
         data_collator=Collator(processor.tokenizer.pad_token_id),
-        callbacks=[stats, crash],
+        callbacks=[stats, timed_save, crash],  # crash last: it runs after the save
     )
     torch.cuda.reset_peak_memory_stats()
     t0 = time.perf_counter()

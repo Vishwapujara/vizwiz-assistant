@@ -39,7 +39,8 @@ class TrainConfig(BaseModel):
     eval_limit: int = 500  # val examples for the periodic val loss
     num_workers: int = 4
     # Checkpointing and logging
-    save_steps: int = 200
+    save_every_minutes: float | None = 10.0  # time-based checkpoints (owner's request)
+    save_steps: int | None = None  # optional step-based checkpoints, in addition
     eval_steps: int = 200
     logging_steps: int = 10
     save_total_limit: int = 2
@@ -78,6 +79,11 @@ def total_optimizer_steps(n_examples: int, cfg: TrainConfig) -> int:
         return cfg.max_steps
     per_epoch = -(-n_examples // cfg.effective_batch)  # ceil
     return max(1, round(per_epoch * cfg.epochs))
+
+
+def save_due(now: float, last_save: float, minutes: float | None) -> bool:
+    """True when at least ``minutes`` have passed since the last checkpoint."""
+    return minutes is not None and now - last_save >= 60 * minutes
 
 
 def last_checkpoint(run_dir: Path) -> Path | None:

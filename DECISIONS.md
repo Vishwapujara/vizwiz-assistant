@@ -743,6 +743,20 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   it after training.
 - **Plan sections:** 10 (E6), 14 (Step 3.1).
 
+### D-048: Checkpoint every 10 minutes (time-based)
+- **Date:** 2026-11-12
+- **Status:** Accepted (owner's request)
+- **Decision:** training saves a checkpoint every `save_every_minutes` = 10 of
+  training time (a `TimedSave` callback sets the Trainer's save flag), instead of
+  every fixed number of steps. Step speed varies 4× across image budgets (D-046), so
+  a fixed step count would mean anything from ~10 to ~40 minutes between saves; a
+  time interval caps the loss from a Colab disconnect at 10 minutes for every run.
+  `save_steps` remains available as an extra trigger (the smoke test uses it).
+- **Cost:** a checkpoint is the adapter plus optimizer state (~0.4 GB); the newest 2
+  are kept (`save_total_limit`), so ~0.8 GB of Drive per run, and each save takes
+  seconds, about 2–3% of training time.
+- **Plan sections:** 8.3.
+
 ---
 
 ## Open decisions
