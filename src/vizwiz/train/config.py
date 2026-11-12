@@ -27,14 +27,14 @@ class TrainConfig(BaseModel):
     warmup_ratio: float = Field(0.03, ge=0, lt=1)
     epochs: float = 1.0
     max_steps: int | None = None  # overrides epochs when set
-    per_device_batch: int = 2
-    grad_accum: int = 8  # effective batch = per_device_batch × grad_accum
+    per_device_batch: int = 1  # fastest at 524k pixels in the L4 profile (D-050)
+    grad_accum: int = 16  # effective batch = per_device_batch × grad_accum
     weight_decay: float = 0.0
     max_grad_norm: float = 1.0
     gradient_checkpointing: bool = True
     seed: int = 1234
     # Data
-    max_pixels: int = 524_288  # provisional until Step 3.1 profiling (D-041)
+    max_pixels: int = 524_288  # fixed by the D-047 rule (D-050)
     limit: int | None = None  # train examples (smoke tests)
     eval_limit: int = 500  # val examples for the periodic val loss
     num_workers: int = 4

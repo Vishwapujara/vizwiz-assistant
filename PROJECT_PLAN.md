@@ -551,7 +551,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   (QLoRA mode); verify loss masking (only answer tokens contribute) and
   checkpoint/resume (kill the run, resume, confirm step count continues). Then
   measure peak memory and step time on L4 in bf16 LoRA mode and fix the image
-  resolution setting. STOP.
+  resolution setting. STOP. **Done** (D-046, D-050: 524,288 pixels).
 - **3.2** (Colab, L4) Train answering adapter (E2). Evaluate. STOP.
 - **3.3** (Colab, L4) Train answerability and quality adapters (E2). Evaluate. STOP.
 - **3.4** Error analysis (Section 9.3) on all three adapters. STOP.
@@ -611,7 +611,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 
 ## 17. Open decisions (resolve when reached)
 
-- Image resolution setting (Step 3.1, from L4 memory/latency measurements).
+- ~~Image resolution setting~~ resolved: 524,288 pixels (D-050).
 - 4-bit serving format: AWQ vs GPTQ (Step 4.1, whichever vLLM supports for this model on L4).
 - Cascade "unusable image" rule (Step 5.2, tuned on val).
 - Final serving quantization format (after E4).

@@ -781,6 +781,38 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 - **Unchanged:** scope, experiments E1–E5, and all phases.
 - **Plan sections:** 1, 10, 15.
 
+### D-050: Image budget fixed at 524,288 pixels (D-047 rule applied)
+- **Date:** 2026-11-12
+- **Status:** Accepted (pre-registered rule, D-047)
+- **Measurement** (untrained model, val split, `06_resolution_check.ipynb`; paired
+  95% CI of the difference vs 524k in brackets):
+
+  | Budget (px) | Visual tokens | Answering VQA acc | Answerability AP |
+  |---|---|---|---|
+  | 262,144 | ~234 | 54.99 [-2.11, +0.29] | 64.96 [-1.17, +1.46] |
+  | 524,288 | ~494 | 55.87 (reference) | 64.77 (reference) |
+  | 1,048,576 | ~972 | 56.07 [-0.92, +1.30] | 65.69 [-0.16, +2.12] |
+
+- **Rule applied:** best answering 56.07 and best AP 65.69 (both at 1M).
+  262k is 1.08 points behind on answering, so it fails the 1.0-point limit (AP gap
+  0.73 passes). 524k is 0.20 behind on answering and 0.92 behind on AP, so it passes
+  both. The smallest passing budget is **524,288**.
+- **Honest reading:** every paired CI contains 0, so on val the three budgets are
+  not clearly different. 262k missed the limit by 0.08 points. The rule was fixed
+  in advance, so it is applied as written and not re-argued after the result.
+  1M would double the training time (18.6 h vs 9.8 h per epoch of the three
+  adapters) for a difference within noise.
+- **Consequences:**
+  - `max_pixels` = 524,288 for training, evaluation and serving. This is the E1
+    budget already, so **E1 does not need a rerun**.
+  - Batch: `per_device_batch` 1 × `grad_accum` 16 (effective batch 16, unchanged).
+    In the profile bs1 was the fastest setting at 524k (1.46 vs 1.41 ex/s at bs2),
+    and its peak memory was 9.7 GB.
+  - Remaining GPU estimate: about 31–33 h.
+  - Answering on val is 55.87 zero-shot. This is the val reference that E2
+    training curves are compared against; the reported E2 number is on test.
+- **Plan sections:** 8.1, 14 (Step 3.1).
+
 ---
 
 ## Open decisions
@@ -789,7 +821,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| Image resolution setting | Step 3.1 | Measured (D-046): memory fits at all budgets; time per epoch 5.1 h / 9.8 h / 18.6 h at 262k / 524k / 1M. Accuracy side measured by the D-047 rule. |
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
