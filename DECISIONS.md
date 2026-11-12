@@ -757,6 +757,30 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   seconds, about 2–3% of training time.
 - **Plan sections:** 8.3.
 
+### D-049: Keep VizWiz; frame it around safety; two additions
+- **Date:** 2026-11-12
+- **Status:** Accepted (owner)
+- **Context:** the owner asked whether VizWiz solves a real problem, given that
+  frontier models (GPT, Claude) plus phone screen readers already answer photo
+  questions, and compared it with other portfolio projects.
+- **Decision:** keep the project. The real-world problem is not "answer photo
+  questions" but **unreliable answers on unusable photos**: about 30% of blind
+  users' questions cannot be answered from the photo they took (audit finding 1),
+  and E1 caught none of them at 90% precision. The project is framed as: a
+  self-hosted assistant that knows when it cannot see, tells the user how to retake
+  the photo, and answers only when reliable, with measured accuracy, decline rate,
+  cost and privacy.
+- **Additions:**
+  - **Frontier reference** (optional, after E2): a frontier vision API on 300–500
+    *val* questions, compared on accuracy, decline behaviour on unanswerable
+    questions, and cost per photo. Sends dataset photos to an external API (CC BY
+    4.0 permits it); to be confirmed by the owner before running.
+  - **Sensitivity-guided compression** (optional, in E4): measure which layers
+    tolerate low precision and protect the sensitive ones, instead of uniform
+    quantization. Decided at Phase 4 from the remaining GPU budget.
+- **Unchanged:** scope, experiments E1–E5, and all phases.
+- **Plan sections:** 1, 10, 15.
+
 ---
 
 ## Open decisions
@@ -769,6 +793,9 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
+| E3 (QLoRA vs LoRA): run or cut | After E2 | Keep if GPU budget allows (~2–4 h); E4 has priority |
+| Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
+| Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 
 ---
 
