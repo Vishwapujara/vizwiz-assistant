@@ -14,5 +14,8 @@ Rule fixed before the run: the smallest budget within 1.0 point of the best answ
 accuracy and within 1.5 points of the best AP. 262k fails on answering (1.08 behind);
 **524k passes** (0.20 and 0.92 behind). All CIs contain 0.
 
-Speed at 1M during this run: about 4 examples/s on the L4, against about 8 at 524k
-in E1.
+Inference speed on the L4 (vLLM, answering / answerability, examples per second):
+15.4 / 16.2 at 262k, 7.8 / 8.1 at 524k, 4.0 / 4.1 at 1M. Speed halves each time the
+budget doubles, because visual tokens dominate the compute.
+
+Raw numbers: `resolution_summary.json`.
