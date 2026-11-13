@@ -1,0 +1,15 @@
+{
+  "run_id": "e2-answer-lora",
+  "finished_utc": "2026-11-12T21:19:13+00:00",
+  "resumed_from": null,
+  "global_step": 821,
+  "optimizer_steps_planned": 821,
+  "steps_this_session": 821,
+  "train_loss": 0.521,
+  "final_val_loss": 0.4865,
+  "wall_s": 10129.0,
+  "optimizer_step_s_median": 11.399,
+  "examples_per_s": 1.4,
+  "peak_mem_gb": 10.07,
+  "adapter_dir": "/content/drive/MyDrive/vizwiz/checkpoints/e2-answer-lora/adapter"
+}

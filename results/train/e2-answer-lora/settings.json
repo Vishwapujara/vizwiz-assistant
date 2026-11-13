@@ -1,0 +1,52 @@
+{
+  "run_id": "e2-answer-lora",
+  "git_commit": "ad220ce",
+  "config": {
+    "task": "answer",
+    "model": "Qwen/Qwen3-VL-4B-Instruct",
+    "mode": "lora",
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "learning_rate": 0.0001,
+    "warmup_ratio": 0.03,
+    "epochs": 1.0,
+    "max_steps": null,
+    "per_device_batch": 1,
+    "grad_accum": 16,
+    "weight_decay": 0.0,
+    "max_grad_norm": 1.0,
+    "gradient_checkpointing": true,
+    "seed": 1234,
+    "max_pixels": 524288,
+    "limit": null,
+    "eval_limit": 500,
+    "num_workers": 4,
+    "save_every_minutes": 10.0,
+    "save_steps": null,
+    "eval_steps": 200,
+    "logging_steps": 10,
+    "save_total_limit": 2
+  },
+  "effective_batch": 16,
+  "train_examples": 13134,
+  "val_examples": 500,
+  "optimizer_steps": 821,
+  "record_sha256": {
+    "vqa_train.jsonl": "f60a3ccd2705a2cd5693c06899639d0a21034e01bf2224a680343b6f6df05557",
+    "quality_train.jsonl": "fe55d8a57694d179cb801dcc66367d43eeaf7bec8bedc773e38a3690d95b63aa",
+    "vqa_val.jsonl": "341c7be0f20fb7c4836cf594ac1d02998521ed36f8eec7c772eb0cd3aca4dee5",
+    "quality_val.jsonl": "b5a5f2672f63749c1c8b25da66af75a56c888be25d7e1fa436211d96425b36b4"
+  },
+  "dtype": "bfloat16",
+  "gpu": "NVIDIA L4",
+  "versions": {
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "pillow": "13.0.0"
+  }
+}

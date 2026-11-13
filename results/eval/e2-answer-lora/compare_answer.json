@@ -1,0 +1,27 @@
+{
+  "task": "answer",
+  "split": "test",
+  "metric": "vqa_accuracy",
+  "n": 2934,
+  "reference": "e1",
+  "runs": {
+    "e1": {
+      "value": 53.52,
+      "diff_vs_reference": 0.0,
+      "diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "p_better": 0.0
+    },
+    "e2": {
+      "value": 61.73,
+      "diff_vs_reference": 8.21,
+      "diff_ci95": [
+        6.98,
+        9.34
+      ],
+      "p_better": 1.0
+    }
+  }
+}

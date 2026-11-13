@@ -1,0 +1,111 @@
+{
+  "run_id": "e2-answer-lora",
+  "created_utc": "2026-11-12T21:21:06+00:00",
+  "git_commit": "ad220ce",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "adapter": "adapter",
+  "split": "test",
+  "limit": null,
+  "seed": 0,
+  "max_pixels": 524288,
+  "decoding": {
+    "temperature": 0.0,
+    "max_new_tokens": {
+      "answer": 16,
+      "answerability": 4,
+      "quality": 48
+    }
+  },
+  "dtype": "bfloat16",
+  "gpu": "NVIDIA L4",
+  "engine_load_s": 105.7,
+  "versions": {
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "pillow": "13.0.0"
+  },
+  "tasks": {
+    "answer": {
+      "metrics": {
+        "n": 2934,
+        "vqa_accuracy": 61.73,
+        "vqa_accuracy_ci95": [
+          60.19,
+          63.2
+        ],
+        "declined_pct": 0.0,
+        "by_answer_type": {
+          "number": {
+            "n": 48,
+            "accuracy": 69.38
+          },
+          "other": {
+            "n": 2691,
+            "accuracy": 59.55
+          },
+          "yes/no": {
+            "n": 195,
+            "accuracy": 90.0
+          }
+        },
+        "by_quality_label": {
+          "blur": {
+            "n": 1051,
+            "accuracy": 57.66
+          },
+          "bright": {
+            "n": 122,
+            "accuracy": 63.28
+          },
+          "dark": {
+            "n": 116,
+            "accuracy": 55.17
+          },
+          "framing": {
+            "n": 1595,
+            "accuracy": 59.41
+          },
+          "none": {
+            "n": 731,
+            "accuracy": 68.08
+          },
+          "obstruction": {
+            "n": 59,
+            "accuracy": 64.92
+          },
+          "rotation": {
+            "n": 533,
+            "accuracy": 54.69
+          },
+          "unrecognizable": {
+            "n": 225,
+            "accuracy": 59.2
+          }
+        },
+        "by_quality_any_issue": {
+          "any_issue": {
+            "n": 2203,
+            "accuracy": 59.62
+          },
+          "no_issue": {
+            "n": 731,
+            "accuracy": 68.08
+          }
+        }
+      },
+      "timing": {
+        "examples": 2934,
+        "wall_s": 432.1,
+        "generate_s": 409.4,
+        "examples_per_s": 7.17,
+        "generated_tokens_mean": 3.24
+      },
+      "git_commit": "ad220ce",
+      "created_utc": "2026-11-12T21:28:20+00:00"
+    }
+  }
+}
