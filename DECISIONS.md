@@ -832,6 +832,24 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   3 hours of training, not after.
 - **Plan sections:** 8.1, 10 (E2), 14 (Step 3.2).
 
+### D-052: Step 3.3 answerability and quality runs use the E2 recipe unchanged
+- **Date:** 2026-11-13
+- **Status:** Accepted
+- **Runs:** `e2-answerability-lora` (notebook 08; 17,967 training questions, 1,123
+  steps, ~3.5–4 h) and `e2-quality-lora` (notebook 09; 20,525 training photos,
+  1,283 steps, ~4–4.5 h). Same settings as D-051: bf16 LoRA r 16, 1 epoch, lr
+  1e-4, effective batch 16, 524,288 px, 10-minute checkpoints.
+- **Why unchanged:** the answering run trained cleanly (val loss 0.487 below train
+  0.521, no disconnects), and one recipe for all three adapters keeps E5
+  (multi-task vs cascade) a fair comparison.
+- **Reported results** (full test set, paired against E1 on the same examples):
+  answerability AP plus recall at precision 0.8 / 0.9, F1 at 0.5 and invalid-reply
+  rate; quality macro-F1 plus per-label F1.
+- **Class balance not changed:** 27% of answerability training questions are
+  unanswerable. AP and the cascade threshold (Step 5.2, tuned on val) do not
+  depend on the 0.5 cut-off, so no reweighting is applied.
+- **Plan sections:** 8.1, 10 (E2), 14 (Step 3.3).
+
 ---
 
 ## Open decisions
@@ -843,7 +861,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
-| E3 (QLoRA vs LoRA): run or cut | After E2 | Keep if GPU budget allows (~2–4 h); E4 has priority |
+| E3 (QLoRA vs LoRA): run or cut | After Step 3.3 | ~3.5 h; competes with an answering-adapter improvement run (e.g. 2 epochs, chosen on val from the E2 val-loss curve); E4 has priority |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
 | Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 
