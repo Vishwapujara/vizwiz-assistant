@@ -1,0 +1,27 @@
+{
+  "task": "quality",
+  "split": "test",
+  "metric": "macro_f1",
+  "n": 7750,
+  "reference": "e1",
+  "runs": {
+    "e1": {
+      "value": 27.95,
+      "diff_vs_reference": 0.0,
+      "diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "p_better": 0.0
+    },
+    "e2": {
+      "value": 65.2,
+      "diff_vs_reference": 37.24,
+      "diff_ci95": [
+        35.89,
+        38.65
+      ],
+      "p_better": 1.0
+    }
+  }
+}

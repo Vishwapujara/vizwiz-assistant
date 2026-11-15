@@ -556,7 +556,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   measure peak memory and step time on L4 in bf16 LoRA mode and fix the image
   resolution setting. STOP. **Done** (D-046, D-050: 524,288 pixels).
 - **3.2** (Colab, L4) Train answering adapter (E2). Evaluate. STOP. **Done**: 61.7 vs 53.5 (+8.2, CI [+7.0, +9.3]); `results/eval/e2-answer-lora`.
-- **3.3** (Colab, L4) Train answerability and quality adapters (E2). Evaluate. STOP. Answerability **done**: AP 89.9 vs 69.4 (+20.8 paired); quality pending.
+- **3.3** (Colab, L4) Train answerability and quality adapters (E2). Evaluate. STOP. Answerability **done**: AP 89.9 vs 69.4 (+20.8 paired). Quality **done**: macro-F1 65.2 vs 28.0 (+37.2 paired).
 - **3.4** Error analysis (Section 9.3) on all three adapters. STOP.
 - **3.5** (Colab, L4) E3: QLoRA run for the answering adapter; compare with LoRA. STOP.
 - **3.6** (Colab, L4) E5: train multi-task adapter; compare with cascade. STOP.
