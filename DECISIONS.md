@@ -850,6 +850,39 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   depend on the 0.5 cut-off, so no reweighting is applied.
 - **Plan sections:** 8.1, 10 (E2), 14 (Step 3.3).
 
+### D-053: No extra answering run: E3 and the improvement run are skipped
+- **Date:** 2026-11-15
+- **Status:** Accepted (owner)
+- **Context:** all three E2 adapters beat E1 with default settings (answering +8.2,
+  answerability AP +20.8, quality macro-F1 +37.2; all CIs far from 0). About 12
+  L4-hours used, ~19–20 planned hours left.
+- **Decision:** skip E3 (QLoRA vs LoRA) and the answering-adapter improvement run
+  (e.g. 2 epochs). E3 measures a memory trade-off we do not need (LoRA uses 10 GB
+  of 24); the improvement run is expected to add 0–2 points on one adapter, while
+  the answering adapter's main weakness (bad photos, 8 points behind clean ones)
+  is handled by the cascade, not by tuning. GPU time goes to E4, E5 and serving.
+- **Revisit:** if GPU budget remains after Phase 5, the improvement run (chosen on
+  val from the W&B val-loss curve) is the first optional extra.
+- **Plan sections:** 10 (E3), 14 (Step 3.5).
+
+### D-054: Error analysis in two parts; automatic part on test
+- **Date:** 2026-11-15
+- **Status:** Accepted
+- **Part 1 (now, Step 3.4):** `vizwiz.eval.errors` compares E1 with the three E2
+  adapters on the same **test** examples, broken down by question kind (keyword
+  rules), agreement among the 10 human answerers (label-noise proxy), photo
+  quality labels, and number of "unanswerable" votes. CPU only, uses the
+  prediction files already on Drive. Test is used because it is the only split
+  where both E1 and E2 predictions exist; the analysis is descriptive and no model
+  or threshold is chosen from it.
+- **Part 2 (Step 5.2):** the manual review of ~100 failures per task (PROJECT_PLAN
+  9.3) runs on **val**, together with the val predictions that Step 5.2 needs
+  anyway to tune the cascade; the reviewer looks at photos privately in Colab and
+  only category counts are committed.
+- **Privacy:** reports hold counts and rates only: no question text, answers, ids
+  or photos.
+- **Plan sections:** 9.3, 14 (Steps 3.4, 5.2).
+
 ---
 
 ## Open decisions
@@ -861,7 +894,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
-| E3 (QLoRA vs LoRA): run or cut | After Step 3.3 | ~3.5 h; competes with an answering-adapter improvement run (e.g. 2 epochs, chosen on val from the E2 val-loss curve); E4 has priority |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
 | Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 

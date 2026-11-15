@@ -223,6 +223,7 @@ vizwiz-assistant/
 │   ├── 07_e2_answer.ipynb        # L4: train answering adapter, test eval, paired vs E1 (3.2, D-051)
 │   ├── 08_e2_answerability.ipynb # L4: train answerability adapter, eval, vs E1 (3.3, D-052)
 │   ├── 09_e2_quality.ipynb       # L4: train quality adapter, eval, vs E1 (3.3, D-052)
+│   ├── 10_error_analysis.ipynb   # CPU: E1 vs E2 mistakes by slice, test (3.4, D-054)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
@@ -557,8 +558,8 @@ Steps marked (Colab) require the owner to run a notebook and report output.
   resolution setting. STOP. **Done** (D-046, D-050: 524,288 pixels).
 - **3.2** (Colab, L4) Train answering adapter (E2). Evaluate. STOP. **Done**: 61.7 vs 53.5 (+8.2, CI [+7.0, +9.3]); `results/eval/e2-answer-lora`.
 - **3.3** (Colab, L4) Train answerability and quality adapters (E2). Evaluate. STOP. Answerability **done**: AP 89.9 vs 69.4 (+20.8 paired). Quality **done**: macro-F1 65.2 vs 28.0 (+37.2 paired).
-- **3.4** Error analysis (Section 9.3) on all three adapters. STOP.
-- **3.5** (Colab, L4) E3: QLoRA run for the answering adapter; compare with LoRA. STOP.
+- **3.4** Error analysis (Section 9.3) on all three adapters. STOP. Part 1 automatic on test (notebook 10, D-054); part 2 manual review on val at Step 5.2.
+- ~~**3.5** (Colab, L4) E3: QLoRA run for the answering adapter; compare with LoRA. STOP.~~ Skipped (D-053).
 - **3.6** (Colab, L4) E5: train multi-task adapter; compare with cascade. STOP.
 
 ### Phase 4: Compression
