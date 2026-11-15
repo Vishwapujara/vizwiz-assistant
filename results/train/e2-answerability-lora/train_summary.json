@@ -1,0 +1,15 @@
+{
+  "run_id": "e2-answerability-lora",
+  "finished_utc": "2026-11-14T20:58:01+00:00",
+  "resumed_from": "checkpoint-959",
+  "global_step": 1123,
+  "optimizer_steps_planned": 1123,
+  "steps_this_session": 164,
+  "train_loss": 0.0554,
+  "final_val_loss": 0.0531,
+  "wall_s": 2125.0,
+  "optimizer_step_s_median": 11.093,
+  "examples_per_s": 1.44,
+  "peak_mem_gb": 10.09,
+  "adapter_dir": "/content/drive/MyDrive/vizwiz/checkpoints/e2-answerability-lora/adapter"
+}

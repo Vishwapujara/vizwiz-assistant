@@ -1,0 +1,27 @@
+{
+  "task": "answerability",
+  "split": "test",
+  "metric": "average_precision",
+  "n": 4319,
+  "reference": "e1",
+  "runs": {
+    "e1": {
+      "value": 69.02,
+      "diff_vs_reference": 0.0,
+      "diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "p_better": 0.0
+    },
+    "e2": {
+      "value": 89.83,
+      "diff_vs_reference": 20.81,
+      "diff_ci95": [
+        18.5,
+        22.9
+      ],
+      "p_better": 1.0
+    }
+  }
+}

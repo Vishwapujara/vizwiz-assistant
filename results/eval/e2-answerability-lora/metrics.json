@@ -1,0 +1,84 @@
+{
+  "run_id": "e2-answerability-lora",
+  "created_utc": "2026-11-14T21:01:53+00:00",
+  "git_commit": "31dbbbd",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "adapter": "adapter",
+  "split": "test",
+  "limit": null,
+  "seed": 0,
+  "max_pixels": 524288,
+  "decoding": {
+    "temperature": 0.0,
+    "max_new_tokens": {
+      "answer": 16,
+      "answerability": 4,
+      "quality": 48
+    }
+  },
+  "dtype": "bfloat16",
+  "gpu": "NVIDIA L4",
+  "engine_load_s": 226.5,
+  "versions": {
+    "torch": "2.13.0",
+    "torchvision": "0.28.0",
+    "transformers": "5.19.0",
+    "vllm": "0.32.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "pillow": "13.0.0"
+  },
+  "tasks": {
+    "answerability": {
+      "metrics": {
+        "n": 4319,
+        "positives_unanswerable": 1385,
+        "average_precision": 89.85,
+        "average_precision_ci95": [
+          88.27,
+          91.14
+        ],
+        "official_f1_at_0.5": 80.9,
+        "recall_at_precision_0.8": 85.56,
+        "recall_at_precision_0.9": 63.1,
+        "macro_f1_generated": 86.37,
+        "per_class_generated": {
+          "unanswerable": {
+            "precision": 0.8316,
+            "recall": 0.7949,
+            "f1": 0.8128,
+            "support": 1385
+          },
+          "answerable": {
+            "precision": 0.9052,
+            "recall": 0.924,
+            "f1": 0.9145,
+            "support": 2934
+          }
+        },
+        "invalid_output_pct": 0.0,
+        "invalid_output_kinds": {},
+        "confusion": {
+          "answerable->answerable": 2711,
+          "answerable->unanswerable": 223,
+          "unanswerable->answerable": 284,
+          "unanswerable->unanswerable": 1101
+        },
+        "borderline_answerable": {
+          "n": 550,
+          "predicted_unanswerable_pct": 27.27
+        }
+      },
+      "timing": {
+        "examples": 4319,
+        "wall_s": 608.9,
+        "generate_s": 576.7,
+        "examples_per_s": 7.49,
+        "generated_tokens_mean": 3.31,
+        "score_fallbacks": 0
+      },
+      "git_commit": "31dbbbd",
+      "created_utc": "2026-11-14T21:12:09+00:00"
+    }
+  }
+}

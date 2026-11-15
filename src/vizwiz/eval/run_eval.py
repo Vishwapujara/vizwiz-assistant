@@ -229,7 +229,7 @@ def run_task(
                 gen_tokens += p["tokens"]
                 row = {"id": r["id"], "prediction": p["text"], "tokens": p["tokens"]}
                 if "score" in p:
-                    row["score"] = round(p["score"], 6)
+                    row["score"] = p["score"]  # full precision: rounding creates ties (R-009)
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
                 examples.append(to_example(task, r, p))
             print(f"  [{task}] {len(examples)}/{len(records)}", flush=True)

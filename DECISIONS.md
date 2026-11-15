@@ -1007,6 +1007,20 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 <!--
 Template:
 
+### R-009: Rounded scores make the paired AP slightly differ from the reported AP
+- **Date:** 2026-11-14
+- **Status:** Resolved (for new runs)
+- **What happened:** for E1, `compare` reported answerability AP 69.02 while
+  `metrics.json` says 69.38 on the same 4,319 questions (E2: 89.83 vs 89.85).
+- **Cause:** `run_eval` wrote scores to `predictions_*.jsonl` rounded to 6
+  decimals; `compare` reads those files, `metrics.json` used full precision. E1
+  gave most direct-answer replies a P(unanswerable) below 1e-6, so rounding turned
+  them into ties at 0, which changes AP.
+- **Fix:** scores are now written at full precision. E1 and the E2 answerability
+  run keep their rounded files (rerunning E1 costs ~10 GPU-minutes and changes no
+  conclusion); reported headline numbers come from `metrics.json`, paired
+  differences from `compare`, and both are stated where they appear.
+
 ### R-001: <short title>
 - **Date hit:** YYYY-MM-DD
 - **Step:** <plan step, e.g. 3.1>
