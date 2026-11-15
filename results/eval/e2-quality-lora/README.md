@@ -34,3 +34,9 @@ Paired difference on the same 7,750 photos: **+37.2 [+35.9, +38.7]**
   quality k = 2), so some disagreement is built into the ground truth.
 
 Inference with the adapter: 7.1 photos/s.
+
+## Training (`results/train/e2-quality-lora/`)
+- 1,283 optimizer steps on one L4. **Colab disconnected once**: the run resumed
+  from the step-764 checkpoint and finished the remaining 519 steps (1.8 h).
+- Train loss 0.203, final val loss 0.178: no sign of overfitting.
+- Peak memory 10.1 GB.

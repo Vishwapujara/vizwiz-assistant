@@ -1,0 +1,15 @@
+{
+  "run_id": "e2-quality-lora",
+  "finished_utc": "2026-11-15T15:03:31+00:00",
+  "resumed_from": "checkpoint-764",
+  "global_step": 1283,
+  "optimizer_steps_planned": 1283,
+  "steps_this_session": 519,
+  "train_loss": 0.2027,
+  "final_val_loss": 0.1775,
+  "wall_s": 6600.6,
+  "optimizer_step_s_median": 11.45,
+  "examples_per_s": 1.4,
+  "peak_mem_gb": 10.05,
+  "adapter_dir": "/content/drive/MyDrive/vizwiz/checkpoints/e2-quality-lora/adapter"
+}
