@@ -224,6 +224,7 @@ vizwiz-assistant/
 │   ├── 08_e2_answerability.ipynb # L4: train answerability adapter, eval, vs E1 (3.3, D-052)
 │   ├── 09_e2_quality.ipynb       # L4: train quality adapter, eval, vs E1 (3.3, D-052)
 │   ├── 10_error_analysis.ipynb   # CPU: E1 vs E2 mistakes by slice, test (3.4, D-054)
+│   ├── 11_e5_multitask.ipynb     # L4: one adapter on all 3 tasks vs specialists (3.6, D-055)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4

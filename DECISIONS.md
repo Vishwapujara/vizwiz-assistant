@@ -883,6 +883,30 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   or photos.
 - **Plan sections:** 9.3, 14 (Steps 3.4, 5.2).
 
+### D-055: E5 multi-task adapter trained on all the specialists' data
+- **Date:** 2026-11-16
+- **Status:** Accepted (owner chose "all data")
+- **Run:** `e5-multi-lora`, notebook `11_e5_multitask.ipynb`, L4. One LoRA adapter
+  on the union of the three tasks' training records (13,134 + 17,967 + 20,525 =
+  51,626), shuffled together, 1 epoch = 3,227 optimizer steps (~11 h, 2–3 Colab
+  sessions with automatic resume). Recipe identical to D-051/D-052; only the val
+  loss interval is 400 steps instead of 200 (monitoring only).
+- **Task tag:** each example keeps its own task's system prompt (PROJECT_PLAN
+  6.4). The serving prompts stay the same as for the specialists, so the cascade
+  code does not change; only the adapter name does.
+- **Why all the data:** the specialists together saw exactly these 51,626
+  examples (~10.3 L4-hours). Equal data and equal compute make the comparison
+  about architecture only; a smaller run would mix "one adapter" with "less data".
+- **Comparison:** each task on its full test set, paired against the specialist
+  (reference) and E1 on the same examples. **Reading, fixed before the run:** the
+  combined adapter "matches" a specialist when the paired 95% CI of the
+  difference includes 0 or lies above it; it is "worse" when the CI lies wholly
+  below 0.
+- **Latency side of E5:** measured in the serving benchmark (Phase 5): both
+  designs make one call per cascade stage with the same prompts, so the
+  difference is adapter switching and memory, not the number of calls.
+- **Plan sections:** 6.4, 10 (E5), 14 (Step 3.6).
+
 ---
 
 ## Open decisions

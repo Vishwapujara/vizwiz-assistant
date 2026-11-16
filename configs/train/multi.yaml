@@ -1,0 +1,5 @@
+# E5: one adapter on all three tasks (answer + answerability + quality), D-055.
+# Same recipe as the specialists; val loss every 400 steps instead of 200 (monitoring
+# only, 3,227 steps), to keep evaluation overhead near the specialists' share.
+task: multi
+eval_steps: 400

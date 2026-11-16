@@ -15,7 +15,7 @@ from vizwiz.data.formatting import TASKS
 class TrainConfig(BaseModel):
     model_config = {"extra": "forbid"}  # a typo in a YAML key is an error, not ignored
 
-    task: Literal[TASKS]  # type: ignore[valid-type]
+    task: Literal[(*TASKS, "multi")]  # type: ignore[valid-type]  # multi = E5
     model: str = "Qwen/Qwen3-VL-4B-Instruct"
     mode: Literal["lora", "qlora"] = "lora"
     # LoRA (fixed: the rank ablation is out of scope, PROJECT_PLAN 10)

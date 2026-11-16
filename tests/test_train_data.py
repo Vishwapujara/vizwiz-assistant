@@ -57,3 +57,20 @@ def test_dataset_masks_prompt_and_collator_pads(tmp_path):
     assert batch["labels"][0, short:].eq(-100).all() and batch["input_ids"][0, short:].eq(0).all()
     assert batch["attention_mask"][0, short:].eq(0).all()
     assert batch["pixel_values"].shape == (8, 8) and batch["image_grid_thw"].shape == (2, 3)
+
+
+def test_dataset_uses_each_records_own_task(tmp_path):
+    Image.new("RGB", (64, 64)).save(tmp_path / "a.jpg")
+    recs = [
+        {"id": "1", "image": "a.jpg", "question": "q?", "target": "milk",
+         "answerability": "answerable", "_task": "answerability"},
+        {"id": "2", "image": "a.jpg", "labels": ["blur"], "_task": "quality"},
+    ]  # fmt: skip
+    ds = SFTDataset("multi", recs, {"a.jpg": tmp_path / "a.jpg"}, FakeProcessor(), 4096)
+
+    def trained(item):
+        pairs = zip(item["input_ids"][0], item["labels"][0], strict=True)
+        return "".join(chr(t) for t, lbl in pairs if lbl != -100)
+
+    assert trained(ds[0]) == "answerable|"
+    assert trained(ds[1]) == '["blur"]|'

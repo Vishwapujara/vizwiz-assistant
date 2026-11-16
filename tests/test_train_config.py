@@ -70,3 +70,24 @@ def test_time_based_save_every_10_minutes_by_default():
     assert not save_due(now=599.0, last_save=0.0, minutes=10)
     assert save_due(now=600.0, last_save=0.0, minutes=10)
     assert not save_due(now=10_000.0, last_save=0.0, minutes=None)
+
+
+def test_multi_task_config_and_records():
+    from vizwiz.train.data import select_records
+
+    cfg = load_train_config("configs/train/multi.yaml")
+    assert cfg.task == "multi"
+    vqa = [
+        {"id": "vqa/a", "image": "a", "answerability": "answerable"},
+        {"id": "vqa/b", "image": "b", "answerability": "unanswerable"},
+    ]
+    quality = [{"id": "quality/a", "image": "a", "labels": ["none"]}]
+    recs = select_records("multi", vqa, quality, None, 0)
+    assert sorted((r["id"], r["_task"]) for r in recs) == [
+        ("quality/a", "quality"),
+        ("vqa/a", "answer"),
+        ("vqa/a", "answerability"),
+        ("vqa/b", "answerability"),
+    ]
+    assert "_task" not in vqa[0]  # tags go on copies, not the shared records
+    assert len(select_records("multi", vqa, quality, 2, 0)) == 2

@@ -14,13 +14,21 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
-from vizwiz.data.formatting import IGNORE_INDEX, build_messages, task_records
+from vizwiz.data.formatting import IGNORE_INDEX, TASKS, build_messages, task_records
+
+MULTI = "multi"  # E5: one adapter trained on all three tasks (PROJECT_PLAN 6.4)
 
 
 def select_records(
     task: str, vqa: list[dict], quality: list[dict], limit: int | None, seed: int
 ) -> list[dict]:
-    recs = task_records(task, vqa, quality)
+    """Records one run trains on. For ``multi``, the union of the three tasks, each
+    record tagged with its task (``_task``); the task's own system prompt is the task
+    tag, so serving uses the same prompts as the specialist adapters."""
+    if task == MULTI:
+        recs = [{**r, "_task": t} for t in TASKS for r in task_records(t, vqa, quality)]
+    else:
+        recs = task_records(task, vqa, quality)
     if limit is not None and limit < len(recs):
         recs = random.Random(seed).sample(recs, limit)
     return recs
@@ -50,15 +58,16 @@ class SFTDataset:
         from vizwiz.serve.preprocess import prepare_image
 
         r = self.records[i]
+        task = r.get("_task", self.task)
         img = prepare_image(self.image_path[r["image"]], self.max_pixels)
         full = self.processor.apply_chat_template(
-            build_messages(self.task, r, img, with_target=True),
+            build_messages(task, r, img, with_target=True),
             tokenize=True,
             return_dict=True,
             return_tensors="pt",
         )
         prompt = self.processor.apply_chat_template(
-            build_messages(self.task, r, img, with_target=False),
+            build_messages(task, r, img, with_target=False),
             tokenize=True,
             add_generation_prompt=True,
             return_dict=True,
