@@ -561,7 +561,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **3.3** (Colab, L4) Train answerability and quality adapters (E2). Evaluate. STOP. Answerability **done**: AP 89.9 vs 69.4 (+20.8 paired). Quality **done**: macro-F1 65.2 vs 28.0 (+37.2 paired).
 - **3.4** Error analysis (Section 9.3) on all three adapters. STOP. Part 1 **done** (`results/error_analysis`, D-054); part 2 manual review on val at Step 5.2.
 - ~~**3.5** (Colab, L4) E3: QLoRA run for the answering adapter; compare with LoRA. STOP.~~ Skipped (D-053).
-- **3.6** (Colab, L4) E5: train multi-task adapter; compare with cascade. STOP.
+- **3.6** (Colab, L4) E5: train multi-task adapter; compare with cascade. STOP. **Done**: matches all three specialists (answering +0.8, CI [+0.2, +1.5]; D-056); `results/eval/e5-multi-lora`.
 
 ### Phase 4: Compression
 - **4.1** (Colab, L4) Quantize base to FP8 and one 4-bit format (AWQ or GPTQ)

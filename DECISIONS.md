@@ -909,6 +909,33 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-056: E5 result: one multi-task adapter matches all three specialists
+- **Date:** 2026-11-17
+- **Status:** Accepted (result read with the D-055 rule fixed before the run)
+- **Run:** `e5-multi-lora`, commit `93b9192`, 3,227 steps on one L4 over 3 Colab
+  sessions (last one resumed from step 2,184). Train loss 0.220, final val loss
+  0.222. Results in `results/eval/e5-multi-lora`, `results/train/e5-multi-lora`.
+- **Result (test, paired vs the specialist on the same examples):**
+
+  | Task | Specialist (E2) | E5 | Difference [95% CI] | D-055 reading |
+  |---|---|---|---|---|
+  | Answering, VQA accuracy | 61.73 | 62.56 | +0.83 [+0.18, +1.53] | matches (slightly better) |
+  | Answerability, AP | 89.83 | 90.00 | +0.17 [-0.37, +0.70] | matches |
+  | Quality, macro-F1 | 65.20 | 65.59 | +0.40 [-0.29, +1.10] | matches |
+
+- **Meaning:** one adapter does the work of three with no measurable loss; on
+  answering it is a little better (likely the other tasks' photos help it see
+  more examples). The answering gain is small (under 1 point), so it is reported
+  as "no worse, possibly slightly better", not as a headline improvement.
+- **Consequence for serving (Phase 5):** E5 becomes the default adapter for all
+  three cascade stages (one adapter to store, load and version). The three
+  specialists stay registered, so multi-LoRA serving and the specialist-vs-E5
+  latency comparison (the open half of E5) are still measured in Phase 5. Phase 4
+  (E4) quantizes the base and evaluates E5 first; specialists only if time allows.
+- **Plan sections:** 10 (E5), 14 (Steps 3.6, 4.2, 5.1).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
