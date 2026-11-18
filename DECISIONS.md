@@ -936,13 +936,40 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-057: E4 is FP8 only, on the E5 adapter; 4-bit deferred
+- **Date:** 2026-11-18
+- **Status:** Accepted (owner chose option A)
+- **Why shrink at all:** the bf16 model already fits on the L4, so this is about
+  serving cost: smaller weights leave more GPU memory for requests in progress
+  (more users at once) and are faster to read. E4 measures what that costs in
+  accuracy.
+- **Choice:** FP8 only. vLLM casts the bf16 weights to FP8 while loading
+  (`quantization="fp8"`, dynamic scales), so there is no calibration run and no
+  extra model file; the L4 (Ada) has FP8 hardware. The LoRA adapter stays bf16
+  and is attached unmerged. 4-bit (AWQ/GPTQ) needs a calibration run on sample
+  photos and its Qwen3-VL support is uncertain; it is deferred and done only if
+  time allows. About 1–2 L4-hours instead of 4–5.
+- **What is tested:** E5 only (D-056 made it the serving default); specialists
+  are not re-run.
+- **Run:** notebook `12_e4_fp8.ipynb`, `run_eval --quantization fp8`.
+  (1) speed and memory: the same 1,000 answering test questions with bf16 and
+  FP8 in the same session (photos/s, weights memory, KV cache room);
+  (2) all three test sets with FP8, paired against E5 bf16.
+- **Reading, fixed before the run:** FP8 is "acceptable" when, on every task,
+  the lower end of the paired 95% CI of (FP8 − bf16) is above −1 point. If
+  acceptable and faster or with more cache room, FP8 becomes the serving default
+  in Phase 5; otherwise serving stays bf16 and the drop is reported.
+- **Plan sections:** 10 (E4), 14 (Steps 4.1, 4.2).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
 
 | Item | Resolve at | Notes |
 |---|---|---|
-| 4-bit serving format: AWQ vs GPTQ | Step 4.1 | Whichever vLLM supports for Qwen3-VL on L4 |
+| 4-bit serving format: AWQ vs GPTQ | Only if time allows (D-057) | Deferred; FP8 tested first |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
 | Final serving quantization format | After E4 | |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |

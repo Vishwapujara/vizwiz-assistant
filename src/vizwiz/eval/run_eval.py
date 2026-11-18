@@ -101,6 +101,7 @@ class VLLMGenerator:
         max_model_len: int,
         gpu_memory_utilization: float,
         seed: int,
+        quantization: str | None = None,
     ):
         import os
 
@@ -123,6 +124,7 @@ class VLLMGenerator:
             limit_mm_per_prompt={"image": 1},
             enable_lora=adapter is not None,
             max_lora_rank=16,
+            quantization=quantization,  # "fp8": weights cast to FP8 at load (E4, D-057)
             seed=seed,
         )
         self.lora = None
@@ -328,6 +330,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--adapter", type=Path, help="LoRA adapter directory (default: base)")
     p.add_argument("--max-model-len", type=int, default=4096)
     p.add_argument("--gpu-memory-utilization", type=float, default=0.85)
+    p.add_argument(
+        "--quantization", choices=["none", "fp8"], default="none", help="base weights (E4)"
+    )
     p.add_argument("--run-id", required=True)
     p.add_argument("--out", type=Path, required=True)
     return p
@@ -339,7 +344,12 @@ def main(argv: list[str] | None = None) -> int:
 
     t0 = time.perf_counter()
     gen = VLLMGenerator(
-        args.model, args.adapter, args.max_model_len, args.gpu_memory_utilization, args.seed
+        args.model,
+        args.adapter,
+        args.max_model_len,
+        args.gpu_memory_utilization,
+        args.seed,
+        quantization=None if args.quantization == "none" else args.quantization,
     )
     load_s = round(time.perf_counter() - t0, 1)
 
@@ -357,6 +367,7 @@ def main(argv: list[str] | None = None) -> int:
         "max_pixels": args.max_pixels or None,
         "decoding": {"temperature": 0.0, "max_new_tokens": MAX_NEW_TOKENS},
         "dtype": gen.dtype,
+        "quantization": args.quantization,
         "gpu": torch.cuda.get_device_name(0),
         "engine_load_s": load_s,
         "versions": package_versions(),

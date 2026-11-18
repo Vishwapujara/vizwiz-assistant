@@ -225,6 +225,7 @@ vizwiz-assistant/
 │   ├── 09_e2_quality.ipynb       # L4: train quality adapter, eval, vs E1 (3.3, D-052)
 │   ├── 10_error_analysis.ipynb   # CPU: E1 vs E2 mistakes by slice, test (3.4, D-054)
 │   ├── 11_e5_multitask.ipynb     # L4: one adapter on all 3 tasks vs specialists (3.6, D-055)
+│   ├── 12_e4_fp8.ipynb           # L4: E5 on an FP8 base vs bf16, accuracy + speed (4.1-4.2, D-057)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
@@ -564,9 +565,8 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **3.6** (Colab, L4) E5: train multi-task adapter; compare with cascade. STOP. **Done**: matches all three specialists (answering +0.8, CI [+0.2, +1.5]; D-056); `results/eval/e5-multi-lora`.
 
 ### Phase 4: Compression
-- **4.1** (Colab, L4) Quantize base to FP8 and one 4-bit format (AWQ or GPTQ)
-  **[VERIFY tool support for Qwen3-VL; vision encoder may need to stay in bf16]**. STOP.
-- **4.2** (Colab, L4) E4: evaluate each adapter on each quantized base in vLLM. STOP.
+- **4.1** (Colab, L4) FP8 base (cast at load by vLLM); 4-bit deferred (D-057). Notebook `12_e4_fp8.ipynb`. STOP.
+- **4.2** (Colab, L4) E4: E5 adapter on the FP8 base vs bf16, all three tasks, plus speed and memory (same notebook, D-057). STOP.
 
 ### Phase 5: Serving
 - **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP.
@@ -617,6 +617,6 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 ## 17. Open decisions (resolve when reached)
 
 - ~~Image resolution setting~~ resolved: 524,288 pixels (D-050).
-- 4-bit serving format: AWQ vs GPTQ (Step 4.1, whichever vLLM supports for this model on L4).
+- 4-bit serving format: AWQ vs GPTQ, deferred; only if time allows (D-057).
 - Cascade "unusable image" rule (Step 5.2, tuned on val).
 - Final serving quantization format (after E4).

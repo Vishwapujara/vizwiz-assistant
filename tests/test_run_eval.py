@@ -114,3 +114,9 @@ def test_rerun_of_one_task_keeps_the_others(tmp_path):
     again = build_parser().parse_args([*base, "--tasks", "quality"])
     report = evaluate(FakeGenerator(), again, {"run_id": "t"})
     assert set(report["tasks"]) == {"answer", "answerability", "quality"}
+
+
+def test_quantization_flag_defaults_to_none():
+    base = ["--records", "r", "--images", "i", "--run-id", "x", "--out", "o"]
+    assert build_parser().parse_args(base).quantization == "none"
+    assert build_parser().parse_args([*base, "--quantization", "fp8"]).quantization == "fp8"
