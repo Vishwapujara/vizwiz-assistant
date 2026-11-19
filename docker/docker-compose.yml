@@ -1,0 +1,68 @@
+# Local stack (Step 5.4, D-062): gateway + mock model + Prometheus + Grafana.
+#   docker compose -f docker/docker-compose.yml up --build -d
+#   docker compose -f docker/docker-compose.yml --profile demo up traffic   # synthetic load
+# Gateway http://localhost:8080/docs · Prometheus http://localhost:9090 · Grafana http://localhost:3000
+# Ports bind to 127.0.0.1 only: nothing is reachable from the local network.
+name: vizwiz
+
+x-app: &app
+  build:
+    context: ..
+    dockerfile: docker/gateway.Dockerfile
+  image: vizwiz-gateway:local
+  restart: unless-stopped
+
+services:
+  model:
+    <<: *app
+    command: ["uvicorn", "vizwiz.serve.mock_model:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      MOCK_LATENCY_MS: "${MOCK_LATENCY_MS:-120}"  # rough per-call time of the real model
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/models', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  gateway:
+    <<: *app
+    environment:
+      VIZWIZ_MODEL_URL: http://model:8000
+      VIZWIZ_ADMIN_TOKEN: "${VIZWIZ_ADMIN_TOKEN:-}"  # unset: admin endpoints off
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      model: {condition: service_healthy}
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=2d"]
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["127.0.0.1:9090:9090"]
+    depends_on: [gateway]
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"  # local viewing without a login
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-admin}"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/gateway.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [prometheus]
+    restart: unless-stopped
+
+  traffic:  # synthetic photos only, never dataset images
+    <<: *app
+    profiles: [demo]
+    restart: "no"
+    command: ["python", "-m", "vizwiz.bench.traffic", "--url", "http://gateway:8080",
+              "--rps", "${TRAFFIC_RPS:-4}", "--duration", "${TRAFFIC_SECONDS:-600}"]
+    depends_on:
+      gateway: {condition: service_healthy}

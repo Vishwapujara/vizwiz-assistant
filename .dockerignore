@@ -1,0 +1,8 @@
+# Only the package, its configs and pyproject go into the image (no data, no secrets).
+*
+!pyproject.toml
+!README.md
+!src/
+!configs/
+**/__pycache__
+**/*.pyc

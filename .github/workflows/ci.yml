@@ -24,3 +24,29 @@ jobs:
         run: ruff check . && ruff format --check .
       - name: Test
         run: pytest
+
+  compose-smoke:
+    # Builds the image and runs gateway + mock model + Prometheus, then sends
+    # synthetic traffic and checks every cascade branch was reached and scraped.
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start stack
+        run: docker compose -f docker/docker-compose.yml up --build -d --wait model gateway prometheus
+      - name: Synthetic traffic
+        run: |
+          docker compose -f docker/docker-compose.yml --profile demo run --rm traffic \
+            python -m vizwiz.bench.traffic --url http://gateway:8080 --rps 5 --duration 20 | tee traffic.log
+          grep -q "'answered'" traffic.log && grep -q "'retake'" traffic.log && grep -q "'unanswerable'" traffic.log
+      - name: Prometheus has the gateway metrics
+        run: |
+          sleep 10
+          curl -sf -G localhost:9090/api/v1/query --data-urlencode 'query=sum(vizwiz_requests_total)' \
+            | python3 -c "import json,sys; v=float(json.load(sys.stdin)['data']['result'][0]['value'][1]); print('requests scraped:', v); assert v > 50"
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f docker/docker-compose.yml logs --tail 100
+      - name: Stop stack
+        if: always()
+        run: docker compose -f docker/docker-compose.yml down
