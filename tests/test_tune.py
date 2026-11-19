@@ -48,8 +48,15 @@ def test_parity(tmp_path):
     (tmp_path / "predictions_quality.jsonl").write_text(
         "\n".join(json.dumps({"id": f"quality/img{i}.jpg", "prediction": p})
                   for i, p in ((0, '["blur"]'), (1, '["dark"]'))) + "\n")  # fmt: skip
-    p = parity(rows, records, tmp_path)
+    quality = [{"image": "img0.jpg", "labels": ["blur"]}, {"image": "img1.jpg", "labels": ["none"]}]
+    p = parity(rows, records, tmp_path, quality)
     assert p["answerability"]["n"] == 2 and p["answerability"]["max_abs_score_diff"] == 0.2
     assert p["answerability"]["same_decision_at_0.5_pct"] == 50.0
     assert p["answer"]["same_answer_pct"] == 100.0
-    assert p["quality"] == {"n": 2, "same_labels_pct": 50.0}
+    assert p["quality"]["n"] == 2 and p["quality"]["same_labels_pct"] == 50.0
+    # served and offline answers both "red": same accuracy, zero difference
+    assert p["answer"]["vqa_accuracy"]["diff"] == 0.0
+    # both get blur right (F1 1 of 7 labels); offline's false "dark" leaves dark F1 at 0
+    q = p["quality"]["macro_f1"]
+    assert q["served"] == q["offline"] == 14.29 and q["diff"] == 0.0
+    assert "average_precision" not in p["answerability"]  # no unanswerable question here

@@ -20,7 +20,14 @@ from statistics import mean
 
 from vizwiz.data.config import load_data_config
 from vizwiz.data.formatting import read_jsonl
-from vizwiz.eval.metrics import UNANSWERABLE, clean_answer, parse_quality
+from vizwiz.eval.metrics import (
+    UNANSWERABLE,
+    average_precision,
+    clean_answer,
+    paired_bootstrap_diff,
+    parse_quality,
+    prf,
+)
 from vizwiz.eval.vqa_metric import normalize_answer, vqa_accuracy
 
 THRESHOLDS = [round(0.05 * i, 2) for i in range(1, 20)]
@@ -35,8 +42,34 @@ def _mean(xs: list) -> float | None:
     return mean(xs) if xs else None
 
 
-def parity(rows: list[dict], records: list[dict], offline_dir: Path) -> dict:
-    """Agreement of served outputs with offline predictions on the same photos."""
+def _impact(n: int, stat) -> dict:
+    """Paired bootstrap of (served - offline) for a metric, in points."""
+    off, srv = paired_bootstrap_diff(n, stat, 2, reference=0)
+    pts = lambda x: None if x is None else round(100 * x, 2)  # noqa: E731
+    ci = srv["diff_ci95"]
+    return {
+        "offline": pts(off["value"]),
+        "served": pts(srv["value"]),
+        "diff": pts(srv["diff_vs_reference"]),
+        "diff_ci95": [pts(x) for x in ci] if ci else None,
+    }
+
+
+def _macro_f1(pred: list[set], gold: list[set], labels: list[str], idx) -> float:
+    f1s = []
+    for lbl in labels:
+        tp = sum(1 for i in idx if lbl in pred[i] and lbl in gold[i])
+        fp = sum(1 for i in idx if lbl in pred[i] and lbl not in gold[i])
+        fn = sum(1 for i in idx if lbl not in pred[i] and lbl in gold[i])
+        f1s.append(prf(tp, fp, fn)["f1"])
+    return mean(f1s)
+
+
+def parity(
+    rows: list[dict], records: list[dict], offline_dir: Path, quality_records: list[dict] = ()
+) -> dict:
+    """Agreement of served outputs with offline predictions on the same photos, and
+    whether the differences change accuracy (paired served - offline, in points)."""
     by_id = {r["id"]: r for r in rows}
     out: dict = {}
     f = offline_dir / "predictions_answerability.jsonl"
@@ -49,16 +82,36 @@ def parity(rows: list[dict], records: list[dict], offline_dir: Path) -> dict:
             "max_abs_score_diff": round(max(diffs), 4) if diffs else None,
             "same_decision_at_0.5_pct": _pct(_mean([(a >= 0.5) == (b >= 0.5) for a, b in pairs])),
         }
+        gold = {r["id"]: int(r["answerability"] == UNANSWERABLE) for r in records}
+        ids = [p["id"] for p in read_jsonl(f) if p["id"] in by_id and p["id"] in gold]
+        y = [gold[i] for i in ids]
+        if ids and any(y):
+            off = {p["id"]: p["score"] for p in read_jsonl(f)}
+            scores = [[off[i] for i in ids], [by_id[i]["score"] for i in ids]]
+            out["answerability"]["average_precision"] = _impact(
+                len(ids),
+                lambda idx, run: average_precision([y[i] for i in idx],
+                                                   [scores[run][i] for i in idx]),
+            )  # fmt: skip
     f = offline_dir / "predictions_answer.jsonl"
     if f.exists():
-        pairs = [(by_id[p["id"]]["answer"], clean_answer(p["prediction"]))
-                 for p in read_jsonl(f) if p["id"] in by_id]  # fmt: skip
+        answers = {r["id"]: r["answers"] for r in records}
+        trip = [(by_id[p["id"]]["answer"], clean_answer(p["prediction"]), answers[p["id"]])
+                for p in read_jsonl(f) if p["id"] in by_id and p["id"] in answers]  # fmt: skip
         out["answer"] = {
-            "n": len(pairs),
+            "n": len(trip),
             "same_answer_pct": _pct(
-                _mean([normalize_answer(a) == normalize_answer(b) for a, b in pairs])
+                _mean([normalize_answer(a) == normalize_answer(b) for a, b, _ in trip])
             ),
         }
+        if trip:
+            acc = [
+                [vqa_accuracy(b, g) for _, b, g in trip],
+                [vqa_accuracy(a, g) for a, _, g in trip],
+            ]
+            out["answer"]["vqa_accuracy"] = _impact(
+                len(trip), lambda idx, run: mean([acc[run][i] for i in idx])
+            )
     f = offline_dir / "predictions_quality.jsonl"
     if f.exists():
         allowed = load_data_config().quality_labels
@@ -73,6 +126,21 @@ def parity(rows: list[dict], records: list[dict], offline_dir: Path) -> dict:
             "n": len(pairs),  # photos that are in both the VQA and the quality split
             "same_labels_pct": _pct(_mean([a == b for a, b in pairs])),
         }
+        gold_q = {r["image"]: set(r["labels"]) - {"none"} for r in quality_records}
+        trip = []
+        for p in read_jsonl(f):
+            image = p["id"].removeprefix("quality/")
+            if image in served and image in gold_q:
+                trip.append(
+                    (parse_quality(p["prediction"], allowed)[0], served[image], gold_q[image])
+                )
+        if trip:
+            labels = [lbl for lbl in allowed if lbl != "none"]
+            preds = [[a for a, _, _ in trip], [b for _, b, _ in trip]]
+            gold_list = [g for _, _, g in trip]
+            out["quality"]["macro_f1"] = _impact(
+                len(trip), lambda idx, run: _macro_f1(preds[run], gold_list, labels, idx)
+            )
     return out
 
 
@@ -134,6 +202,10 @@ def tune(val_rows, records_val, unusable, test_rows=None, records_test=None) -> 
             "never_decline": cascade_metrics(val_rows, records_val, 1.01, unusable, False),
             "at_0.5": cascade_metrics(val_rows, records_val, 0.5, unusable),
             "sweep": sweep,
+            # reported for the quality-rule question, not used to pick the threshold
+            "best_without_quality_rule": choose(
+                [cascade_metrics(val_rows, records_val, x, unusable, False) for x in THRESHOLDS]
+            ),
         },
     }
     if test_rows is not None:
@@ -167,7 +239,9 @@ def main(argv: list[str] | None = None) -> int:
         )
     report = tune(val_rows, rec_val, unusable, test_rows, rec_test)
     if args.offline_val:
-        report["parity_val"] = parity(val_rows, rec_val, args.offline_val)
+        q_file = args.records / "quality_val.jsonl"
+        q_val = read_jsonl(q_file) if q_file.exists() else []
+        report["parity_val"] = parity(val_rows, rec_val, args.offline_val, q_val)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2) + "\n")
     print(f"Saved {args.report}")

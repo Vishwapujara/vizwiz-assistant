@@ -1104,6 +1104,44 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-063: Serving check result (Step 5.1): parity and the chosen threshold
+- **Date:** 2026-11-19
+- **Status:** In progress (accuracy impact of the parity gap measured next, notebook
+  `14_serve_parity.ipynb`, CPU)
+- **Run:** notebook 13 at `b28c456`, L4: vLLM + gateway with E5 (bf16), 2,000 val and
+  4,319 test questions replayed through the served path.
+- **Parity against the D-060 bars (val):**
+
+  | Stage | Agreement | Bar | Result |
+  |---|---|---|---|
+  | Answerability decision at 0.5 | 98.8% (mean score diff 0.012) | ≥ 98% | pass |
+  | Answers | 92.2% (1,464 answerable) | ≥ 95% | **fail** |
+  | Quality label sets | 90.1% (1,962 photos) | ≥ 90% | pass (barely) |
+
+  Agreement measures *same output*, not *same accuracy*: greedy decoding flips
+  on near-ties when the photo is re-encoded as JPEG. Before spending GPU time on
+  the planned fix (lossless PNG), notebook 14 measures whether the differences
+  change accuracy (paired served − offline per stage).
+- **Threshold (rule fixed in D-060, chosen on val):** 0.10. Val: VizWiz accuracy
+  75.6 (51.96 never declining; 70.2 at 0.5). **Test, applied unchanged: 77.0**
+  (47.1 never declining; 70.9 at 0.5). At 0.10 the system answers 48% of test
+  questions; wrong answers fall to 14.6% of all questions (52.8% never
+  declining, 26.4% at 0.5); 30.4% of answerable questions are declined and 2.5%
+  of unanswerable ones are answered.
+- **Why so low a threshold:** the official metric scores a decline as the answer
+  "unanswerable", which earns credit whenever ≥ 3 of 10 annotators said so, also
+  on many questions labelled answerable. Declining is therefore cheap under the
+  metric. The 0.10 operating point matches the safety goal (few wrong answers)
+  but declines often; the threshold stays a config value, and the trade-off
+  curve is reported.
+- **Quality rule:** at 0.10 it lowers VizWiz accuracy (val 75.6 vs 77.2 without
+  it; test 77.0 vs 77.7) and mostly adds declines of answerable questions
+  (wrongly declined 29.2% vs 25.7% on val) for 0.35 points fewer wrong answers.
+  Decision pending the owner (see below).
+- **Plan sections:** 6.5, 14 (Step 5.1).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
@@ -1111,7 +1149,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | Item | Resolve at | Notes |
 |---|---|---|
 | 4-bit serving format: AWQ vs GPTQ | Only if time allows (D-057) | Deferred; FP8 tested first |
-| Cascade thresholds (answerability, unusable labels) | Step 5.1 (Colab) | Rule fixed in D-060; result pending |
+| Quality rule as a hard retake gate, or tips only | After notebook 14 | D-063: costs 0.7–1.6 VizWiz points |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
 | Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 
