@@ -2,8 +2,14 @@
 
     POST /v1/assist   multipart form: image (file), question (text)
     GET  /health      gateway and model server status
-    GET  /adapters    adapters configured per stage and adapters the server has loaded
+    GET  /adapters    adapter per stage, adapters the server has loaded, registry status
     GET  /metrics     Prometheus metrics
+    POST /adapters/{name}/load      {"version": "v1"}  load without serving   (admin)
+    POST /adapters/{name}/promote   {"version": "v1"}  make it live            (admin)
+    POST /adapters/{name}/rollback                     back to the previous    (admin)
+
+Admin endpoints need the registry on and the header ``X-Admin-Token`` equal to
+``VIZWIZ_ADMIN_TOKEN``; with no token set they are disabled.
 
     uvicorn --factory vizwiz.serve.gateway:create_app --port 8080
 
@@ -16,12 +22,14 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import secrets
 import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, Response
 from prometheus_client import (
     CONTENT_TYPE_LATEST,
@@ -32,10 +40,12 @@ from prometheus_client import (
     generate_latest,
 )
 
+from vizwiz.serve.adapters import AdapterManager
 from vizwiz.serve.cascade import Cascade
 from vizwiz.serve.config import ServeConfig, load_serve_config
 from vizwiz.serve.model_client import ModelClient, ModelError
 from vizwiz.serve.preprocess import prepare_image, to_data_url
+from vizwiz.serve.registry import Registry, RegistryError
 
 log = logging.getLogger("vizwiz.gateway")
 LATENCY_BUCKETS = (0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 5, 10, 20)
@@ -54,14 +64,27 @@ class Metrics:
         self.retries = Counter("vizwiz_model_retries", "Model call retries", ["stage"],
                                registry=r)  # fmt: skip
         self.in_flight = Gauge("vizwiz_in_flight", "Assist requests in progress", registry=r)
+        self.live = Gauge("vizwiz_adapter_live", "Adapter serving each stage", ["stage", "adapter"],
+                          registry=r)  # fmt: skip
+
+    def set_live(self, stages: dict[str, str]) -> None:
+        self.live.clear()
+        for stage, adapter in stages.items():
+            self.live.labels(stage, adapter).set(1)
 
 
 def _prepare(data: bytes, cfg: ServeConfig) -> str:
     return to_data_url(prepare_image(data, cfg.max_pixels), cfg.jpeg_quality)
 
 
-def create_app(cfg: ServeConfig | None = None, client: ModelClient | None = None) -> FastAPI:
+def create_app(
+    cfg: ServeConfig | None = None,
+    client: ModelClient | None = None,
+    registry: Registry | None = None,
+    admin_token: str | None = None,
+) -> FastAPI:
     cfg = cfg or load_serve_config()
+    admin_token = admin_token or os.environ.get("VIZWIZ_ADMIN_TOKEN") or None
     if not log.handlers:  # one JSON object per line on stderr, next to uvicorn's own logs
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter("%(message)s"))
@@ -78,15 +101,25 @@ def create_app(cfg: ServeConfig | None = None, client: ModelClient | None = None
     )
     cascade = Cascade(client, cfg)
     metrics = Metrics()
+    metrics.set_live(cascade.adapters)
+    if registry is None and cfg.registry.enabled:
+        from vizwiz.serve.registry import WandbRegistry
+
+        registry = WandbRegistry(cfg.registry.project, cfg.registry.entity)
+    manager = AdapterManager(cascade, client, registry, cfg) if registry is not None else None
     max_bytes = int(cfg.limits.max_upload_mb * 1024 * 1024)
 
     @asynccontextmanager
     async def lifespan(_app):
+        if manager is not None:
+            await manager.sync()
+            metrics.set_live(cascade.adapters)
         yield
         if owns_client:
             await client.aclose()
 
     app = FastAPI(title="VizWiz visual assistant", lifespan=lifespan)
+    app.state.manager, app.state.cascade, app.state.metrics = manager, cascade, metrics
 
     def fail(status: str, code: int, detail: str, rid: str):
         metrics.requests.labels(status).inc()
@@ -136,7 +169,7 @@ def create_app(cfg: ServeConfig | None = None, client: ModelClient | None = None
             loaded = set(await client.models())
         except ModelError:
             return JSONResponse({"status": "degraded", "model_server": "unreachable"}, 503)
-        missing = sorted(set(cfg.adapters.values()) - loaded)
+        missing = sorted(set(cascade.adapters.values()) - loaded)
         body = {"status": "ok" if not missing else "degraded", "model_server": "ok",
                 "mode": cfg.mode, "missing_adapters": missing}  # fmt: skip
         return JSONResponse(body, 200 if not missing else 503)
@@ -147,7 +180,49 @@ def create_app(cfg: ServeConfig | None = None, client: ModelClient | None = None
             loaded = await client.models()
         except ModelError as e:
             raise HTTPException(503, "model server unreachable") from e
-        return {"configured": cfg.adapters, "loaded": loaded}
+        body = {"stages": dict(cascade.adapters), "loaded": loaded}
+        if manager is not None:
+            body["registry"] = manager.status()
+        return body
+
+    def admin(token: str | None) -> AdapterManager:
+        if manager is None:
+            raise HTTPException(404, "the adapter registry is not enabled")
+        if not admin_token:
+            raise HTTPException(403, "admin endpoints are disabled (no VIZWIZ_ADMIN_TOKEN)")
+        if not token or not secrets.compare_digest(token, admin_token):
+            raise HTTPException(401, "missing or wrong X-Admin-Token")
+        return manager
+
+    async def run_admin(action, *args):
+        try:
+            out = await action(*args)
+        except RegistryError as e:
+            raise HTTPException(409, str(e)) from e
+        except ModelError as e:
+            raise HTTPException(503, f"model server refused the change: {e}") from e
+        metrics.set_live(cascade.adapters)
+        log.info(
+            json.dumps({"admin": action.__name__, "args": list(args), "stages": cascade.adapters})
+        )
+        return out
+
+    @app.post("/adapters/{name}/load")
+    async def load(name: str, version: Annotated[str, Body(embed=True)],
+                   x_admin_token: Annotated[str | None, Header()] = None):  # fmt: skip
+        v = await run_admin(admin(x_admin_token).load, name, version)
+        return {"loaded": v.served_name, "metadata": v.metadata}
+
+    @app.post("/adapters/{name}/promote")
+    async def promote(name: str, version: Annotated[str, Body(embed=True)],
+                      x_admin_token: Annotated[str | None, Header()] = None):  # fmt: skip
+        out = await run_admin(admin(x_admin_token).promote, name, version)
+        return {**out, "stages": dict(cascade.adapters)}
+
+    @app.post("/adapters/{name}/rollback")
+    async def rollback(name: str, x_admin_token: Annotated[str | None, Header()] = None):
+        out = await run_admin(admin(x_admin_token).rollback, name)
+        return {**out, "stages": dict(cascade.adapters)}
 
     @app.get("/metrics")
     async def prometheus():

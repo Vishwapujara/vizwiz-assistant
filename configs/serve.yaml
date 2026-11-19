@@ -1,7 +1,9 @@
 # Gateway settings (Step 5.2, D-059). Env overrides: VIZWIZ_SERVE_CONFIG (this file's
-# path), VIZWIZ_MODEL_URL (model server), VIZWIZ_MODEL_API_KEY (if vLLM uses --api-key).
+# path), VIZWIZ_MODEL_URL (model server), VIZWIZ_MODEL_API_KEY (if vLLM uses --api-key),
+# VIZWIZ_ADMIN_TOKEN (enables the adapter admin endpoints; unset = disabled).
 model_url: http://localhost:8000      # vLLM OpenAI-compatible server, or the mock
-adapters:                             # LoRA name per cascade stage (E5 for all, D-056)
+adapters:                             # per stage: LoRA name on the server, or the registry
+                                      # collection when the registry is on (E5 for all, D-056)
   quality: e5-multi-lora
   answerability: e5-multi-lora
   answer: e5-multi-lora
@@ -19,3 +21,10 @@ timeouts:
 limits:
   max_upload_mb: 10
   max_question_chars: 500
+registry:                             # W&B artifacts with a production alias (D-026, D-061)
+  enabled: false                      # true: resolve, download and load adapters at startup
+  project: vizwiz-assistant
+  alias: production
+  cache_dir: /tmp/vizwiz-adapters
+  base_model: Qwen/Qwen3-VL-4B-Instruct
+  max_lora_rank: 16

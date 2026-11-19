@@ -95,9 +95,11 @@ class AssistResult:
 class Cascade:
     def __init__(self, client: ModelClient, cfg: ServeConfig):
         self.client, self.cfg = client, cfg
+        # stage -> adapter name on the model server; the registry swaps entries live (D-061)
+        self.adapters = dict(cfg.adapters)
 
     async def _quality(self, url: str) -> tuple[list[str], StageTrace]:
-        adapter = self.cfg.adapters["quality"]
+        adapter = self.adapters["quality"]
         r = await self.client.chat(adapter, messages("quality", url, ""), MAX_NEW_TOKENS["quality"])
         labels, valid = _parse_quality(r.text, QUALITY_LABELS)
         issues = [lbl for lbl in QUALITY_LABELS if lbl in labels]  # fixed order
@@ -105,7 +107,7 @@ class Cascade:
         return issues, StageTrace("quality", adapter, out, r.latency_ms, r.attempts)
 
     async def _answerability(self, url: str, q: str) -> tuple[float, StageTrace]:
-        adapter = self.cfg.adapters["answerability"]
+        adapter = self.adapters["answerability"]
         r = await self.client.chat(
             adapter, messages("answerability", url, q), MAX_NEW_TOKENS["answerability"],
             top_logprobs=TOP_LOGPROBS,
@@ -115,7 +117,7 @@ class Cascade:
         return score, StageTrace("answerability", adapter, out, r.latency_ms, r.attempts)
 
     async def _answer(self, url: str, q: str) -> tuple[str, StageTrace]:
-        adapter = self.cfg.adapters["answer"]
+        adapter = self.adapters["answer"]
         r = await self.client.chat(adapter, messages("answer", url, q), MAX_NEW_TOKENS["answer"])
         answer = clean_answer(r.text)
         return answer, StageTrace("answer", adapter, {"answer": answer}, r.latency_ms, r.attempts)

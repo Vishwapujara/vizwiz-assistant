@@ -20,6 +20,7 @@ dependencies = [
 data = ["datasets", "pandas", "pillow", "numpy"]
 train = ["torch", "transformers", "peft", "trl", "accelerate", "bitsandbytes"]
 serve = ["fastapi", "uvicorn", "httpx", "python-multipart", "prometheus-client", "pillow"]
+registry = ["wandb"]  # only for the W&B registry (serve.registry.WandbRegistry)
 bench = ["locust"]
 dev = ["pytest>=8", "ruff>=0.6", "pillow"]
 

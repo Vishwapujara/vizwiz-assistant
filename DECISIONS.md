@@ -1042,6 +1042,40 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-061: Adapter registry and live promotion (Step 5.3)
+- **Date:** 2026-11-19
+- **Status:** Accepted (code and tests done against the in-memory fake; the W&B
+  client is first exercised on Colab at Step 6.1)
+- **Code:** `src/vizwiz/serve/registry.py` (`Registry` protocol, `InMemoryRegistry`,
+  `WandbRegistry`, promote/rollback rules, CLI), `src/vizwiz/serve/adapters.py`
+  (live switching in the gateway), tests in `tests/test_registry.py`.
+- **Storage:** W&B project artifacts of type `lora-adapter`, one collection per
+  adapter (`e5-multi-lora:v0`, `v1`, ...) with metadata: task, base model, rank,
+  alpha, training run, git commit, headline test metrics. Two aliases:
+  `production` (live) and `previous` (the one before). W&B keeps an alias on one
+  version per collection, so adding it moves it. Plain project artifacts rather
+  than the organisation-level Registry product: same alias mechanism, no org
+  setup, and the run → adapter lineage is kept.
+- **Promotion order:** download → load on vLLM under a per-version name
+  (`e5-multi-lora-v1`) → move the alias → switch the cascade stages. A failure in
+  the first two steps leaves traffic untouched. The previous version stays loaded,
+  so rollback is an alias swap plus a switch with no download; older versions are
+  unloaded.
+- **Refusals:** a version trained on a different base model, or with a rank above
+  the server's `--max-lora-rank`, is refused (409) and nothing changes.
+- **Gateway:** with `registry.enabled`, startup resolves each collection's
+  `production` version, downloads it once into `cache_dir` and loads it (vLLM needs
+  `VLLM_ALLOW_RUNTIME_LORA_UPDATING=True`). Admin endpoints `load`, `promote` and
+  `rollback` need `X-Admin-Token` = `VIZWIZ_ADMIN_TOKEN` (constant-time check);
+  without a token set they are off. The `vizwiz_adapter_live{stage,adapter}`
+  metric shows which version serves each stage. Registry off (the default, and
+  for Docker Compose): adapter names are used as already loaded, as before.
+- **Secrets:** `WANDB_API_KEY` and `VIZWIZ_ADMIN_TOKEN` come from the environment
+  only (Colab Secrets on Colab), never from files.
+- **Plan sections:** 12.1, 14 (Step 5.3).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.

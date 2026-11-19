@@ -94,3 +94,12 @@ class ModelClient:
     async def models(self) -> list[str]:
         r, _ = await self._request("GET", "/v1/models")
         return [m["id"] for m in r.json().get("data", [])]
+
+    async def load_adapter(self, name: str, path: str) -> None:
+        """vLLM runtime LoRA loading (server needs VLLM_ALLOW_RUNTIME_LORA_UPDATING=True)."""
+        await self._request(
+            "POST", "/v1/load_lora_adapter", json={"lora_name": name, "lora_path": path}
+        )
+
+    async def unload_adapter(self, name: str) -> None:
+        await self._request("POST", "/v1/unload_lora_adapter", json={"lora_name": name})

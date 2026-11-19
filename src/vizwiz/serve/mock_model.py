@@ -1,9 +1,9 @@
 """Fake OpenAI-compatible model server for local runs, Docker Compose and CI.
 
 Speaks the part of vLLM's API the gateway uses (``GET /v1/models``,
-``POST /v1/chat/completions`` with logprobs). It recognises the task from the
-system prompt and answers from simple photo statistics, so every cascade branch
-can be reached with a synthetic image:
+``POST /v1/chat/completions`` with logprobs, runtime LoRA load and unload). It
+recognises the task from the system prompt and answers from simple photo
+statistics, so every cascade branch can be reached with a synthetic image:
 
     flat photo (almost one colour)  -> quality ["unrecognizable"]
     dark photo (mean brightness <50) -> quality ["dark"], answerability unanswerable
@@ -50,7 +50,7 @@ def mock_reply(task: str, mean: float, std: float) -> tuple[str, float]:
 
 
 def create_mock_app(adapters: list[str] | None = None, latency_ms: float = 0.0) -> FastAPI:
-    adapters = adapters or ["e5-multi-lora"]
+    adapters = list(["e5-multi-lora"] if adapters is None else adapters)  # load/unload change it
     task_of = {prompt: task for task, prompt in SYSTEM_PROMPTS.items()}
     app = FastAPI(title="vizwiz mock model")
 
@@ -58,6 +58,25 @@ def create_mock_app(adapters: list[str] | None = None, latency_ms: float = 0.0) 
     async def models():
         return {"object": "list", "data": [{"id": m, "object": "model"}
                                            for m in [BASE_MODEL, *adapters]]}  # fmt: skip
+
+    @app.post("/v1/load_lora_adapter")
+    async def load(request: Request):
+        body = await request.json()
+        name, path = body.get("lora_name"), body.get("lora_path", "")
+        if not os.path.exists(os.path.join(path, "adapter_config.json")):
+            raise HTTPException(400, f"no adapter at {path!r}")
+        if name in adapters:
+            raise HTTPException(400, f"adapter {name!r} is already loaded")
+        adapters.append(name)
+        return f"Success: LoRA adapter {name!r} added successfully."
+
+    @app.post("/v1/unload_lora_adapter")
+    async def unload(request: Request):
+        name = (await request.json()).get("lora_name")
+        if name not in adapters:
+            raise HTTPException(404, f"adapter {name!r} is not loaded")
+        adapters.remove(name)
+        return f"Success: LoRA adapter {name!r} removed successfully."
 
     @app.post("/v1/chat/completions")
     async def chat(request: Request):

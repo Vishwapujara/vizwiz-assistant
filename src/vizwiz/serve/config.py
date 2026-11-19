@@ -35,6 +35,17 @@ class Limits(BaseModel):
     max_question_chars: int = Field(500, gt=0)
 
 
+class RegistryConfig(BaseModel):
+    model_config = {"extra": "forbid"}
+    enabled: bool = False  # off: ``adapters`` are names already loaded on the model server
+    project: str = "vizwiz-assistant"
+    entity: str | None = None  # W&B entity; default: the API key's default entity
+    alias: str = "production"
+    cache_dir: str = "/tmp/vizwiz-adapters"
+    base_model: str = "Qwen/Qwen3-VL-4B-Instruct"  # promotion refuses other bases
+    max_lora_rank: int = 16  # = the model server's --max-lora-rank
+
+
 class ServeConfig(BaseModel):
     model_config = {"extra": "forbid"}
     model_url: str = "http://localhost:8000"
@@ -49,6 +60,7 @@ class ServeConfig(BaseModel):
     rules: Rules = Rules()
     timeouts: Timeouts = Timeouts()
     limits: Limits = Limits()
+    registry: RegistryConfig = RegistryConfig()
 
     def model_post_init(self, _context) -> None:
         missing = set(STAGES) - set(self.adapters)
