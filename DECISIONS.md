@@ -1165,6 +1165,34 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-065: Load test design (Step 6.1)
+- **Date:** 2026-11-19
+- **Status:** Accepted (code checked locally against the Docker stack; run on Colab
+  in notebook `15_load_test.ipynb`)
+- **Tool:** Locust 2.47.0, headless, in its own small venv so it cannot change
+  the pinned vLLM packages. Closed loop: each user sends the next request as soon
+  as the reply arrives, so users = requests in flight. `vizwiz.bench.sweep` runs
+  10 s warm-up + 60 s measured per level and reads the gateway's and vLLM's
+  Prometheus metrics around each run (outcome mix, mean time per stage, peak
+  KV-cache use).
+- **Load:** 300 val questions with their real photos (fixed seed), held in
+  memory by the load generator; nothing about them is logged or committed.
+- **Sweeps:** users 1, 2, 4, 8, 16, 32 for (a) E5 in each cascade mode
+  (`sequential`, `parallel_checks`, `speculative`) and (b) the three specialists
+  (one adapter per stage) in `parallel_checks`. All on one vLLM server with the
+  four adapters loaded (`--max-loras 4`), so the server is identical across runs.
+- **Also in the same session:** the PNG val replay (D-063) and the first real W&B
+  registry run (register E5 as `production`, start the gateway from the registry
+  and time resolve + download + load; check a rollback without a previous
+  version is refused).
+- **Reported later (Step 6.2):** throughput at the latency target (p95 < 2 s),
+  cost per 1,000 requests, and the merged-model baseline (three merged bf16 4B
+  models need about 3 × 8.5 GiB of weights alone, more than the L4's 24 GB with
+  room for requests: the reason for multi-LoRA).
+- **Plan sections:** 12.3, 14 (Step 6.1).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.

@@ -228,6 +228,7 @@ vizwiz-assistant/
 │   ├── 12_e4_fp8.ipynb           # L4: E5 on an FP8 base vs bf16, accuracy + speed (4.1-4.2, D-057)
 │   ├── 13_serve_check.ipynb      # L4: vLLM + gateway, parity, threshold tuning (5.1, D-060)
 │   ├── 14_serve_parity.ipynb     # CPU: does the served path cost accuracy? (5.1, D-063)
+│   ├── 15_load_test.ipynb        # L4: Locust sweeps, PNG check, W&B registry (6.1, D-065)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4

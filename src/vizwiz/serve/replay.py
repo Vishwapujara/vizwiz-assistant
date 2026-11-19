@@ -33,7 +33,9 @@ async def replay_one(cascade: Cascade, record: dict, path: Path, sem: asyncio.Se
     cfg = cascade.cfg
     async with sem:
         url = await asyncio.to_thread(
-            lambda: to_data_url(prepare_image(path, cfg.max_pixels), cfg.jpeg_quality)
+            lambda: to_data_url(
+                prepare_image(path, cfg.max_pixels), cfg.jpeg_quality, cfg.image_format
+            )
         )
         t0 = time.perf_counter()
         (issues, tq), (score, ta), (answer, tans) = await asyncio.gather(

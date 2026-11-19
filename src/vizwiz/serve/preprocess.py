@@ -56,10 +56,14 @@ def visual_tokens(width: int, height: int, factor: int = FACTOR) -> int:
     return (width // factor) * (height // factor)
 
 
-def to_data_url(img: Image.Image, quality: int = 95) -> str:
-    """JPEG ``data:`` URL for the OpenAI-compatible image_url field (serving only)."""
+def to_data_url(img: Image.Image, quality: int = 95, fmt: str = "jpeg") -> str:
+    """``data:`` URL for the OpenAI-compatible image_url field (serving only).
+    JPEG (default, small) or PNG (lossless: the exact pixels evaluation used, D-063)."""
     import base64
 
     buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=quality)
-    return "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+    if fmt == "png":
+        img.save(buf, format="PNG")
+    else:
+        img.save(buf, format="JPEG", quality=quality)
+    return f"data:image/{fmt};base64," + base64.b64encode(buf.getvalue()).decode("ascii")

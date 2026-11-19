@@ -74,7 +74,7 @@ class Metrics:
 
 
 def _prepare(data: bytes, cfg: ServeConfig) -> str:
-    return to_data_url(prepare_image(data, cfg.max_pixels), cfg.jpeg_quality)
+    return to_data_url(prepare_image(data, cfg.max_pixels), cfg.jpeg_quality, cfg.image_format)
 
 
 def create_app(

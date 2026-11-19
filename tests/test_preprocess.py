@@ -30,3 +30,19 @@ def test_exif_orientation_is_applied():
     loaded = load_image(buf.getvalue())
     assert loaded.size == (200, 400)
     assert prepare_image(buf.getvalue(), None).size == (192, 384)
+
+
+def test_to_data_url_png_is_lossless():
+    import base64
+    import io
+
+    from PIL import Image
+
+    from vizwiz.serve.preprocess import to_data_url
+
+    img = Image.effect_noise((64, 32), 60).convert("RGB")
+    url = to_data_url(img, fmt="png")
+    assert url.startswith("data:image/png;base64,")
+    back = Image.open(io.BytesIO(base64.b64decode(url.split(",", 1)[1]))).convert("RGB")
+    assert back.tobytes() == img.tobytes()
+    assert to_data_url(img).startswith("data:image/jpeg;base64,")
