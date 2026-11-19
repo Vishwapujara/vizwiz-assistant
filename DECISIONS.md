@@ -1024,7 +1024,8 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   background. `vizwiz.serve.replay` sends every val and test VQA question
   through the served path (gateway image preparation, the three stage calls,
   16 questions at a time) and keeps all three outputs per question.
-  `vizwiz.serve.tune` computes parity and the threshold sweep.
+  `vizwiz.serve.tune` computes parity and the threshold sweep. On Colab the
+  gateway listens on port 8090: Colab's own notebook server holds 8080.
 - **Parity, fixed before the run:** the served path "matches" offline evaluation
   on val when the answerability decision at 0.5 agrees on ≥ 98% of questions,
   answers agree on ≥ 95%, and quality label sets agree on ≥ 90%. Expected
