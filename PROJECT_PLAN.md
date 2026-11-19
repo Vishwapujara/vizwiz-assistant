@@ -570,7 +570,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 
 ### Phase 5: Serving
 - **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP.
-- **5.2** FastAPI gateway + cascade + preprocessing + guidance mapping + mock model + tests. STOP.
+- **5.2** FastAPI gateway + cascade + preprocessing + guidance mapping + mock model + tests. STOP. Code **done** (D-059); threshold tuning on val and the served-vs-offline check move to the 5.1 notebook.
 - **5.3** Adapter registry (W&B Registry client + in-memory fake) + promote/rollback + load/unload endpoints. STOP.
 - **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP.
 
@@ -618,4 +618,4 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 
 - ~~Image resolution setting~~ resolved: 524,288 pixels (D-050).
 - 4-bit serving format: AWQ vs GPTQ, deferred; only if time allows (D-057).
-- Cascade "unusable image" rule (Step 5.2, tuned on val).
+- Cascade thresholds: initial rule in D-059, tuned on val at Step 5.1.

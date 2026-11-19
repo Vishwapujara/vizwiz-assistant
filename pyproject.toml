@@ -19,7 +19,7 @@ dependencies = [
 [project.optional-dependencies]
 data = ["datasets", "pandas", "pillow", "numpy"]
 train = ["torch", "transformers", "peft", "trl", "accelerate", "bitsandbytes"]
-serve = ["fastapi", "uvicorn", "httpx", "sqlmodel"]
+serve = ["fastapi", "uvicorn", "httpx", "python-multipart", "prometheus-client", "pillow"]
 bench = ["locust"]
 dev = ["pytest>=8", "ruff>=0.6", "pillow"]
 

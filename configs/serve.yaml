@@ -1,0 +1,21 @@
+# Gateway settings (Step 5.2, D-059). Env overrides: VIZWIZ_SERVE_CONFIG (this file's
+# path), VIZWIZ_MODEL_URL (model server), VIZWIZ_MODEL_API_KEY (if vLLM uses --api-key).
+model_url: http://localhost:8000      # vLLM OpenAI-compatible server, or the mock
+adapters:                             # LoRA name per cascade stage (E5 for all, D-056)
+  quality: e5-multi-lora
+  answerability: e5-multi-lora
+  answer: e5-multi-lora
+max_pixels: 524288                    # same budget as training and eval (D-050)
+jpeg_quality: 95                      # photo re-encoded once after resizing
+mode: parallel_checks                 # sequential | parallel_checks | speculative
+rules:
+  answerability_threshold: 0.5        # decline when P(unanswerable) >= this; tuned on val later
+  unusable_labels: [unrecognizable]   # quality labels that mean "retake", whatever the question
+  max_tips: 2                         # retake tips shown at most
+timeouts:
+  model_call_s: 20
+  retries: 2                          # on connection errors, 429 and 5xx
+  backoff_s: 0.2                      # doubled after each retry
+limits:
+  max_upload_mb: 10
+  max_question_chars: 500

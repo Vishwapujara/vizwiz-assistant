@@ -980,6 +980,38 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-059: Gateway and cascade design (Step 5.2)
+- **Date:** 2026-11-19
+- **Status:** Accepted (code and tests done locally against the mock; threshold
+  tuning and the served-vs-offline check run on Colab at Step 5.1)
+- **Code:** `src/vizwiz/serve/{config,model_client,cascade,guidance,gateway,mock_model}.py`,
+  settings in `configs/serve.yaml`, tests in `tests/test_serve.py`.
+- **Cascade rule:** retake when the quality stage finds an unusable label
+  (`unrecognizable`); else decline when P(unanswerable) ≥ threshold (0.5 for now);
+  else answer. This is the error-analysis recommendation (D-054). Declines carry
+  fixed retake tips for the detected issues; answers carry them as optional tips.
+- **Stage overlap (`mode`):** `parallel_checks` by default: quality and
+  answerability run together (both need only the photo and question), then the
+  answer, so latency ≈ max(check) + answer instead of the sum. `sequential` does
+  the least GPU work; `speculative` also starts the answer at once and cancels it
+  on a decline (lowest latency, most GPU work). The decision is identical in all
+  three; the trade-off is measured in the Phase 6 benchmark.
+- **Parity with evaluation:** same system prompts, greedy decoding and max tokens
+  as `run_eval`; photo prepared with the same `prepare_image` (524,288 pixels) and
+  sent once as JPEG quality 95. Over the API only token strings are available, so
+  the answerability score uses token-text prefixes instead of token ids; Step 5.1
+  compares served and offline scores on the same val photos.
+- **Failures:** model calls retry connection errors, 429 and 5xx (2 retries,
+  exponential backoff); then the request fails with 503. No answer is given
+  without both checks (safety over availability).
+- **Privacy:** logs and Prometheus metrics hold request ids, statuses, timings,
+  quality labels and scores only; never the photo, question or answer.
+- **Tips text:** fixed and reviewed, not generated (`guidance.py`); a test checks
+  every quality label has one.
+- **Plan sections:** 6.5, 12.1, 13, 14 (Step 5.2).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
@@ -987,7 +1019,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | Item | Resolve at | Notes |
 |---|---|---|
 | 4-bit serving format: AWQ vs GPTQ | Only if time allows (D-057) | Deferred; FP8 tested first |
-| Cascade "unusable image" rule | Step 5.2 | Tuned on val |
+| Cascade thresholds (answerability, unusable labels) | Step 5.1 (Colab) | Initial rule in D-059; tune on val |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
 | Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 
