@@ -1,0 +1,36 @@
+{
+  "task": "answer",
+  "split": "test",
+  "metric": "vqa_accuracy",
+  "n": 2934,
+  "reference": "e5_bf16",
+  "runs": {
+    "e1": {
+      "value": 53.52,
+      "diff_vs_reference": -9.04,
+      "diff_ci95": [
+        -10.2,
+        -7.84
+      ],
+      "p_better": 0.0
+    },
+    "e5_bf16": {
+      "value": 62.56,
+      "diff_vs_reference": 0.0,
+      "diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "p_better": 0.0
+    },
+    "e5_fp8": {
+      "value": 62.25,
+      "diff_vs_reference": -0.31,
+      "diff_ci95": [
+        -0.83,
+        0.17
+      ],
+      "p_better": 0.1
+    }
+  }
+}

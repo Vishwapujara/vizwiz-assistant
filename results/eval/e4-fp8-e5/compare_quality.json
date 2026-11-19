@@ -1,0 +1,36 @@
+{
+  "task": "quality",
+  "split": "test",
+  "metric": "macro_f1",
+  "n": 7750,
+  "reference": "e5_bf16",
+  "runs": {
+    "e1": {
+      "value": 27.95,
+      "diff_vs_reference": -37.64,
+      "diff_ci95": [
+        -38.92,
+        -36.29
+      ],
+      "p_better": 0.0
+    },
+    "e5_bf16": {
+      "value": 65.59,
+      "diff_vs_reference": 0.0,
+      "diff_ci95": [
+        0.0,
+        0.0
+      ],
+      "p_better": 0.0
+    },
+    "e5_fp8": {
+      "value": 64.98,
+      "diff_vs_reference": -0.62,
+      "diff_ci95": [
+        -1.16,
+        -0.04
+      ],
+      "p_better": 0.02
+    }
+  }
+}

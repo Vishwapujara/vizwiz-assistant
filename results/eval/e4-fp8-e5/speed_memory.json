@@ -1,0 +1,22 @@
+{
+  "none": {
+    "examples_per_s": 7.15,
+    "engine_load_s": 266.6,
+    "accuracy_1000": 61.7,
+    "memory": [
+      "Model loading took 8.6 GiB memory and 38.935831 seconds",
+      "Available KV cache memory: 6.72 GiB",
+      "GPU KV cache size: 48,912 tokens, Maximum concurrency for 4,096 tokens per request: 11.94x"
+    ]
+  },
+  "fp8": {
+    "examples_per_s": 8.12,
+    "engine_load_s": 235.5,
+    "accuracy_1000": 61.26,
+    "memory": [
+      "Model loading took 5.05 GiB memory and 9.062492 seconds",
+      "Available KV cache memory: 10.42 GiB",
+      "GPU KV cache size: 75,856 tokens, Maximum concurrency for 4,096 tokens per request: 18.52x"
+    ]
+  }
+}

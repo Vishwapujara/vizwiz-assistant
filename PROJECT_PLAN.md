@@ -566,7 +566,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 
 ### Phase 4: Compression
 - **4.1** (Colab, L4) FP8 base (cast at load by vLLM); 4-bit deferred (D-057). Notebook `12_e4_fp8.ipynb`. STOP.
-- **4.2** (Colab, L4) E4: E5 adapter on the FP8 base vs bf16, all three tasks, plus speed and memory (same notebook, D-057). STOP.
+- **4.2** (Colab, L4) E4: E5 adapter on the FP8 base vs bf16, all three tasks, plus speed and memory (same notebook, D-057). STOP. **Done**: FP8 −0.6 quality macro-F1 (fails the margin narrowly), +55% KV cache, +14% speed; serving stays bf16 (D-058).
 
 ### Phase 5: Serving
 - **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP.
@@ -619,4 +619,3 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - ~~Image resolution setting~~ resolved: 524,288 pixels (D-050).
 - 4-bit serving format: AWQ vs GPTQ, deferred; only if time allows (D-057).
 - Cascade "unusable image" rule (Step 5.2, tuned on val).
-- Final serving quantization format (after E4).

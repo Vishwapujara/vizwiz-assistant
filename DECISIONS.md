@@ -963,6 +963,23 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-058: E4 result: FP8 fails the margin on quality by a hair; serving stays bf16
+- **Date:** 2026-11-19
+- **Status:** Accepted (result read with the D-057 rule fixed before the run)
+- **Run:** `e4-fp8-e5`, commit `774f66b`, L4. Results in `results/eval/e4-fp8-e5`.
+- **Result (paired, FP8 − bf16):** answering −0.31 [−0.83, +0.17]; answerability
+  AP +0.01 [−0.20, +0.22]; quality macro-F1 −0.62 [−1.16, −0.04]. Quality's CI
+  lower end is below the −1 point margin, so FP8 is **not acceptable** under
+  D-057. The loss is mostly the rare `bright` label; `unrecognizable` holds.
+- **Gains it would have given:** weights 8.6 → 5.05 GiB, KV cache 6.72 → 10.42
+  GiB (11.9 → 18.5 concurrent 4k-token requests), 7.15 → 8.12 photos/s.
+- **Decision:** the rule is applied as written (no moving the margin after
+  seeing the result): Phase 5 serves bf16 by default. FP8 stays available as a
+  documented serving option for high load, with its measured cost stated.
+- **Plan sections:** 10 (E4), 14 (Steps 4.2, 5.1).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
@@ -971,7 +988,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 |---|---|---|
 | 4-bit serving format: AWQ vs GPTQ | Only if time allows (D-057) | Deferred; FP8 tested first |
 | Cascade "unusable image" rule | Step 5.2 | Tuned on val |
-| Final serving quantization format | After E4 | |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
 | Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 
