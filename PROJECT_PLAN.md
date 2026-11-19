@@ -573,7 +573,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP. Notebook `13_serve_check.ipynb`: real server behind the gateway, served-vs-offline parity, threshold tuning on val, cascade result on test (D-060). Done after 5.2 on purpose.
 - **5.2** FastAPI gateway + cascade + preprocessing + guidance mapping + mock model + tests. STOP. Code **done** (D-059); threshold tuning on val and the served-vs-offline check move to the 5.1 notebook.
 - **5.3** Adapter registry (W&B Registry client + in-memory fake) + promote/rollback + load/unload endpoints. STOP. Code **done** (D-061); first real W&B use at 6.1.
-- **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP.
+- **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP. **Done** (D-062); Streamlit dashboard joins at 6.3.
 
 ### Phase 6: Benchmarking and reporting
 - **6.1** (Colab, L4) Locust load tests and sweeps; save metrics; plots. STOP.

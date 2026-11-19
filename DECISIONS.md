@@ -1076,6 +1076,33 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-062: Local Docker Compose stack with monitoring (Step 5.4)
+- **Date:** 2026-11-19
+- **Status:** Accepted (stack built and checked locally; CI job `compose-smoke`)
+- **Stack** (`docker/docker-compose.yml`): `model` (mock model server, 120 ms per
+  call by default), `gateway`, `prometheus` (scrapes the gateway every 5 s),
+  `grafana` (provisioned datasource and the "VizWiz gateway" dashboard), and
+  `traffic` (profile `demo`) sending synthetic photos.
+- **Image** (`docker/gateway.Dockerfile`): one image for gateway, mock and traffic
+  (python:3.13-slim, `pip install -e .[serve]`, non-root user, health check, 265 MB).
+  `.dockerignore` allows only `pyproject.toml`, `README.md`, `src/` and `configs/`
+  in the build, so data, results and secrets cannot end up in the image.
+- **Dashboard panels:** requests/s by outcome, end-to-end p50/p95/p99, stage p95,
+  share of retakes and declines, in flight, errors and retries, live adapter per
+  stage.
+- **Safety:** ports bind to 127.0.0.1 only; Grafana anonymous access is read-only
+  (Viewer) and its admin password comes from `GRAFANA_ADMIN_PASSWORD`; demo
+  traffic uses generated photos only, never dataset images; registry off (no W&B
+  key needed locally).
+- **Versions:** prom/prometheus v3.5.0, grafana/grafana 12.1.0.
+- **CI:** `compose-smoke` builds and starts the stack, sends 20 s of traffic,
+  checks all three cascade outcomes appear and that Prometheus scraped them.
+- **Not here:** the Streamlit results dashboard is part of Step 6.3 and will be
+  added to this stack then; real-model latency comes from the Colab benchmark (6.1).
+- **Plan sections:** 12.1, 12.2, 13, 14 (Step 5.4).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
