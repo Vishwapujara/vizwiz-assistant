@@ -34,6 +34,9 @@ def cfg(**kw) -> ServeConfig:
     return ServeConfig(model_url="http://mock", timeouts={"backoff_s": 0}, **kw)
 
 
+GATE = {"unusable_labels": ["unrecognizable"]}  # the optional hard retake gate (D-064)
+
+
 def mock_client(**kw) -> ModelClient:
     transport = httpx.ASGITransport(app=create_mock_app(**kw))
     return ModelClient("http://mock", backoff_s=0, transport=transport)
@@ -88,7 +91,8 @@ def test_cascade_branches(mode, kind, status):
     async def go():
         client = mock_client()
         try:
-            return await Cascade(client, cfg(mode=mode)).run(to_data_url(photo(kind)), "What?")
+            c = cfg(mode=mode, rules=GATE)
+            return await Cascade(client, c).run(to_data_url(photo(kind)), "What?")
         finally:
             await client.aclose()
 
@@ -97,7 +101,7 @@ def test_cascade_branches(mode, kind, status):
     used = [t.stage for t in r.trace if t.used]
     if status == "answered":
         assert r.answer == "mock answer" and r.message == "mock answer"
-        assert used == ["quality", "answerability", "answer"] and r.unanswerable_score < 0.5
+        assert used == ["quality", "answerability", "answer"] and r.unanswerable_score < 0.1
     elif status == "retake":
         assert r.answer is None and r.message.startswith(guidance.UNUSABLE)
         assert used == ["quality"] and r.issues == ["unrecognizable"]
@@ -107,6 +111,25 @@ def test_cascade_branches(mode, kind, status):
         assert r.answer is None and r.message.startswith(guidance.CANNOT_ANSWER)
         assert r.issues == ["dark"] and r.tips == [guidance.TIPS["dark"]]
         assert used == ["quality", "answerability"] and r.unanswerable_score >= 0.5
+
+
+def test_default_is_tips_only():
+    async def go(kind):
+        client = mock_client()
+        try:
+            return await Cascade(client, cfg()).run(to_data_url(photo(kind)), "What?")
+        finally:
+            await client.aclose()
+
+    flat = asyncio.run(go("flat"))  # unrecognizable: declined by answerability, not forced
+    assert flat.status == "unanswerable"
+    assert flat.tips == [guidance.TIPS["unrecognizable"], guidance.GENERIC_RETAKE]
+    assert [t.stage for t in flat.trace if t.used] == ["quality", "answerability"]
+    assert asyncio.run(go("normal")).status == "answered"
+    assert (
+        cfg().rules.answerability_threshold == 0.10
+        and load_serve_config().rules.unusable_labels == []
+    )
 
 
 def test_threshold_moves_the_decision():
@@ -167,7 +190,7 @@ def assist(app, image: bytes, question="What is this?"):
 
 
 def test_gateway_assist_branches_and_metrics():
-    app = create_app(cfg(), mock_client())
+    app = create_app(cfg(rules=GATE), mock_client())
     r = assist(app, jpeg("normal"))
     assert r.status_code == 200 and r.headers["X-Request-ID"] == r.json()["request_id"]
     body = r.json()

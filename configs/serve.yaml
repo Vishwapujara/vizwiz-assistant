@@ -11,8 +11,9 @@ max_pixels: 524288                    # same budget as training and eval (D-050)
 jpeg_quality: 95                      # photo re-encoded once after resizing
 mode: parallel_checks                 # sequential | parallel_checks | speculative
 rules:
-  answerability_threshold: 0.5        # decline when P(unanswerable) >= this; tuned on val later
-  unusable_labels: [unrecognizable]   # quality labels that mean "retake", whatever the question
+  answerability_threshold: 0.10       # decline when P(unanswerable) >= this; chosen on val (D-063)
+  unusable_labels: []                 # quality labels that force a retake whatever the question;
+                                      # empty = tips only (D-064); [unrecognizable] = hard gate
   max_tips: 2                         # retake tips shown at most
 timeouts:
   model_call_s: 20

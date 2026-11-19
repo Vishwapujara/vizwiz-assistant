@@ -17,8 +17,8 @@ STAGES = ("quality", "answerability", "answer")
 
 class Rules(BaseModel):
     model_config = {"extra": "forbid"}
-    answerability_threshold: float = Field(0.5, ge=0, le=1)
-    unusable_labels: list[str] = ["unrecognizable"]
+    answerability_threshold: float = Field(0.10, ge=0, le=1)  # chosen on val (D-063)
+    unusable_labels: list[str] = []  # empty: quality gives tips only, no forced retake (D-064)
     max_tips: int = Field(2, ge=0)
 
 

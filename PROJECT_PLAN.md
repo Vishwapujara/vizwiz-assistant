@@ -571,13 +571,13 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **4.2** (Colab, L4) E4: E5 adapter on the FP8 base vs bf16, all three tasks, plus speed and memory (same notebook, D-057). STOP. **Done**: FP8 −0.6 quality macro-F1 (fails the margin narrowly), +55% KV cache, +14% speed; serving stays bf16 (D-058).
 
 ### Phase 5: Serving
-- **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP. Notebook `13_serve_check.ipynb`: real server behind the gateway, served-vs-offline parity, threshold tuning on val, cascade result on test (D-060). Done after 5.2 on purpose.
+- **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP. Notebook `13_serve_check.ipynb`: real server behind the gateway, served-vs-offline parity, threshold tuning on val, cascade result on test (D-060). Done after 5.2 on purpose. **Done**: served path costs no measurable accuracy; threshold 0.10, quality as tips only; test VizWiz accuracy 77.7 vs 47.1 always answering (D-063, D-064).
 - **5.2** FastAPI gateway + cascade + preprocessing + guidance mapping + mock model + tests. STOP. Code **done** (D-059); threshold tuning on val and the served-vs-offline check move to the 5.1 notebook.
 - **5.3** Adapter registry (W&B Registry client + in-memory fake) + promote/rollback + load/unload endpoints. STOP. Code **done** (D-061); first real W&B use at 6.1.
 - **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP. **Done** (D-062); Streamlit dashboard joins at 6.3.
 
 ### Phase 6: Benchmarking and reporting
-- **6.1** (Colab, L4) Locust load tests and sweeps; save metrics; plots. STOP.
+- **6.1** (Colab, L4) Locust load tests and sweeps; save metrics; plots. STOP. Includes a val replay with lossless (PNG) photos (D-063).
 - **6.2** Cost analysis and merged-model baseline comparison. STOP.
 - **6.3** Streamlit results dashboard; README with architecture diagram, results
   tables, model card, and reproduction instructions; `docs/results_writeup.md`. STOP.
@@ -620,4 +620,4 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 
 - ~~Image resolution setting~~ resolved: 524,288 pixels (D-050).
 - 4-bit serving format: AWQ vs GPTQ, deferred; only if time allows (D-057).
-- Cascade thresholds: initial rule in D-059, tuned on val at Step 5.1.
+- ~~Cascade thresholds~~ resolved: 0.10, quality as tips only (D-063, D-064).

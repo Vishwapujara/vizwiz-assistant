@@ -5,7 +5,7 @@ Speaks the part of vLLM's API the gateway uses (``GET /v1/models``,
 recognises the task from the system prompt and answers from simple photo
 statistics, so every cascade branch can be reached with a synthetic image:
 
-    flat photo (almost one colour)  -> quality ["unrecognizable"]
+    flat photo (almost one colour)  -> quality ["unrecognizable"], answerability unanswerable
     dark photo (mean brightness <50) -> quality ["dark"], answerability unanswerable
     anything else                    -> quality ["none"], answerable, "mock answer"
 
@@ -44,7 +44,7 @@ def mock_reply(task: str, mean: float, std: float) -> tuple[str, float]:
     if task == "quality":
         return ('["unrecognizable"]' if flat else '["dark"]' if dark else '["none"]'), 0.0
     if task == "answerability":
-        p = 0.95 if flat else 0.8 if dark else 0.1
+        p = 0.95 if flat else 0.8 if dark else 0.02
         return ("unanswerable" if p >= 0.5 else "answerable"), p
     return "mock answer", 0.0
 

@@ -1,9 +1,10 @@
 """The inference cascade (PROJECT_PLAN 6.5, D-059).
 
     photo + question
-      -> quality: if an unusable label is found (e.g. unrecognizable) -> retake guidance
-      -> answerability: if P(unanswerable) >= threshold -> decline (+ retake tips)
-      -> answer
+      -> quality: if an unusable label is found -> retake guidance (off by default:
+         quality gives tips only, D-064)
+      -> answerability: if P(unanswerable) >= threshold (0.10, D-063) -> decline + tips
+      -> answer (+ tips for photo issues)
 
 Prompts are the training prompts (``formatting.SYSTEM_PROMPTS``) and decoding matches
 the offline evaluation (greedy, same max tokens), so served replies are the ones that
@@ -155,7 +156,8 @@ class Cascade:
             trace.append(tans)
             if not answer:  # an empty reply is treated as "cannot answer"
                 return self._finish(self._decline(issues, score), trace, t0)
-            tips = guidance.tips_for(issues, rules.max_tips)
+            # "can't make out the photo" contradicts an answer; the other tips still help
+            tips = guidance.tips_for(issues, rules.max_tips, skip=("unrecognizable",))
             result = AssistResult("answered", answer, answer, issues, score, tips)
             return self._finish(result, trace, t0)
         finally:

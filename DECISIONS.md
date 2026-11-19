@@ -1106,8 +1106,7 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ### D-063: Serving check result (Step 5.1): parity and the chosen threshold
 - **Date:** 2026-11-19
-- **Status:** In progress (accuracy impact of the parity gap measured next, notebook
-  `14_serve_parity.ipynb`, CPU)
+- **Status:** Accepted. Results in `results/serve/serve-check/` (notebooks 13 and 14).
 - **Run:** notebook 13 at `b28c456`, L4: vLLM + gateway with E5 (bf16), 2,000 val and
   4,319 test questions replayed through the served path.
 - **Parity against the D-060 bars (val):**
@@ -1119,9 +1118,12 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
   | Quality label sets | 90.1% (1,962 photos) | ≥ 90% | pass (barely) |
 
   Agreement measures *same output*, not *same accuracy*: greedy decoding flips
-  on near-ties when the photo is re-encoded as JPEG. Before spending GPU time on
-  the planned fix (lossless PNG), notebook 14 measures whether the differences
-  change accuracy (paired served − offline per stage).
+  on near-ties when the photo is re-encoded as JPEG. Notebook 14 (CPU) measured
+  the accuracy effect, served − offline, paired: answering −0.59 [−1.41, +0.18],
+  answerability AP +0.08 [−0.18, +0.37], quality macro-F1 −0.38 [−1.39, +0.65].
+  No measurable loss. Deviation from D-060, chosen by the owner: the PNG fix is
+  not applied now but tested at Step 6.1 (a val replay with lossless photos in
+  the load-test notebook, which needs the GPU anyway).
 - **Threshold (rule fixed in D-060, chosen on val):** 0.10. Val: VizWiz accuracy
   75.6 (51.96 never declining; 70.2 at 0.5). **Test, applied unchanged: 77.0**
   (47.1 never declining; 70.9 at 0.5). At 0.10 the system answers 48% of test
@@ -1137,7 +1139,28 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 - **Quality rule:** at 0.10 it lowers VizWiz accuracy (val 75.6 vs 77.2 without
   it; test 77.0 vs 77.7) and mostly adds declines of answerable questions
   (wrongly declined 29.2% vs 25.7% on val) for 0.35 points fewer wrong answers.
-  Decision pending the owner (see below).
+  Decided in D-064.
+- **Plan sections:** 6.5, 14 (Step 5.1).
+
+---
+
+### D-064: Quality gives tips only; no forced retake (Step 5.1)
+- **Date:** 2026-11-19
+- **Status:** Accepted (owner chose "tips only")
+- **Decision:** `rules.unusable_labels: []`. The quality stage still runs on every
+  photo, and its tips go with declines and answers (an answer never carries "I
+  can't make out the photo"). Whether to decline is decided by the answerability
+  score alone, at threshold 0.10 (D-063).
+- **Evidence (val, where the choice was made):** VizWiz accuracy 77.2 vs 75.6 with
+  the gate; answerable questions declined 25.7% vs 29.2%; wrong answers 15.3% vs
+  14.9% of questions. Test, reported once: 77.7 vs 77.0. The best threshold
+  without the gate is also 0.10, so the threshold choice does not change.
+- **Why not keep the pre-set gate:** it was the error-analysis recommendation
+  (D-054), but measured on the served system it mostly declines photos the
+  answerability check would have answered correctly. The answerability adapter
+  already sees the photo, so it covers most unusable photos itself.
+- **Reversible:** `unusable_labels: [unrecognizable]` restores the gate; tests
+  cover both settings.
 - **Plan sections:** 6.5, 14 (Step 5.1).
 
 ---
@@ -1149,7 +1172,6 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | Item | Resolve at | Notes |
 |---|---|---|
 | 4-bit serving format: AWQ vs GPTQ | Only if time allows (D-057) | Deferred; FP8 tested first |
-| Quality rule as a hard retake gate, or tips only | After notebook 14 | D-063: costs 0.7–1.6 VizWiz points |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
 | Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 

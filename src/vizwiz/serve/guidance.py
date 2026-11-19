@@ -43,4 +43,6 @@ def retake_message(issues: Iterable[str], limit: int) -> tuple[str, list[str]]:
 def decline_message(issues: Iterable[str], limit: int) -> tuple[str, list[str]]:
     """Message when the photo is usable but the question cannot be answered from it."""
     tips = tips_for(issues, limit) or [NOT_VISIBLE]
+    if tips == [TIPS["unrecognizable"]]:  # says what is wrong, not yet how to fix it
+        tips.append(GENERIC_RETAKE)
     return " ".join([CANNOT_ANSWER, *tips]), tips

@@ -38,7 +38,7 @@ jobs:
         run: |
           docker compose -f docker/docker-compose.yml --profile demo run --rm traffic \
             python -m vizwiz.bench.traffic --url http://gateway:8080 --rps 5 --duration 20 | tee traffic.log
-          grep -q "'answered'" traffic.log && grep -q "'retake'" traffic.log && grep -q "'unanswerable'" traffic.log
+          grep -q "'answered'" traffic.log && grep -q "'unanswerable'" traffic.log
       - name: Prometheus has the gateway metrics
         run: |
           sleep 10
