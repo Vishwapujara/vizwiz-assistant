@@ -226,6 +226,7 @@ vizwiz-assistant/
 │   ├── 10_error_analysis.ipynb   # CPU: E1 vs E2 mistakes by slice, test (3.4, D-054)
 │   ├── 11_e5_multitask.ipynb     # L4: one adapter on all 3 tasks vs specialists (3.6, D-055)
 │   ├── 12_e4_fp8.ipynb           # L4: E5 on an FP8 base vs bf16, accuracy + speed (4.1-4.2, D-057)
+│   ├── 13_serve_check.ipynb      # L4: vLLM + gateway, parity, threshold tuning (5.1, D-060)
 │   ├── 02_train.ipynb            # T4 smoke / L4 real
 │   ├── 03_eval.ipynb             # L4
 │   ├── 04_quantize.ipynb         # L4
@@ -569,7 +570,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **4.2** (Colab, L4) E4: E5 adapter on the FP8 base vs bf16, all three tasks, plus speed and memory (same notebook, D-057). STOP. **Done**: FP8 −0.6 quality macro-F1 (fails the margin narrowly), +55% KV cache, +14% speed; serving stays bf16 (D-058).
 
 ### Phase 5: Serving
-- **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP.
+- **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP. Notebook `13_serve_check.ipynb`: real server behind the gateway, served-vs-offline parity, threshold tuning on val, cascade result on test (D-060). Done after 5.2 on purpose.
 - **5.2** FastAPI gateway + cascade + preprocessing + guidance mapping + mock model + tests. STOP. Code **done** (D-059); threshold tuning on val and the served-vs-offline check move to the 5.1 notebook.
 - **5.3** Adapter registry (W&B Registry client + in-memory fake) + promote/rollback + load/unload endpoints. STOP.
 - **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP.

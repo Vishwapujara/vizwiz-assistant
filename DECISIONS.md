@@ -1012,6 +1012,36 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-060: Serving check, parity and threshold tuning (Step 5.1)
+- **Date:** 2026-11-19
+- **Status:** Accepted (rules fixed before the run)
+- **Order:** Step 5.2 (gateway code) was done before 5.1 on purpose: it needs no
+  GPU, and doing it first lets one Colab session test the real model behind the
+  finished gateway.
+- **Run:** notebook `13_serve_check.ipynb`, L4. vLLM OpenAI server with the E5
+  adapter (`--generation-config vllm` so the model's default sampling settings
+  do not apply; greedy as in evaluation) and the gateway, both in the
+  background. `vizwiz.serve.replay` sends every val and test VQA question
+  through the served path (gateway image preparation, the three stage calls,
+  16 questions at a time) and keeps all three outputs per question.
+  `vizwiz.serve.tune` computes parity and the threshold sweep.
+- **Parity, fixed before the run:** the served path "matches" offline evaluation
+  on val when the answerability decision at 0.5 agrees on ≥ 98% of questions,
+  answers agree on ≥ 95%, and quality label sets agree on ≥ 90%. Expected
+  sources of difference: the JPEG re-encode (quality 95) and the token-text
+  answerability score. If it does not match, the first fix tried is sending the
+  photo losslessly (PNG).
+- **Threshold rule, fixed before the run:** sweep the answerability threshold
+  0.05–0.95 (step 0.05) with the quality rule (`unrecognizable` → retake) on;
+  choose the threshold with the highest official VizWiz accuracy on val, where
+  a decline is scored as the answer "unanswerable" (ties: fewer wrong answers,
+  then the lower threshold). Apply it unchanged to test and report test once.
+  Also reported: the same threshold without the quality rule, threshold 0.5, and
+  "never decline", plus wrong answers, wrongly declined and missed unanswerable.
+- **Plan sections:** 6.5, 12.1, 14 (Step 5.1).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
@@ -1019,7 +1049,7 @@ Resolved items move to the Decisions section with a `D-xxx` id.
 | Item | Resolve at | Notes |
 |---|---|---|
 | 4-bit serving format: AWQ vs GPTQ | Only if time allows (D-057) | Deferred; FP8 tested first |
-| Cascade thresholds (answerability, unusable labels) | Step 5.1 (Colab) | Initial rule in D-059; tune on val |
+| Cascade thresholds (answerability, unusable labels) | Step 5.1 (Colab) | Rule fixed in D-060; result pending |
 | Frontier-model reference run | After E2 | D-049; needs owner's OK to send val photos to an API |
 | Sensitivity-guided quantization in E4 | Phase 4 | D-049; from remaining GPU budget |
 
