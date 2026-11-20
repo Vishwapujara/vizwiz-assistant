@@ -581,7 +581,7 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **6.1** (Colab, L4) Locust load tests and sweeps; save metrics; plots. STOP. Includes a val replay with lossless (PNG) photos (D-063). **Done** (D-066): 2.92 req/s within p95 < 2 s; PNG restores parity.
 - **6.2** Cost analysis and merged-model baseline comparison. STOP. **Done** (D-066): $0.067 per 1,000 requests.
 - **6.3** Streamlit results dashboard; README with architecture diagram, results
-  tables, model card, and reproduction instructions; `docs/results_writeup.md`. STOP.
+  tables, model card, and reproduction instructions; `docs/results_writeup.md`. STOP. README and write-up **done**; Streamlit dashboard optional.
 - **6.4** Draft resume bullets: one SDE-focused version, one ML-focused version. STOP.
 
 ---

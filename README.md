@@ -24,6 +24,9 @@ The cost of the safety-first setting: 28.6% of answerable questions are declined
 (with retake tips). The decline threshold is one config value; the full trade-off
 curve is in [`results/serve/serve-check`](results/serve/serve-check/README.md).
 
+**Read the [results write-up](docs/results_writeup.md)** for the full story: what
+worked, what did not, and why.
+
 All comparisons are paired on the same test examples with bootstrap 95% confidence
 intervals; reading rules were fixed before each run and logged in
 [`DECISIONS.md`](DECISIONS.md).
