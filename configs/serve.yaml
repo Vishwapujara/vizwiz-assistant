@@ -8,7 +8,7 @@ adapters:                             # per stage: LoRA name on the server, or t
   answerability: e5-multi-lora
   answer: e5-multi-lora
 max_pixels: 524288                    # same budget as training and eval (D-050)
-image_format: jpeg                    # photo re-encoded once after resizing; png = lossless
+image_format: png                     # lossless: served replies match evaluation (D-066); jpeg = smaller
 jpeg_quality: 95
 mode: parallel_checks                 # sequential | parallel_checks | speculative
 rules:

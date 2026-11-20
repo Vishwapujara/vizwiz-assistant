@@ -578,8 +578,8 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP. **Done** (D-062); Streamlit dashboard joins at 6.3.
 
 ### Phase 6: Benchmarking and reporting
-- **6.1** (Colab, L4) Locust load tests and sweeps; save metrics; plots. STOP. Includes a val replay with lossless (PNG) photos (D-063).
-- **6.2** Cost analysis and merged-model baseline comparison. STOP.
+- **6.1** (Colab, L4) Locust load tests and sweeps; save metrics; plots. STOP. Includes a val replay with lossless (PNG) photos (D-063). **Done** (D-066): 2.92 req/s within p95 < 2 s; PNG restores parity.
+- **6.2** Cost analysis and merged-model baseline comparison. STOP. **Done** (D-066): $0.067 per 1,000 requests.
 - **6.3** Streamlit results dashboard; README with architecture diagram, results
   tables, model card, and reproduction instructions; `docs/results_writeup.md`. STOP.
 - **6.4** Draft resume bullets: one SDE-focused version, one ML-focused version. STOP.

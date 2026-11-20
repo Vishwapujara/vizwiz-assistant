@@ -1,0 +1,14 @@
+{
+  "ran": true,
+  "startup_s": 6.0,
+  "stages": {
+    "answer": "e5-multi-lora-v0",
+    "answerability": "e5-multi-lora-v0",
+    "quality": "e5-multi-lora-v0"
+  },
+  "live": {
+    "e5-multi-lora": "v0"
+  },
+  "rollback_without_previous_status": 409,
+  "requests_ok": 5
+}

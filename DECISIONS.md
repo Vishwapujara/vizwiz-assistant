@@ -1193,6 +1193,31 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-066: Load-test results; PNG becomes the served photo format (Steps 6.1–6.2)
+- **Date:** 2026-11-20
+- **Status:** Accepted. Results in `results/bench/load-test/` (notebook 15 at
+  `2f656b6`), report by `python -m vizwiz.bench.report`.
+- **Load test:** 0 failures in 4,436 requests. Served configuration (E5, parallel
+  checks): one user p50 0.61 s / p95 0.88 s; **2.92 req/s within p95 < 2 s**
+  (4 users); peak 4.12 req/s (16 users). Parallel checks beats sequential
+  (2.02) and speculative (2.37) at the target, so it stays the default.
+  Specialists vs E5: 3.04 vs 2.92, within noise: multi-LoRA batching makes the
+  number of adapters irrelevant to speed here. KV-cache use peaks at 31%: the
+  limit is compute (three prefills of ~600 tokens per request).
+- **Cost:** $0.067 per 1,000 requests within the latency target, $0.048 at peak,
+  assuming a fully busy GCP g2-standard-4 (1 × L4) on demand at $0.707/hour
+  (checked 2026-11-20). Three merged models would not fit on one L4.
+- **Registry:** first real W&B run worked: register, resolve, download, load and
+  switch in 6.0 s; rollback without a previous version refused (409).
+- **PNG:** lossless photos pass every D-060 parity bar (answers 97.4%, decisions
+  99.6%, quality 96.4%; accuracy differences all include 0). Decision: PNG is the
+  served default (`image_format: png`), so served replies are the evaluated
+  ones. Cost about 10 ms CPU per photo (measured locally), under 2% of median
+  latency; the load test itself ran with JPEG. `image_format: jpeg` reverts.
+- **Plan sections:** 12.3, 14 (Steps 6.1, 6.2).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.

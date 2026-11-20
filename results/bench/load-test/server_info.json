@@ -1,0 +1,18 @@
+{
+  "gpu_mem_used_mib_idle": 17544,
+  "vllm_memory": [
+    "Model loading took 8.74 GiB memory and 41.370206 seconds",
+    "Available KV cache memory: 6.66 GiB",
+    "GPU KV cache size: 48,480 tokens, Maximum concurrency for 4,096 tokens per request: 11.84x"
+  ],
+  "adapters_loaded": [
+    "e5-multi-lora",
+    "e2-answer-lora",
+    "e2-answerability-lora",
+    "e2-quality-lora"
+  ],
+  "flags": "--max-model-len 4096 --gpu-memory-utilization 0.85 --max-loras 4 --max-lora-rank 16",
+  "versions": "{\n  \"torch\": \"2.13.0\",\n  \"torchvision\": \"0.28.0\",\n  \"transformers\": \"5.19.0\",\n  \"vllm\": \"0.32.0\",\n  \"peft\": \"0.21.2\",\n  \"accelerate\": \"1.15.0\",\n  \"pillow\": \"13.0.0\"\n}",
+  "locust": "locust 2.47.0 from /content/locust-venv/lib/python3.13/site-packages/locust (Python 3.13.16)",
+  "git_commit": "2f656b6"
+}

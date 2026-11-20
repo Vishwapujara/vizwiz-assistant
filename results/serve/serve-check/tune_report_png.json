@@ -1,0 +1,316 @@
+{
+  "rule": "max official VizWiz accuracy on val (decline = 'unanswerable'), D-060",
+  "unusable_labels": [],
+  "chosen_threshold": 0.1,
+  "val": {
+    "chosen": {
+      "threshold": 0.1,
+      "use_quality_rule": true,
+      "n": 2000,
+      "vizwiz_accuracy": 77.31,
+      "answered_pct": 55.25,
+      "wrong_answers_pct_of_all": 15.2,
+      "wrong_among_answered_pct": 27.51,
+      "wrongly_declined_pct_of_answerable": 25.75,
+      "missed_unanswerable_pct": 3.36
+    },
+    "without_quality_rule": {
+      "threshold": 0.1,
+      "use_quality_rule": false,
+      "n": 2000,
+      "vizwiz_accuracy": 77.31,
+      "answered_pct": 55.25,
+      "wrong_answers_pct_of_all": 15.2,
+      "wrong_among_answered_pct": 27.51,
+      "wrongly_declined_pct_of_answerable": 25.75,
+      "missed_unanswerable_pct": 3.36
+    },
+    "never_decline": {
+      "threshold": 1.01,
+      "use_quality_rule": false,
+      "n": 2000,
+      "vizwiz_accuracy": 52.12,
+      "answered_pct": 100,
+      "wrong_answers_pct_of_all": 48.4,
+      "wrong_among_answered_pct": 48.4,
+      "wrongly_declined_pct_of_answerable": 0,
+      "missed_unanswerable_pct": 100
+    },
+    "at_0.5": {
+      "threshold": 0.5,
+      "use_quality_rule": true,
+      "n": 2000,
+      "vizwiz_accuracy": 71.8,
+      "answered_pct": 75.55,
+      "wrong_answers_pct_of_all": 27.3,
+      "wrong_among_answered_pct": 36.14,
+      "wrongly_declined_pct_of_answerable": 5.87,
+      "missed_unanswerable_pct": 24.81
+    },
+    "sweep": [
+      {
+        "threshold": 0.05,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 76.5,
+        "answered_pct": 49.3,
+        "wrong_answers_pct_of_all": 12.55,
+        "wrong_among_answered_pct": 25.46,
+        "wrongly_declined_pct_of_answerable": 33.27,
+        "missed_unanswerable_pct": 1.68
+      },
+      {
+        "threshold": 0.1,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 77.31,
+        "answered_pct": 55.25,
+        "wrong_answers_pct_of_all": 15.2,
+        "wrong_among_answered_pct": 27.51,
+        "wrongly_declined_pct_of_answerable": 25.75,
+        "missed_unanswerable_pct": 3.36
+      },
+      {
+        "threshold": 0.15,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 77.25,
+        "answered_pct": 59.05,
+        "wrong_answers_pct_of_all": 17.05,
+        "wrong_among_answered_pct": 28.87,
+        "wrongly_declined_pct_of_answerable": 21.11,
+        "missed_unanswerable_pct": 4.85
+      },
+      {
+        "threshold": 0.2,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 77.02,
+        "answered_pct": 61.4,
+        "wrong_answers_pct_of_all": 18.4,
+        "wrong_among_answered_pct": 29.97,
+        "wrongly_declined_pct_of_answerable": 18.37,
+        "missed_unanswerable_pct": 6.16
+      },
+      {
+        "threshold": 0.25,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 76.28,
+        "answered_pct": 64.6,
+        "wrong_answers_pct_of_all": 20.45,
+        "wrong_among_answered_pct": 31.66,
+        "wrongly_declined_pct_of_answerable": 15.03,
+        "missed_unanswerable_pct": 8.96
+      },
+      {
+        "threshold": 0.3,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 75.34,
+        "answered_pct": 67.4,
+        "wrong_answers_pct_of_all": 22.35,
+        "wrong_among_answered_pct": 33.16,
+        "wrongly_declined_pct_of_answerable": 12.43,
+        "missed_unanswerable_pct": 12.31
+      },
+      {
+        "threshold": 0.35,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 74.69,
+        "answered_pct": 69.55,
+        "wrong_answers_pct_of_all": 23.35,
+        "wrong_among_answered_pct": 33.57,
+        "wrongly_declined_pct_of_answerable": 10.59,
+        "missed_unanswerable_pct": 15.3
+      },
+      {
+        "threshold": 0.4,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 74.04,
+        "answered_pct": 70.85,
+        "wrong_answers_pct_of_all": 24.25,
+        "wrong_among_answered_pct": 34.23,
+        "wrongly_declined_pct_of_answerable": 9.29,
+        "missed_unanswerable_pct": 16.6
+      },
+      {
+        "threshold": 0.45,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 72.61,
+        "answered_pct": 73.3,
+        "wrong_answers_pct_of_all": 26.0,
+        "wrong_among_answered_pct": 35.47,
+        "wrongly_declined_pct_of_answerable": 7.65,
+        "missed_unanswerable_pct": 21.27
+      },
+      {
+        "threshold": 0.5,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 71.8,
+        "answered_pct": 75.55,
+        "wrong_answers_pct_of_all": 27.3,
+        "wrong_among_answered_pct": 36.14,
+        "wrongly_declined_pct_of_answerable": 5.87,
+        "missed_unanswerable_pct": 24.81
+      },
+      {
+        "threshold": 0.55,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 71.42,
+        "answered_pct": 76.35,
+        "wrong_answers_pct_of_all": 27.75,
+        "wrong_among_answered_pct": 36.35,
+        "wrongly_declined_pct_of_answerable": 5.19,
+        "missed_unanswerable_pct": 25.93
+      },
+      {
+        "threshold": 0.6,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 70.27,
+        "answered_pct": 78.45,
+        "wrong_answers_pct_of_all": 29.2,
+        "wrong_among_answered_pct": 37.22,
+        "wrongly_declined_pct_of_answerable": 3.83,
+        "missed_unanswerable_pct": 30.04
+      },
+      {
+        "threshold": 0.65,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 69.31,
+        "answered_pct": 79.45,
+        "wrong_answers_pct_of_all": 30.2,
+        "wrong_among_answered_pct": 38.01,
+        "wrongly_declined_pct_of_answerable": 3.35,
+        "missed_unanswerable_pct": 32.46
+      },
+      {
+        "threshold": 0.7,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 67.62,
+        "answered_pct": 81.65,
+        "wrong_answers_pct_of_all": 32.0,
+        "wrong_among_answered_pct": 39.19,
+        "wrongly_declined_pct_of_answerable": 2.8,
+        "missed_unanswerable_pct": 39.18
+      },
+      {
+        "threshold": 0.75,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 66.15,
+        "answered_pct": 83.55,
+        "wrong_answers_pct_of_all": 33.55,
+        "wrong_among_answered_pct": 40.16,
+        "wrongly_declined_pct_of_answerable": 2.32,
+        "missed_unanswerable_pct": 44.96
+      },
+      {
+        "threshold": 0.8,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 63.69,
+        "answered_pct": 86.8,
+        "wrong_answers_pct_of_all": 36.4,
+        "wrong_among_answered_pct": 41.94,
+        "wrongly_declined_pct_of_answerable": 1.43,
+        "missed_unanswerable_pct": 54.66
+      },
+      {
+        "threshold": 0.85,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 62.7,
+        "answered_pct": 88.25,
+        "wrong_answers_pct_of_all": 37.45,
+        "wrong_among_answered_pct": 42.44,
+        "wrongly_declined_pct_of_answerable": 1.09,
+        "missed_unanswerable_pct": 59.14
+      },
+      {
+        "threshold": 0.9,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 60.15,
+        "answered_pct": 91.2,
+        "wrong_answers_pct_of_all": 40.05,
+        "wrong_among_answered_pct": 43.91,
+        "wrongly_declined_pct_of_answerable": 0.48,
+        "missed_unanswerable_pct": 68.47
+      },
+      {
+        "threshold": 0.95,
+        "use_quality_rule": true,
+        "n": 2000,
+        "vizwiz_accuracy": 56.17,
+        "answered_pct": 95.6,
+        "wrong_answers_pct_of_all": 44.3,
+        "wrong_among_answered_pct": 46.34,
+        "wrongly_declined_pct_of_answerable": 0.07,
+        "missed_unanswerable_pct": 83.77
+      }
+    ],
+    "best_without_quality_rule": {
+      "threshold": 0.1,
+      "use_quality_rule": false,
+      "n": 2000,
+      "vizwiz_accuracy": 77.31,
+      "answered_pct": 55.25,
+      "wrong_answers_pct_of_all": 15.2,
+      "wrong_among_answered_pct": 27.51,
+      "wrongly_declined_pct_of_answerable": 25.75,
+      "missed_unanswerable_pct": 3.36
+    }
+  },
+  "parity_val": {
+    "answerability": {
+      "n": 2000,
+      "mean_abs_score_diff": 0.0046,
+      "max_abs_score_diff": 0.0623,
+      "same_decision_at_0.5_pct": 99.6,
+      "average_precision": {
+        "offline": 88.14,
+        "served": 88.07,
+        "diff": -0.07,
+        "diff_ci95": [
+          -0.22,
+          0.07
+        ]
+      }
+    },
+    "answer": {
+      "n": 1464,
+      "same_answer_pct": 97.4,
+      "vqa_accuracy": {
+        "offline": 65.36,
+        "served": 65.15,
+        "diff": -0.21,
+        "diff_ci95": [
+          -0.64,
+          0.23
+        ]
+      }
+    },
+    "quality": {
+      "n": 1962,
+      "same_labels_pct": 96.38,
+      "macro_f1": {
+        "offline": 66.78,
+        "served": 66.22,
+        "diff": -0.56,
+        "diff_ci95": [
+          -1.24,
+          0.0
+        ]
+      }
+    }
+  }
+}

@@ -52,7 +52,7 @@ class ServeConfig(BaseModel):
     model_api_key: str | None = None  # from the environment only, never from the YAML
     adapters: dict[str, str] = {s: "e5-multi-lora" for s in STAGES}
     max_pixels: int = 524_288
-    image_format: Literal["jpeg", "png"] = "jpeg"  # png = lossless, tested at 6.1 (D-063)
+    image_format: Literal["jpeg", "png"] = "png"  # lossless: matches evaluation (D-066)
     jpeg_quality: int = Field(95, ge=50, le=100)
     # sequential: quality, then answerability, then answer (least GPU work)
     # parallel_checks: quality and answerability together, then answer (default)
