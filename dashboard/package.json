@@ -1,0 +1,36 @@
+{
+  "name": "vizwiz-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "db": "node scripts/build-db.ts",
+    "predev": "npm run db",
+    "dev": "next dev -p 3001",
+    "prebuild": "npm run db",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "5.108.2",
+    "@trpc/client": "11.29.7",
+    "@trpc/server": "11.29.7",
+    "@trpc/tanstack-react-query": "11.29.7",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "recharts": "3.11.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}

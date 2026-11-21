@@ -159,7 +159,7 @@ compatibility with Qwen3-VL **and with T4/L4 GPUs** **[VERIFY all versions]**.
 | Adapter registry | W&B Registry (adapters as versioned artifacts; `production` alias = live version), behind a small interface with an in-memory fake for tests (D-026) |
 | Load testing | `locust` (headless mode in Colab) |
 | Monitoring | Prometheus metrics endpoints (vLLM + gateway); Grafana in the local Compose stack |
-| Dashboard | Streamlit (results tables, plots; reads committed `results/*.json`) |
+| Dashboard | Next.js + tRPC + Recharts over SQLite built from committed `results/*.json` (D-067; was Streamlit) |
 | Packaging | Docker, Docker Compose (local + CI only) |
 | CI | GitHub Actions (lint, unit tests, metric-gate check) |
 | Quality | `ruff`, `pytest`, `mypy` (optional) |
@@ -237,7 +237,7 @@ vizwiz-assistant/
 │   ├── gateway.Dockerfile
 │   └── docker-compose.yml        # gateway + mock model + Prometheus + Grafana + dashboard
 ├── monitoring/                   # prometheus.yml, grafana dashboards
-├── dashboard/app.py              # Streamlit results dashboard
+├── dashboard/                    # Next.js results dashboard (D-067)
 ├── docs/
 │   ├── data_licenses.md
 │   └── results_writeup.md        # final write-up for recruiters / interviews
@@ -481,7 +481,7 @@ Cut from scope: full fine-tuning, LoRA rank ablation, 2B vs 4B comparison
 | Environment | Runs | Purpose |
 |---|---|---|
 | Colab L4 (`05_serve_bench.ipynb`) | vLLM + gateway + Locust (headless) as background processes on one VM | Real benchmarks and E4/E5 latency numbers |
-| Local Docker Compose | gateway + mock model + Prometheus + Grafana + Streamlit dashboard | Packaging, demo of the full stack, monitoring dashboards |
+| Local Docker Compose | gateway + mock model + Prometheus + Grafana + results dashboard | Packaging, demo of the full stack, monitoring dashboards |
 | GitHub Actions | unit tests + gateway tests against mock model | CI |
 
 In Colab, raw Prometheus metrics from vLLM and the gateway are scraped by the
@@ -575,13 +575,13 @@ Steps marked (Colab) require the owner to run a notebook and report output.
 - **5.1** (Colab, L4) vLLM multi-LoRA server config; manual request tests per adapter. STOP. Notebook `13_serve_check.ipynb`: real server behind the gateway, served-vs-offline parity, threshold tuning on val, cascade result on test (D-060). Done after 5.2 on purpose. **Done**: served path costs no measurable accuracy; threshold 0.10, quality as tips only; test VizWiz accuracy 77.7 vs 47.1 always answering (D-063, D-064).
 - **5.2** FastAPI gateway + cascade + preprocessing + guidance mapping + mock model + tests. STOP. Code **done** (D-059); threshold tuning on val and the served-vs-offline check move to the 5.1 notebook.
 - **5.3** Adapter registry (W&B Registry client + in-memory fake) + promote/rollback + load/unload endpoints. STOP. Code **done** (D-061); first real W&B use at 6.1.
-- **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP. **Done** (D-062); Streamlit dashboard joins at 6.3.
+- **5.4** Local Docker Compose: gateway + mock model + Prometheus + Grafana + dashboard. STOP. **Done** (D-062); results dashboard joined at 6.3 (D-067).
 
 ### Phase 6: Benchmarking and reporting
 - **6.1** (Colab, L4) Locust load tests and sweeps; save metrics; plots. STOP. Includes a val replay with lossless (PNG) photos (D-063). **Done** (D-066): 2.92 req/s within p95 < 2 s; PNG restores parity.
 - **6.2** Cost analysis and merged-model baseline comparison. STOP. **Done** (D-066): $0.067 per 1,000 requests.
-- **6.3** Streamlit results dashboard; README with architecture diagram, results
-  tables, model card, and reproduction instructions; `docs/results_writeup.md`. STOP. README and write-up **done**; Streamlit dashboard optional.
+- **6.3** Results dashboard; README with architecture diagram, results
+  tables, model card, and reproduction instructions; `docs/results_writeup.md`. STOP. README and write-up **done**; results dashboard **done** (Next.js, D-067).
 - **6.4** Draft resume bullets: one SDE-focused version, one ML-focused version. STOP.
 
 ---

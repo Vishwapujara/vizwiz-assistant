@@ -1,7 +1,8 @@
-# Local stack (Step 5.4, D-062): gateway + mock model + Prometheus + Grafana.
+# Local stack (Step 5.4, D-062): gateway + mock model + Prometheus + Grafana + results dashboard (D-067).
 #   docker compose -f docker/docker-compose.yml up --build -d
 #   docker compose -f docker/docker-compose.yml --profile demo up traffic   # synthetic load
 # Gateway http://localhost:8080/docs · Prometheus http://localhost:9090 · Grafana http://localhost:3000
+# Results dashboard http://localhost:8501
 # Ports bind to 127.0.0.1 only: nothing is reachable from the local network.
 name: vizwiz
 
@@ -56,6 +57,14 @@ services:
       - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     ports: ["127.0.0.1:3000:3000"]
     depends_on: [prometheus]
+    restart: unless-stopped
+
+  dashboard:  # results dashboard: reads the committed results/*.json, no model needed
+    build:
+      context: ..
+      dockerfile: docker/dashboard.Dockerfile
+    image: vizwiz-dashboard:local
+    ports: ["127.0.0.1:8501:8501"]
     restart: unless-stopped
 
   traffic:  # synthetic photos only, never dataset images

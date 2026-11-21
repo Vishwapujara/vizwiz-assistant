@@ -25,6 +25,31 @@ jobs:
       - name: Test
         run: pytest
 
+  dashboard:
+    # Results dashboard (D-067): type-check, build (which rebuilds results.db from
+    # results/*.json, so a malformed results file fails here), then query the API.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - name: API answers from the results database
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          (cd .next/standalone && PORT=3077 node server.js &)
+          for i in $(seq 30); do curl -sf localhost:3077/api/trpc/health && break; sleep 1; done
+          curl -sf localhost:3077/api/trpc/load.capacity \
+            | node -e "const d=JSON.parse(require('fs').readFileSync(0)).result.data; console.log(d[0]); if (!(d[0].sloRps > 0)) process.exit(1)"
+
   compose-smoke:
     # Builds the image and runs gateway + mock model + Prometheus, then sends
     # synthetic traffic and checks every cascade branch was reached and scraped.

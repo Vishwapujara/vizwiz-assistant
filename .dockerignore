@@ -1,8 +1,14 @@
 # Only the package, its configs and pyproject go into the image (no data, no secrets).
+# The dashboard image also takes the committed metrics (results/) and its own sources.
 *
 !pyproject.toml
 !README.md
 !src/
 !configs/
+!results/
+!dashboard/
+dashboard/node_modules
+dashboard/.next
+dashboard/data
 **/__pycache__
 **/*.pyc

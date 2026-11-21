@@ -1,0 +1,6 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+# Built from ../results by scripts/build-db.ts on every dev/build.
+data/

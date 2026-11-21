@@ -129,11 +129,31 @@ docker compose -f docker/docker-compose.yml up --build -d
 docker compose -f docker/docker-compose.yml --profile demo run --rm traffic   # synthetic photos
 ```
 
+- Results dashboard: http://localhost:8501
 - Grafana dashboard: http://localhost:3000
 - API docs: http://localhost:8080/docs
 - Prometheus: http://localhost:9090
 
 Ports bind to localhost only. CI builds and smoke-tests this stack on every push.
+
+### Results dashboard
+
+[`dashboard/`](dashboard/) is a Next.js app that shows every result above in one
+page: headline numbers, the decline-threshold trade-off (with a slider), load-test
+latency and cost per configuration, the experiment comparisons with their 95%
+intervals, and the error analysis. No dataset photos are shown.
+
+Stack: Next.js 16 (App Router), tRPC 11 with zod inputs, TanStack Query, Recharts,
+and `node:sqlite`. On every `dev` or `build`, `scripts/build-db.ts` loads the
+committed `results/*.json` into `dashboard/data/results.db`; the tRPC procedures
+read only that database.
+
+```bash
+cd dashboard && npm ci && npm run dev    # http://localhost:3001, needs Node 22.18+
+```
+
+To host it on Vercel, import the repo and set the project's root directory to
+`dashboard` (it reads `../results` while building).
 
 ## Model card
 
@@ -193,6 +213,7 @@ src/vizwiz/serve    gateway, cascade, guidance, registry, mock model, replay/tun
 src/vizwiz/bench    Locust load test, sweep runner, demo traffic
 configs/            data, training and serving settings
 results/            committed metrics (aggregate only)
+dashboard/          results dashboard (Next.js, tRPC, Recharts, SQLite)
 docker/, monitoring/  Compose stack, Prometheus, Grafana dashboard
 ```
 

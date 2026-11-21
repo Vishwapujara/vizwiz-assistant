@@ -1218,6 +1218,35 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-067: Results dashboard in Next.js + tRPC over SQLite, not Streamlit (Step 6.3)
+- **Date:** 2026-11-21
+- **Status:** Accepted. Code in `dashboard/`, image `docker/dashboard.Dockerfile`.
+- **Decision:** the owner asked for the dashboard on their TypeScript web stack
+  instead of the Streamlit app in the plan: Next.js 16 (App Router), tRPC 11 with
+  zod inputs, TanStack Query, Recharts, and `node:sqlite` for reads.
+- **Data path:** `dashboard/scripts/build-db.ts` loads the committed results files
+  into `dashboard/data/results.db` (git-ignored) before every `dev` and `build`;
+  the tRPC procedures read only that database. Results JSON stays the single
+  source of truth, and a malformed results file fails the build (and CI).
+- **What it shows:** headline numbers from the serving check (test, threshold 0.10,
+  quality as tips, D-063, D-064); the val threshold sweep on the served PNG path
+  (D-066) with a slider; Locust latency and throughput per cascade mode; cost per
+  1,000 requests computed from the sweep at $0.707/hour (D-066), which reproduces
+  $0.067; paired comparisons for E5, E4 and resolution with bootstrap intervals;
+  answering accuracy by group and per-label quality F1 from the error analysis.
+- **Privacy:** aggregate metrics only; no dataset photos (plan Section 11).
+- **Hosting:** Docker image added to the local Compose stack at
+  http://localhost:8501; the app is ready for Vercel (root directory
+  `dashboard`), not deployed. Postgres and the AWS/Terraform pieces of the owner's
+  usual stack are left out: the data is a few static files, so they would add cost
+  and nothing else.
+- **Alternatives:** Streamlit (the plan: less code, but not the owner's stack);
+  static JSON imports without SQLite or tRPC (simpler, but not the requested stack).
+- **CI:** new `dashboard` job: type-check, build, start the server, query the API.
+- **Plan sections:** 3, 4, 12.2, 14 (Step 6.3).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.
