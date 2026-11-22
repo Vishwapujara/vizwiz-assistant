@@ -1250,7 +1250,7 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 ### D-068: Dashboard home is "how it works" + try-it; five CC0 sample photos with saved answers
 - **Date:** 2026-11-21
 - **Status:** Accepted. Answers saved in `results/demo/answers.json` (notebook 16 at
-  `6ab16e8`, **T4 in float16**: L4 was unavailable on the owner's Colab plan; the
+  `f00d70a`, **T4 in float16**: L4 was unavailable on the owner's Colab plan; the
   setup is recorded with the answers and shown on the page).
 - **Run result:** clock "6:47", sign "chapel lane", bananas "banana" (all correct);
   blurred sign declined (P(unanswerable) 0.96, issues blur/framing/unrecognizable,
