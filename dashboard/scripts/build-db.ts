@@ -60,7 +60,7 @@ CREATE TABLE demo_samples (
   reference TEXT, shows TEXT, source TEXT, source_url TEXT, author TEXT, license TEXT, changes TEXT);
 CREATE TABLE demo_answers (
   id TEXT PRIMARY KEY, status TEXT NOT NULL, message TEXT NOT NULL, answer TEXT, issues TEXT NOT NULL,
-  unanswerable_score REAL, tips TEXT NOT NULL, latency_ms REAL, created_utc TEXT, git_commit TEXT);
+  unanswerable_score REAL, tips TEXT NOT NULL, latency_ms REAL, created_utc TEXT, git_commit TEXT, setup TEXT);
 CREATE TABLE error_groups (
   dimension TEXT NOT NULL, grp TEXT NOT NULL, n INTEGER NOT NULL,
   accuracy_before REAL NOT NULL, accuracy_after REAL NOT NULL, PRIMARY KEY (dimension, grp));
@@ -187,7 +187,7 @@ if (existsSync(join(resultsDir, "demo", "answers.json"))) {
       id: a.id, status: a.status, message: a.message, answer: a.answer ?? null,
       issues: JSON.stringify(a.issues ?? []), unanswerable_score: a.unanswerable_score ?? null,
       tips: JSON.stringify(a.tips ?? []), latency_ms: a.latency_ms ?? null,
-      created_utc: demo.created_utc ?? null, git_commit: demo.git_commit ?? null,
+      created_utc: demo.created_utc ?? null, git_commit: demo.git_commit ?? null, setup: demo.setup ?? null,
     });
     demoAnswers++;
   }

@@ -32,7 +32,9 @@ def git_commit() -> str | None:
         return None
 
 
-async def collect(client: httpx.AsyncClient, samples: list[dict], image_dir: Path) -> dict:
+async def collect(
+    client: httpx.AsyncClient, samples: list[dict], image_dir: Path, setup: str | None = None
+) -> dict:
     """Ask the gateway about every sample, one at a time (latencies stay comparable)."""
     health = (await client.get("/health")).json()
     adapters = (await client.get("/adapters")).json().get("stages", {})
@@ -57,6 +59,7 @@ async def collect(client: httpx.AsyncClient, samples: list[dict], image_dir: Pat
     return {
         "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "git_commit": git_commit(),
+        "setup": setup,
         "mode": health.get("mode"),
         "adapters": adapters,
         "answers": answers,
@@ -69,6 +72,7 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--samples", required=True, type=Path, help="samples.json manifest")
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--timeout", type=float, default=120.0)
+    ap.add_argument("--setup", help='what produced the answers, e.g. "L4, bfloat16"')
     args = ap.parse_args(argv)
 
     samples = json.loads(args.samples.read_text())
@@ -78,7 +82,7 @@ def main(argv: list[str] | None = None) -> None:
         async with httpx.AsyncClient(
             base_url=args.gateway, timeout=args.timeout, headers=headers
         ) as c:
-            return await collect(c, samples, args.samples.parent)
+            return await collect(c, samples, args.samples.parent, args.setup)
 
     report = asyncio.run(run())
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -92,7 +92,7 @@ export function TryIt() {
             <ReplyCard
               title="Saved answer from the fine-tuned model"
               reply={s.saved}
-              note={s.saved.createdUtc ? `Computed ${s.saved.createdUtc.slice(0, 10)}${s.saved.gitCommit ? ` at ${s.saved.gitCommit}` : ""}` : undefined}
+              note={savedNote(s.saved)}
             />
           ) : (
             <div className="reply empty">
@@ -115,6 +115,15 @@ export function TryIt() {
       </div>
     </div>
   );
+}
+
+function savedNote(s: { createdUtc: string | null; gitCommit: string | null; setup: string | null }) {
+  const parts = [
+    s.createdUtc && `Computed ${s.createdUtc.slice(0, 10)}`,
+    s.setup && `on ${s.setup}`,
+    s.gitCommit && `at ${s.gitCommit}`,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" ") : undefined;
 }
 
 function ReplyCard({ title, reply, note }: { title: string; reply: Reply; note?: string }) {

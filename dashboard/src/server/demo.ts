@@ -17,7 +17,7 @@ type SampleRow = {
 type AnswerRow = {
   id: string; status: string; message: string; answer: string | null; issues: string;
   unanswerable_score: number | null; tips: string; latency_ms: number | null;
-  created_utc: string | null; git_commit: string | null;
+  created_utc: string | null; git_commit: string | null; setup: string | null;
 };
 
 const reply = z.object({
@@ -54,6 +54,7 @@ export const demoRouter = router({
               latency_ms: a.latency_ms,
               createdUtc: a.created_utc,
               gitCommit: a.git_commit,
+              setup: a.setup,
             }
           : null,
       };
