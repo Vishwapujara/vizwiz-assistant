@@ -60,7 +60,7 @@ export function HowItWorks() {
                 Answer
               </div>
               <p>If the question looks answerable, the model gives a short answer, like a sighted helper would.</p>
-              <p className="out">“Bananas.” · “Chapel Lane.”</p>
+              <p className="out">“chapel lane” · “banana” · “6:47”</p>
             </div>
             <div className="step card outcome">
               <div className="step-title">
@@ -70,7 +70,7 @@ export function HowItWorks() {
                 Decline, with tips
               </div>
               <p>If not, it says so instead of guessing, and explains how to take a better photo.</p>
-              <p className="out">“I can't answer that from this photo. The photo is blurry. Hold the phone steady, elbows on a table if you can.”</p>
+              <p className="out">“I can't answer that from this photo. I can't make out what the photo shows. The photo is blurry. Hold the phone steady, elbows on a table if you can.”</p>
             </div>
           </div>
         </li>

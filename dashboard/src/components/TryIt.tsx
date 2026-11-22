@@ -91,7 +91,7 @@ export function TryIt() {
           ) : s.saved ? (
             <ReplyCard
               title="Saved answer from the fine-tuned model"
-              reply={s.saved}
+              reply={{ ...s.saved, latency_ms: null }}
               note={savedNote(s.saved)}
             />
           ) : (
@@ -126,6 +126,7 @@ function savedNote(s: { createdUtc: string | null; gitCommit: string | null; set
   return parts.length ? parts.join(" ") : undefined;
 }
 
+// Saved answers carry no time: they may come from a different GPU or a cold start.
 function ReplyCard({ title, reply, note }: { title: string; reply: Reply; note?: string }) {
   const st = STATUS[reply.status];
   return (
@@ -135,6 +136,12 @@ function ReplyCard({ title, reply, note }: { title: string; reply: Reply; note?:
         <span aria-hidden="true">{st.icon}</span> {st.label}
       </div>
       <p className="spoken">{reply.message}</p>
+      {/* A decline already speaks its tips; an answer can still carry one. */}
+      {reply.status === "answered" && reply.tips.length > 0 && (
+        <p className="tip">
+          <span aria-hidden="true">💡</span> Tip: {reply.tips.join(" ")}
+        </p>
+      )}
       <dl>
         {reply.unanswerable_score !== null && (
           <>

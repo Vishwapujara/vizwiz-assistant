@@ -248,3 +248,4 @@ tr.em td { font-weight: 600; }
   .step-arrow { height: 28px; }
   .step-arrow::after { content: "↓"; }
 }
+.reply .tip { font-size: 14px; color: var(--text-secondary); margin: -4px 0 10px; }

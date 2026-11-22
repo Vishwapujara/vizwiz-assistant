@@ -1,0 +1,74 @@
+{
+ "created_utc": "2026-11-22T00:57:16+00:00",
+ "git_commit": "6ab16e8",
+ "setup": "T4, float16",
+ "mode": "parallel_checks",
+ "adapters": {
+  "quality": "e5-multi-lora",
+  "answerability": "e5-multi-lora",
+  "answer": "e5-multi-lora"
+ },
+ "answers": [
+  {
+   "id": "clock",
+   "status": "answered",
+   "message": "6:47",
+   "answer": "6:47",
+   "issues": [],
+   "unanswerable_score": 0.0017,
+   "tips": [],
+   "latency_ms": 34339.4
+  },
+  {
+   "id": "street-sign",
+   "status": "answered",
+   "message": "chapel lane",
+   "answer": "chapel lane",
+   "issues": [],
+   "unanswerable_score": 0.0008,
+   "tips": [],
+   "latency_ms": 2456.8
+  },
+  {
+   "id": "bananas",
+   "status": "answered",
+   "message": "banana",
+   "answer": "banana",
+   "issues": [],
+   "unanswerable_score": 0.0002,
+   "tips": [],
+   "latency_ms": 2382.2
+  },
+  {
+   "id": "street-sign-blurry",
+   "status": "unanswerable",
+   "message": "I can't answer that from this photo. I can't make out what the photo shows. The photo is blurry. Hold the phone steady, elbows on a table if you can.",
+   "answer": null,
+   "issues": [
+    "blur",
+    "framing",
+    "unrecognizable"
+   ],
+   "unanswerable_score": 0.9579,
+   "tips": [
+    "I can't make out what the photo shows.",
+    "The photo is blurry. Hold the phone steady, elbows on a table if you can."
+   ],
+   "latency_ms": 2515.7
+  },
+  {
+   "id": "clock-dark",
+   "status": "answered",
+   "message": "6:47",
+   "answer": "6:47",
+   "issues": [
+    "dark"
+   ],
+   "unanswerable_score": 0.0792,
+   "tips": [
+    "The photo is too dark. Turn on a light or move near a window."
+   ],
+   "latency_ms": 2691.1
+  }
+ ]
+}

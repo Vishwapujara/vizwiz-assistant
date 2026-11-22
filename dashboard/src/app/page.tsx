@@ -24,7 +24,7 @@ export default function Home() {
         <p className="lede">
           Pick a photo to see what the fine-tuned model says. Answers were saved from a real run, so this works with
           the GPU off; when the AWS server is on you can also ask the model live. The photos are openly licensed,
-          not from VizWiz; the last two are degraded copies to show how the assistant declines.
+          not from VizWiz; the last two are blurred or darkened copies, to show how bad photos are handled.
         </p>
         <TryIt />
       </section>

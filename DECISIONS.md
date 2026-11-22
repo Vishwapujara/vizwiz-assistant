@@ -1249,7 +1249,15 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ### D-068: Dashboard home is "how it works" + try-it; five CC0 sample photos with saved answers
 - **Date:** 2026-11-21
-- **Status:** Accepted. Answers pending: run `notebooks/16_demo_answers.ipynb` (L4).
+- **Status:** Accepted. Answers saved in `results/demo/answers.json` (notebook 16 at
+  `6ab16e8`, **T4 in float16**: L4 was unavailable on the owner's Colab plan; the
+  setup is recorded with the answers and shown on the page).
+- **Run result:** clock "6:47", sign "chapel lane", bananas "banana" (all correct);
+  blurred sign declined (P(unanswerable) 0.96, issues blur/framing/unrecognizable,
+  blur tip); dark clock answered "6:47" with a "too dark" tip (P 0.079, just under
+  the 0.10 threshold). The clock's first reference answer ("about 9:30") was wrong:
+  the hands were misread; corrected to 6:47 after zooming in. Saved answers show no
+  latency (the first T4 request took 34 s of warm-up; the rest about 2.5 s).
 - **Decision:** the owner asked for the first page to explain the assistant and let
   people try it, with the numbers on their own page. `/` is now a three-step flow
   (photo → quality and answerability checks → answer or decline with tips) plus a
