@@ -136,12 +136,17 @@ docker compose -f docker/docker-compose.yml --profile demo run --rm traffic   # 
 
 Ports bind to localhost only. CI builds and smoke-tests this stack on every push.
 
-### Results dashboard
+### Dashboard
 
-[`dashboard/`](dashboard/) is a Next.js app that shows every result above in one
-page: headline numbers, the decline-threshold trade-off (with a slider), load-test
-latency and cost per configuration, the experiment comparisons with their 95%
-intervals, and the error analysis. No dataset photos are shown.
+[`dashboard/`](dashboard/) is a Next.js app with two pages:
+
+- **How it works** (`/`): the three-step cascade explained without numbers, and
+  *Try it yourself*: five openly licensed photos (CC0, not VizWiz; two are
+  deliberately blurred or darkened) with the fine-tuned model's saved answers, plus a
+  *Run live* button while the AWS GPU server is on.
+- **Results** (`/results`): headline numbers, the decline-threshold trade-off (with a
+  slider), load-test latency and cost, the experiment comparisons with their 95%
+  intervals, and the error analysis.
 
 Stack: Next.js 16 (App Router), tRPC 11 with zod inputs, TanStack Query, Recharts,
 and `node:sqlite`. On every `dev` or `build`, `scripts/build-db.ts` loads the
@@ -154,6 +159,18 @@ cd dashboard && npm ci && npm run dev    # http://localhost:3001, needs Node 22.
 
 To host it on Vercel, import the repo and set the project's root directory to
 `dashboard` (it reads `../results` while building).
+
+**Saved try-it answers:** run [`notebooks/16_demo_answers.ipynb`](notebooks/16_demo_answers.ipynb)
+on a Colab L4 (~15 min) and commit its `answers.json` as `results/demo/answers.json`.
+
+### Live model on AWS (off by default)
+
+[`infra/aws/`](infra/aws/README.md) is Terraform for one g6.xlarge (NVIDIA L4) running
+vLLM and the gateway. **Off costs $0**: with `enabled = false` (the default) no
+billable resource exists. `terraform apply -var enabled=true` turns it on (~$0.80/hour,
+ready in ~10–15 min, terminates itself after 2 hours); `-var enabled=false` turns it
+off. Then set `VIZWIZ_GATEWAY_URL` and `VIZWIZ_API_KEY` for the dashboard. Needs an
+AWS GPU quota increase first; see the README there.
 
 ## Model card
 
@@ -213,7 +230,8 @@ src/vizwiz/serve    gateway, cascade, guidance, registry, mock model, replay/tun
 src/vizwiz/bench    Locust load test, sweep runner, demo traffic
 configs/            data, training and serving settings
 results/            committed metrics (aggregate only)
-dashboard/          results dashboard (Next.js, tRPC, Recharts, SQLite)
+dashboard/          dashboard: how it works, try it, results (Next.js, tRPC, SQLite)
+infra/aws/          Terraform for the on-demand GPU server (off by default)
 docker/, monitoring/  Compose stack, Prometheus, Grafana dashboard
 ```
 

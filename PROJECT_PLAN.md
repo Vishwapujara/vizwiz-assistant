@@ -29,7 +29,8 @@ GPU work run in Colab. Nothing GPU-related runs locally.
 4. **Verify before assuming.** Library versions, model support, GPU support,
    dataset licenses, and dataset statistics in this plan are best-known values and
    must be verified (marked **[VERIFY]**). Report any discrepancy before proceeding.
-5. **Never commit data, images, model weights, or secrets** to git.
+5. **Never commit data, images, model weights, or secrets** to git. (One exception:
+   five small CC0 demo photos for the dashboard's try-it section, never dataset images, D-068.)
 6. **Never display or publish raw VizWiz images** in public artifacts (demo,
    README, dashboard, write-up). See Section 11 (Privacy).
 7. **Code lives in the repo; Colab only runs it.** Claude Code cannot operate

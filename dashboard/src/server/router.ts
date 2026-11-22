@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { all, get } from "./db";
+import { demoRouter } from "./demo";
 import { publicProcedure, router } from "./trpc";
 import { CONFIGS, ERROR_DIMENSIONS, EXPERIMENTS, LOAD_METRICS } from "@/lib/constants";
 
@@ -119,6 +120,8 @@ export const appRouter = router({
       "SELECT run_id, created_utc, git_commit, split, dtype FROM runs ORDER BY created_utc",
     ),
   ),
+
+  demo: demoRouter,
 
   health: publicProcedure.query(() => ({ ok: get<{ n: number }>("SELECT COUNT(*) AS n FROM headline")!.n > 0 })),
 });

@@ -1,55 +1,34 @@
-import { Breakdowns } from "@/components/Breakdowns";
-import { Experiments } from "@/components/Experiments";
-import { LoadTest } from "@/components/LoadTest";
-import { Overview } from "@/components/Overview";
-import { Threshold } from "@/components/Threshold";
+import { HowItWorks } from "@/components/HowItWorks";
+import { TryIt } from "@/components/TryIt";
 
-export default function Page() {
+export default function Home() {
   return (
     <main className="page">
-      <header className="page-header">
-        <h1>VizWiz visual assistant: results</h1>
+      <header className="page-header hero-head">
+        <h1>A photo assistant that knows when to say “I can't tell”</h1>
         <p>
-          A photo-and-question assistant for blind and low-vision users. Qwen3-VL-4B with one multi-task LoRA adapter,
-          served by vLLM behind a three-stage cascade on one NVIDIA L4. It prefers declining to guessing.
-        </p>
-        <p className="meta">
-          Every number is read from the committed <code>results/</code> files. No VizWiz photos are shown.
+          Blind and low-vision people take a photo and ask a question: “What does this sign say?”, “What time is it?”.
+          This assistant answers briefly, or, when the photo can't answer the question, says so and explains how to take
+          a better one.
         </p>
       </header>
 
-      <section aria-labelledby="h-overview">
-        <h2 id="h-overview">Overview</h2>
-        <p className="lede">The served system against the untrained model on the held-out test split.</p>
-        <Overview />
+      <section aria-labelledby="h-how">
+        <h2 id="h-how">How it works</h2>
+        <p className="lede">Every reply goes through three small steps, all done by the same fine-tuned model.</p>
+        <HowItWorks />
       </section>
 
-      <section aria-labelledby="h-threshold">
-        <h2 id="h-threshold">Decline threshold</h2>
+      <section aria-labelledby="h-try">
+        <h2 id="h-try">Try it yourself</h2>
         <p className="lede">
-          The answerability stage gives P(unanswerable). Above the threshold the reply is a decline plus retake tips.
-          One config value sets the trade-off between wrong answers and unnecessary declines.
+          Pick a photo to see what the fine-tuned model says. Answers were saved from a real run, so this works with
+          the GPU off; when the AWS server is on you can also ask the model live. The photos are openly licensed,
+          not from VizWiz; the last two are degraded copies to show how the assistant declines.
         </p>
-        <Threshold />
+        <TryIt />
       </section>
 
-      <section aria-labelledby="h-load">
-        <h2 id="h-load">Load test and cost</h2>
-        <p className="lede">Four cascade configurations under increasing concurrency on a single L4.</p>
-        <LoadTest />
-      </section>
-
-      <section aria-labelledby="h-exp">
-        <h2 id="h-exp">Experiments</h2>
-        <p className="lede">Paired comparisons on the same examples; reading rules were fixed before each run.</p>
-        <Experiments />
-      </section>
-
-      <section aria-labelledby="h-break">
-        <h2 id="h-break">Where it improved</h2>
-        <p className="lede">Error analysis of the fine-tuned model against the untrained one.</p>
-        <Breakdowns />
-      </section>
     </main>
   );
 }

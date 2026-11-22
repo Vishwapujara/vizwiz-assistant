@@ -55,6 +55,12 @@ CREATE TABLE load_sweep (
 CREATE TABLE quality_labels (
   run TEXT NOT NULL, label TEXT NOT NULL, precision REAL, recall REAL, f1 REAL, support INTEGER,
   PRIMARY KEY (run, label));
+CREATE TABLE demo_samples (
+  pos INTEGER NOT NULL, id TEXT PRIMARY KEY, file TEXT NOT NULL, question TEXT NOT NULL,
+  reference TEXT, shows TEXT, source TEXT, source_url TEXT, author TEXT, license TEXT, changes TEXT);
+CREATE TABLE demo_answers (
+  id TEXT PRIMARY KEY, status TEXT NOT NULL, message TEXT NOT NULL, answer TEXT, issues TEXT NOT NULL,
+  unanswerable_score REAL, tips TEXT NOT NULL, latency_ms REAL, created_utc TEXT, git_commit TEXT);
 CREATE TABLE error_groups (
   dimension TEXT NOT NULL, grp TEXT NOT NULL, n INTEGER NOT NULL,
   accuracy_before REAL NOT NULL, accuracy_after REAL NOT NULL, PRIMARY KEY (dimension, grp));
@@ -162,6 +168,31 @@ for (const dimension of ["by_question_kind", "by_quality_label", "by_answerer_ag
   }
 }
 
+// --- try-it samples (openly licensed photos, D-068) and their saved answers ----
+const samples: Json[] = JSON.parse(readFileSync(join(here, "..", "public", "samples", "samples.json"), "utf8"));
+samples.forEach((x, pos) =>
+  insert("demo_samples", {
+    pos, id: x.id, file: x.file, question: x.question, reference: x.reference ?? null, shows: x.shows ?? null,
+    source: x.source, source_url: x.source_url, author: x.author, license: x.license, changes: x.changes ?? null,
+  }),
+);
+// Written by `python -m vizwiz.serve.demo` (notebook 16); absent until that has run.
+let demoAnswers = 0;
+if (existsSync(join(resultsDir, "demo", "answers.json"))) {
+  const demo = readJson("demo/answers.json");
+  const known = new Set(samples.map((x) => x.id));
+  for (const a of demo.answers) {
+    if (!known.has(a.id)) continue;
+    insert("demo_answers", {
+      id: a.id, status: a.status, message: a.message, answer: a.answer ?? null,
+      issues: JSON.stringify(a.issues ?? []), unanswerable_score: a.unanswerable_score ?? null,
+      tips: JSON.stringify(a.tips ?? []), latency_ms: a.latency_ms ?? null,
+      created_utc: demo.created_utc ?? null, git_commit: demo.git_commit ?? null,
+    });
+    demoAnswers++;
+  }
+}
+
 // --- meta -----------------------------------------------------------------
 const meta: Record<string, string> = {
   model: readJson("eval/e5-multi-lora/metrics.json").model,
@@ -178,4 +209,7 @@ for (const [key, value] of Object.entries(meta)) insert("meta", { key, value });
 db.exec("COMMIT");
 db.close();
 
-console.log(`results.db: ${sweep.length} load-test rows, ${headline.length} headline rows -> ${dbPath}`);
+console.log(
+  `results.db: ${sweep.length} load-test rows, ${headline.length} headline rows, ` +
+    `${samples.length} try-it samples (${demoAnswers} with saved answers) -> ${dbPath}`,
+);

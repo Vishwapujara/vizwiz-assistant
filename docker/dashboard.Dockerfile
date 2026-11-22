@@ -9,10 +9,12 @@ COPY dashboard ./
 RUN npm run build
 
 FROM node:24-slim
+# Set VIZWIZ_GATEWAY_URL and VIZWIZ_API_KEY at run time to enable live try-it calls (D-069).
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=8501 HOSTNAME=0.0.0.0
 WORKDIR /app
 COPY --from=build --chown=node:node /repo/dashboard/.next/standalone ./
 COPY --from=build --chown=node:node /repo/dashboard/.next/static ./.next/static
+COPY --from=build --chown=node:node /repo/dashboard/public ./public
 USER node
 EXPOSE 8501
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 \

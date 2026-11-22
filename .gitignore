@@ -51,3 +51,14 @@ dist/
 .vscode/
 .idea/
 .DS_Store
+
+# Terraform (infra/aws): local state and your settings stay on your machine.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+
+# The one image exception (D-068): five CC0 try-it photos, never dataset images.
+!dashboard/public/samples/*.jpg

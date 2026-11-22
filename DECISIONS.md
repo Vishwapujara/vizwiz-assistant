@@ -1247,6 +1247,63 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-068: Dashboard home is "how it works" + try-it; five CC0 sample photos with saved answers
+- **Date:** 2026-11-21
+- **Status:** Accepted. Answers pending: run `notebooks/16_demo_answers.ipynb` (L4).
+- **Decision:** the owner asked for the first page to explain the assistant and let
+  people try it, with the numbers on their own page. `/` is now a three-step flow
+  (photo → quality and answerability checks → answer or decline with tips) plus a
+  *Try it yourself* section; `/results` holds every chart from D-067.
+- **Try-it data:** five photos, chosen by the owner to be openly licensed: three
+  CC0 photos from Wikimedia Commons (a clock, a street sign, bananas) and two
+  degraded copies (the sign blurred, the clock darkened to 5%) to show the decline
+  path. Licences read from each file's Commons metadata; listed in
+  `docs/data_licenses.md` and under each photo. No VizWiz images (Section 11).
+- **Saved answers:** `python -m vizwiz.serve.demo` sends each photo through a
+  running gateway (served setup: E5, threshold 0.10, PNG) and writes
+  `results/demo/answers.json`; the dashboard shows them with no GPU running. The
+  owner chose saved + live: when the AWS server (D-069) is on, *Run live* sends the
+  same photo to it. Visitors cannot upload photos: the live call only takes a sample
+  id, looked up in the database, never a path or a file.
+- **Plan rule 5:** a scoped exception for these five photos (~480 KB in all).
+- **Alternatives:** the owner's own photos (best privacy story, needs their time);
+  live-only (section dead whenever AWS is off); visitor uploads (abuse and privacy
+  risk on a public page).
+- **Plan sections:** 11, 15 (extension 4), Step 6.3.
+
+---
+
+### D-069: AWS GPU server in Terraform, off by default ($0 when off)
+- **Date:** 2026-11-21
+- **Status:** Accepted. Code in `infra/aws/`; validated, **not deployed**.
+- **Decision:** one g6.xlarge (1 × NVIDIA L4, the project's GPU) running vLLM + the
+  gateway, set up at boot from the repo: the same pinned packages and vLLM flags as
+  notebook 15; the E5 adapter comes from the W&B registry (`production` alias, D-061).
+- **Off = nothing exists.** Every billable resource sits in one module created only
+  when `enabled = true`; the default is false. No load balancer, NAT gateway or
+  Elastic IP, since they bill when idle (~$50/month together). Kept while off: two
+  free SSM SecureString parameters (gateway API key, W&B key) and an optional free
+  AWS Budget alert.
+- **Safety net:** the instance schedules its own shutdown after `max_hours`
+  (default 2) with `instance_initiated_shutdown_behavior = terminate`, so a forgotten
+  server stops billing for compute and disk.
+- **Access:** port 8080 only; `POST /v1/assist` requires `X-API-Key` when
+  `VIZWIZ_API_KEY` is set (new, optional gateway setting; tested). No SSH; shell via
+  Session Manager. IMDSv2 only, encrypted disk. Plain HTTP to the instance: only the
+  dashboard's server calls it, with the five sample photos.
+- **Cost when on:** about $0.80/hour on demand (us-east-1), or `use_spot = true` for
+  roughly 60% less with possible interruption. Turn-on to ready: ~10–15 min
+  (package install + model download each time).
+- **Known risks, unverified until the first real apply:** the account's GPU quota
+  (often 0 on new accounts; must be requested); the Deep Learning AMI's NVIDIA
+  driver supporting the CUDA build that vLLM 0.32 installs; first-boot time.
+- **Alternatives:** stopped instance (~$8/month disk, faster start); ECS on GPU with
+  an ALB (always-on ALB cost); SageMaker endpoint (no scale to zero for this setup).
+- **CI:** `terraform` job runs `fmt -check` and `validate`.
+- **Plan sections:** 12, 15 (extension 4).
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.

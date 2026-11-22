@@ -30,6 +30,7 @@ services:
     environment:
       VIZWIZ_MODEL_URL: http://model:8000
       VIZWIZ_ADMIN_TOKEN: "${VIZWIZ_ADMIN_TOKEN:-}"  # unset: admin endpoints off
+      VIZWIZ_API_KEY: "${VIZWIZ_API_KEY:-}"  # unset: /v1/assist open (localhost only)
     ports: ["127.0.0.1:8080:8080"]
     depends_on:
       model: {condition: service_healthy}
@@ -65,6 +66,9 @@ services:
       dockerfile: docker/dashboard.Dockerfile
     image: vizwiz-dashboard:local
     ports: ["127.0.0.1:8501:8501"]
+    environment:  # live try-it calls go to the local gateway (mock answers)
+      VIZWIZ_GATEWAY_URL: http://gateway:8080
+      VIZWIZ_API_KEY: "${VIZWIZ_API_KEY:-}"
     restart: unless-stopped
 
   traffic:  # synthetic photos only, never dataset images

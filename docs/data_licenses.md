@@ -100,3 +100,22 @@ One question per image. File names look like `VizWiz_train_00000000.jpg`.
 > Questions from Blind People," CVPR 2018. Image quality issues: T. Chiu et al.,
 > "Assessing Image Quality Issues for Real-World Problems," CVPR 2020. Labels are
 > derived from the original annotations (see `src/vizwiz/data/labels.py`).
+
+## Dashboard try-it photos (D-068)
+
+The dashboard's *Try it* section shows five photos, committed in
+`dashboard/public/samples/`. **None are VizWiz images** (plan Section 11). All come
+from Wikimedia Commons under **CC0 1.0** (public-domain dedication: no conditions; we
+credit the authors anyway). Licences were read from each file's Commons metadata on
+2026-11-21. Every file was resized to 1024 px and saved without metadata.
+
+| Sample | Source file | Author | Licence | Changes |
+|---|---|---|---|---|
+| `clock.jpg` | [Antique Wooden SEC Wall Clock.jpg](https://commons.wikimedia.org/wiki/File:Antique_Wooden_SEC_Wall_Clock.jpg) | Amitbalani | CC0 1.0 | resized |
+| `clock-dark.jpg` | same | Amitbalani | CC0 1.0 | resized; brightness cut to 5% (a dark room) |
+| `street-sign.jpg` | [Street name sign Chapel Lane.png](https://commons.wikimedia.org/wiki/File:Street_name_sign_Chapel_Lane.png) | A.-K. D. | CC0 1.0 | resized, JPEG |
+| `street-sign-blurry.jpg` | same | A.-K. D. | CC0 1.0 | resized; Gaussian blur radius 9 (camera shake) |
+| `bananas.jpg` | [Bunch of bananas on sale.jpg](https://commons.wikimedia.org/wiki/File:Bunch_of_bananas_on_sale.jpg) | Wilfredor | CC0 1.0 | resized |
+
+The same details are in `dashboard/public/samples/samples.json` and under each photo
+on the page.

@@ -230,3 +230,36 @@ def test_gateway_model_down_and_health():
     missing = create_app(cfg(adapters={"quality": "q", "answerability": "a", "answer": "x"}),
                          mock_client())  # fmt: skip
     assert call(missing, "GET", "/health").json()["missing_adapters"] == ["a", "q", "x"]
+
+
+def test_gateway_api_key_guards_assist_only():
+    app = create_app(cfg(), mock_client(), api_key="k3y")
+    assert assist(app, jpeg("normal")).status_code == 401
+    files = {"image": ("p.jpg", jpeg("normal"), "image/jpeg")}
+    wrong = call(app, "POST", "/v1/assist", files=files, data={"question": "What?"},
+                 headers={"X-API-Key": "nope"})  # fmt: skip
+    assert wrong.status_code == 401
+    ok = call(app, "POST", "/v1/assist", files=files, data={"question": "What?"},
+              headers={"X-API-Key": "k3y"})  # fmt: skip
+    assert ok.status_code == 200 and ok.json()["status"] == "answered"
+    assert call(app, "GET", "/health").status_code == 200  # health stays open for probes
+
+
+def test_demo_collect_records_every_sample(tmp_path):
+    from vizwiz.serve.demo import collect
+
+    (tmp_path / "a.jpg").write_bytes(jpeg("normal"))
+    (tmp_path / "b.jpg").write_bytes(jpeg("dark"))
+    samples = [{"id": "a", "file": "a.jpg", "question": "What is this?"},
+               {"id": "b", "file": "b.jpg", "question": "What does it say?"}]  # fmt: skip
+    app = create_app(cfg(rules=GATE), mock_client())
+
+    async def go():
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://gw") as c:
+            return await collect(c, samples, tmp_path)
+
+    report = asyncio.run(go())
+    assert [a["id"] for a in report["answers"]] == ["a", "b"]
+    assert [a["status"] for a in report["answers"]] == ["answered", "unanswerable"]
+    assert report["mode"] and report["adapters"]

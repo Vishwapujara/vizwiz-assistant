@@ -11,6 +11,9 @@
 Admin endpoints need the registry on and the header ``X-Admin-Token`` equal to
 ``VIZWIZ_ADMIN_TOKEN``; with no token set they are disabled.
 
+``POST /v1/assist`` is open unless ``VIZWIZ_API_KEY`` is set; then it needs the header
+``X-API-Key`` with that value (for a gateway on a public address, D-069).
+
     uvicorn --factory vizwiz.serve.gateway:create_app --port 8080
 
 Privacy: logs and metrics hold ids, statuses, timings and quality labels only, never
@@ -82,9 +85,11 @@ def create_app(
     client: ModelClient | None = None,
     registry: Registry | None = None,
     admin_token: str | None = None,
+    api_key: str | None = None,
 ) -> FastAPI:
     cfg = cfg or load_serve_config()
     admin_token = admin_token or os.environ.get("VIZWIZ_ADMIN_TOKEN") or None
+    api_key = api_key or os.environ.get("VIZWIZ_API_KEY") or None
     if not log.handlers:  # one JSON object per line on stderr, next to uvicorn's own logs
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter("%(message)s"))
@@ -127,8 +132,14 @@ def create_app(
         raise HTTPException(code, detail, headers={"X-Request-ID": rid})
 
     @app.post("/v1/assist")
-    async def assist(image: Annotated[UploadFile, File()], question: Annotated[str, Form()]):
+    async def assist(
+        image: Annotated[UploadFile, File()],
+        question: Annotated[str, Form()],
+        x_api_key: Annotated[str | None, Header()] = None,
+    ):
         rid = uuid.uuid4().hex[:16]
+        if api_key and not (x_api_key and secrets.compare_digest(x_api_key, api_key)):
+            fail("unauthorized", 401, "missing or wrong X-API-Key", rid)
         question = question.strip()
         if not question:
             fail("bad_request", 422, "question is empty", rid)

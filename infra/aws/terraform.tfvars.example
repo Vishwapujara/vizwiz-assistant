@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars (git-ignored) and edit. Leave enabled = false when not in use.
+enabled = false
+region  = "us-east-1"
+
+# use_spot      = true                 # cheaper, can be interrupted
+# max_hours     = 2                    # auto-terminate safety net
+# allowed_cidrs = ["203.0.113.4/32"]   # your IP only (blocks Vercel's live calls)
+# budget_email  = "you@example.com"    # free cost alert

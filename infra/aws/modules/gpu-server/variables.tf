@@ -1,0 +1,11 @@
+variable "region" { type = string }
+variable "instance_type" { type = string }
+variable "use_spot" { type = bool }
+variable "max_hours" { type = number }
+variable "allowed_cidrs" { type = list(string) }
+variable "repo_url" { type = string }
+variable "repo_ref" { type = string }
+variable "api_key_parameter" { type = string }
+variable "wandb_key_parameter" { type = string }
+variable "root_volume_gb" { type = number }
+variable "ami_name_pattern" { type = string }

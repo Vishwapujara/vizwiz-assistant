@@ -50,6 +50,21 @@ jobs:
           curl -sf localhost:3077/api/trpc/load.capacity \
             | node -e "const d=JSON.parse(require('fs').readFileSync(0)).result.data; console.log(d[0]); if (!(d[0].sloRps > 0)) process.exit(1)"
 
+  terraform:
+    # AWS GPU server (D-069): format and validate only; nothing is created.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/aws
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.17.2
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
+
   compose-smoke:
     # Builds the image and runs gateway + mock model + Prometheus, then sends
     # synthetic traffic and checks every cascade branch was reached and scraped.

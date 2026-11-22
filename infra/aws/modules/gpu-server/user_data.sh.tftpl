@@ -1,0 +1,112 @@
+#!/bin/bash
+# VizWiz GPU server setup (D-069). Runs once at first boot as root; log: /var/log/vizwiz-setup.log
+# Same model-server flags as the Colab runs (notebook 15); the adapter comes from the
+# W&B registry (production alias, D-061), so no weights are baked into the image.
+set -euo pipefail
+exec > >(tee -a /var/log/vizwiz-setup.log) 2>&1
+echo "[vizwiz] setup started $(date -u +%FT%TZ)"
+
+# Safety net first: whatever happens below, the machine powers off (and, with
+# instance_initiated_shutdown_behavior = terminate, is deleted) after the limit.
+shutdown -h +${max_minutes} "vizwiz: automatic shutdown after the max_hours limit"
+
+get_secret() {
+  aws ssm get-parameter --region ${region} --with-decryption --name "$1" \
+    --query Parameter.Value --output text
+}
+
+id -u vizwiz >/dev/null 2>&1 || useradd --create-home --shell /bin/bash vizwiz
+install -d -o vizwiz -g vizwiz /opt/vizwiz /opt/vizwiz/hf /opt/vizwiz/adapters
+
+# Secrets go into a root-owned env file the services read; never into the log.
+umask 077
+{
+  echo "VIZWIZ_API_KEY=$(get_secret ${api_key_parameter})"
+  echo "WANDB_API_KEY=$(get_secret ${wandb_key_parameter})"
+} > /etc/vizwiz.env
+umask 022
+echo "[vizwiz] secrets loaded"
+
+sudo -u vizwiz -H bash -s <<'SETUP'
+set -euo pipefail
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+git clone --depth 1 --branch ${repo_ref} ${repo_url} /opt/vizwiz/repo
+cd /opt/vizwiz/repo
+echo "[vizwiz] repo at $(git rev-parse --short HEAD)"
+uv venv --quiet --python 3.13 /opt/vizwiz/venv
+uv pip install --quiet --python /opt/vizwiz/venv/bin/python -e ".[serve,registry]" \
+  -r requirements/colab-gpu.txt -c requirements/colab-gpu.lock.txt
+# Gateway settings: the repo's serve.yaml with the registry switched on.
+/opt/vizwiz/venv/bin/python - <<'PY'
+import yaml
+cfg = yaml.safe_load(open("configs/serve.yaml"))
+cfg["model_url"] = "http://127.0.0.1:8000"
+cfg["registry"].update(enabled=True, cache_dir="/opt/vizwiz/adapters")
+yaml.safe_dump(cfg, open("/opt/vizwiz/serve.yaml", "w"))
+PY
+SETUP
+echo "[vizwiz] packages installed"
+
+# The exact notebook-15 command, in a script so systemd does not re-parse its quotes.
+cat > /opt/vizwiz/start-vllm.sh <<'SCRIPT'
+#!/bin/bash
+export HF_HOME=/opt/vizwiz/hf VLLM_USE_FLASHINFER_SAMPLER=0 VLLM_ALLOW_RUNTIME_LORA_UPDATING=True
+exec /opt/vizwiz/venv/bin/vllm serve Qwen/Qwen3-VL-4B-Instruct --dtype bfloat16 \
+  --max-model-len 4096 --gpu-memory-utilization 0.85 --enable-lora --max-lora-rank 16 \
+  --max-loras 4 --max-cpu-loras 8 --limit-mm-per-prompt '{"image": 1}' \
+  --generation-config vllm --seed 0 --host 127.0.0.1 --port 8000
+SCRIPT
+chmod 755 /opt/vizwiz/start-vllm.sh
+
+cat > /etc/systemd/system/vizwiz-vllm.service <<'UNIT'
+[Unit]
+Description=VizWiz model server (vLLM, Qwen3-VL-4B, runtime LoRA loading)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=vizwiz
+ExecStart=/opt/vizwiz/start-vllm.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+cat > /etc/systemd/system/vizwiz-gateway.service <<'UNIT'
+[Unit]
+Description=VizWiz gateway (cascade; adapter from the W&B registry)
+After=vizwiz-vllm.service
+Requires=vizwiz-vllm.service
+
+[Service]
+User=vizwiz
+WorkingDirectory=/opt/vizwiz/repo
+EnvironmentFile=/etc/vizwiz.env
+Environment=VIZWIZ_SERVE_CONFIG=/opt/vizwiz/serve.yaml
+Environment=VIZWIZ_MODEL_URL=http://127.0.0.1:8000
+# Starts before vLLM has finished loading; the registry sync then fails and systemd
+# retries until the model server is up.
+ExecStart=/opt/vizwiz/venv/bin/uvicorn --factory vizwiz.serve.gateway:create_app \
+  --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now vizwiz-vllm.service vizwiz-gateway.service
+echo "[vizwiz] services started; the model download and load take a few more minutes"
+
+for i in $(seq 120); do
+  if curl -sf http://127.0.0.1:8080/health >/dev/null; then
+    echo "[vizwiz] READY after setup $(date -u +%FT%TZ)"
+    exit 0
+  fi
+  sleep 15
+done
+echo "[vizwiz] gateway not healthy after 30 min: journalctl -u vizwiz-vllm -u vizwiz-gateway"
