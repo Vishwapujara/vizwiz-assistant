@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 // How a reply is made: the three-stage cascade, drawn as a flow (no numbers needed).
 
 const CHECKS = [
@@ -94,9 +92,7 @@ export function HowItWorks() {
         </div>
         <div>
           <h3>How well it works</h3>
-          <p>
-            Accuracy, safety, speed and cost are on the <Link href="/results">Results</Link> page.
-          </p>
+          <p>Accuracy, safety, speed and cost follow below.</p>
         </div>
       </div>
     </div>

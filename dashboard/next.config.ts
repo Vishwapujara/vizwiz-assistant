@@ -8,6 +8,8 @@ const config: NextConfig = {
   // with the standalone server (Docker).
   outputFileTracingIncludes: { "/api/trpc/[trpc]": ["./data/results.db", "./public/samples/*.jpg"] },
   poweredByHeader: false,
+  // The numbers page moved from /results to /research.
+  redirects: async () => [{ source: "/results", destination: "/research", permanent: true }],
 };
 
 export default config;

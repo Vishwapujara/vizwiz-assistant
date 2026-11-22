@@ -138,15 +138,17 @@ Ports bind to localhost only. CI builds and smoke-tests this stack on every push
 
 ### Dashboard
 
-[`dashboard/`](dashboard/) is a Next.js app with two pages:
+[`dashboard/`](dashboard/) is a Next.js site presented as a product, **Glimpse**
+(a placeholder name, set in `dashboard/src/lib/brand.ts`):
 
-- **How it works** (`/`): the three-step cascade explained without numbers, and
-  *Try it yourself*: five openly licensed photos (CC0, not VizWiz; two are
-  deliberately blurred or darkened) with the fine-tuned model's saved answers, plus a
-  *Run live* button while the AWS GPU server is on.
-- **Results** (`/results`): headline numbers, the decline-threshold trade-off (with a
-  slider), load-test latency and cost, the experiment comparisons with their 95%
-  intervals, and the error analysis.
+- **Home** (`/`): what it does, in plain words, and *Try it*: pick one of five openly
+  licensed photos (CC0, not VizWiz), tap **Ask**, and hear the reply (**Listen** reads
+  it aloud). Replies are recorded from the fine-tuned model; while the AWS GPU server
+  is on, **Ask** goes to the live model.
+- **Research** (`/research`): how the cascade works, every field the model returned
+  for the demo photos, then the numbers: headline results, the decline-threshold
+  trade-off, load-test latency and cost, experiment comparisons with 95% intervals,
+  and the error analysis.
 
 Stack: Next.js 16 (App Router), tRPC 11 with zod inputs, TanStack Query, Recharts,
 and `node:sqlite`. On every `dev` or `build`, `scripts/build-db.ts` loads the

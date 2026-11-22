@@ -3,20 +3,38 @@ import { Breakdowns } from "@/components/Breakdowns";
 import { Experiments } from "@/components/Experiments";
 import { LoadTest } from "@/components/LoadTest";
 import { Overview } from "@/components/Overview";
+import { HowItWorks } from "@/components/HowItWorks";
 import { Threshold } from "@/components/Threshold";
+import { TryIt } from "@/components/TryIt";
 
-export const metadata: Metadata = { title: "VizWiz Results" };
+export const metadata: Metadata = { title: "Research" };
 
-export default function ResultsPage() {
+export default function ResearchPage() {
   return (
     <main className="page">
       <header className="page-header">
-        <h1>Results</h1>
+        <h1>Research</h1>
         <p>
-          How accurate, how safe, how fast and how cheap the assistant is. Every number is read from the committed{" "}
-          <code>results/</code> files of the experiments; no VizWiz photos are shown.
+          How the assistant works and how well: one small vision-language model fine-tuned on VizWiz, real photos and
+          questions from blind users. Every number is read from the committed <code>results/</code> files; no VizWiz
+          photos are shown.
         </p>
       </header>
+
+      <section aria-labelledby="h-how">
+        <h2 id="h-how">How it works</h2>
+        <p className="lede">Every reply goes through three small steps, all done by the same fine-tuned model.</p>
+        <HowItWorks />
+      </section>
+
+      <section aria-labelledby="h-try">
+        <h2 id="h-try">The demo photos in detail</h2>
+        <p className="lede">
+          The five photos from the home page with everything the model returned: decision, probability and photo
+          issues. Openly licensed (CC0), not from VizWiz; the last two are blurred or darkened on purpose.
+        </p>
+        <TryIt />
+      </section>
 
       <section aria-labelledby="h-overview">
         <h2 id="h-overview">Overview</h2>

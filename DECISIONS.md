@@ -1312,6 +1312,28 @@ that supersedes the old one and mark the old one `Superseded by D-xxx`.
 
 ---
 
+### D-070: The site is presented as a product ("Glimpse"); explanations move to /research
+- **Date:** 2026-11-22
+- **Status:** Accepted.
+- **Decision:** the owner asked for a product-style site, not an explained demo. The
+  home page is a landing page: headline, a phone mock-up cycling through the model's
+  recorded replies, three plain-language benefits, and an app-style *Try it* (pick a
+  photo, **Ask**, **Listen** via the browser's speech synthesis). The cascade
+  walkthrough, the detailed demo (probabilities, issues) and all charts live on
+  `/research`; `/results` redirects there.
+- **Name:** "Glimpse" is a placeholder in one constant (`dashboard/src/lib/brand.ts`).
+  Not "VizWiz": that names the dataset and research group, and a product under it
+  would look like theirs.
+- **Kept honest:** each reply is labelled "Recorded answer" or "Live answer"; the
+  footer says it is a research prototype and not a safety device (model card); photo
+  credits stay under the phone.
+- **Accessibility:** replies are in an `aria-live` region; photo choice is a radio
+  group; the hero animation stops under `prefers-reduced-motion` and is hidden from
+  screen readers (the interactive version below carries the same content).
+- **Plan sections:** Step 6.3.
+
+---
+
 ## Open decisions
 
 Resolved items move to the Decisions section with a `D-xxx` id.

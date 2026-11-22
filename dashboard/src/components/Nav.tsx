@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const LINKS = [
-  { href: "/", label: "How it works" },
-  { href: "/results", label: "Results" },
-] as const;
+import { BRAND } from "@/lib/brand";
 
 export function Nav() {
   const path = usePathname();
@@ -14,14 +10,14 @@ export function Nav() {
     <nav className="nav" aria-label="Main">
       <div className="nav-inner">
         <Link href="/" className="brand">
-          VizWiz assistant
+          <span className="brand-mark" aria-hidden="true" />
+          {BRAND}
         </Link>
         <div className="nav-links">
-          {LINKS.map((l) => (
-            <Link key={l.href} href={l.href} aria-current={path === l.href ? "page" : undefined}>
-              {l.label}
-            </Link>
-          ))}
+          <Link href="/#try">Try it</Link>
+          <Link href="/research" aria-current={path === "/research" ? "page" : undefined}>
+            Research
+          </Link>
         </div>
       </div>
     </nav>
